@@ -141,6 +141,7 @@
                 });
             }
 
+            // TU CÓDIGO ORIGINAL DEL BOTÓN
             btnToggle.addEventListener('click', () => {
                 panelAgorlab.classList.toggle('visible');
                 if (tooltip) tooltip.style.display = 'none';
@@ -153,6 +154,26 @@
                     btnToggle.style.color = '#FF5F00';
                 }
             });
+
+            // ----------------------------------------------------
+            // NUEVO CÓDIGO OPTIMIZADO: Cerrar el panel al hacer clic afuera
+            // ----------------------------------------------------
+            document.addEventListener('click', (event) => {
+                // Primero revisamos si el panel está abierto
+                if (panelAgorlab.classList.contains('visible')) {
+                    // Verificamos que el clic NO sea dentro del panel Y NO sea dentro o sobre el botón
+                    if (!panelAgorlab.contains(event.target) && !btnToggle.contains(event.target)) {
+                        // Ocultamos el panel
+                        panelAgorlab.classList.remove('visible');
+                        
+                        // Restauramos los colores del botón a su estado original (cerrado)
+                        btnToggle.style.backgroundColor = '#000000';
+                        btnToggle.style.color = '#FF5F00';
+                    }
+                }
+            });
+            // ----------------------------------------------------
+
         });
 
         const CONTENT = {
@@ -834,6 +855,7 @@
                                         <h3>${s.title}</h3>
                                         <div class="p-info">${s.desc}<br><b style="color:white; margin-top:5px; display:block;">${s.price}</b></div>
                                     </div>
+                                </div>
                                 `).join('')}
                             </div>
                         </div>
