@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Loot // Agorlab Ultra</title>
+    <style>
+        :root {
+            /* Paleta Cómic Vibrante */
+            --c-orange: #ff4700;
+            --c-yellow: #ffde00;
+            --c-green:  #00f055;
+            --c-blue:   #2563eb;
+            --c-cyan:   #00e5ff;
+            --c-dark:   #0f172a;
+            --c-light:  #f8fafc;
+            --c-ink:    #000000;
+            
+            /* Grosores y sombras */
+            --b-thick: 4px solid var(--c-ink);
+            --b-thin:  2px solid var(--c-ink);
+            --shadow-hard: 6px 6px 0px var(--c-ink);
+            --shadow-hover: 10px 10px 0px var(--c-ink);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial Black', 'Impact', sans-serif;
+            letter-spacing: -0.5px;
+        }
+
+        /* Fondo Halftone (Puntos de cómic) */
+        body {
+            background-color: var(--c-dark);
+            background-image: 
+                radial-gradient(var(--c-ink) 25%, transparent 25%),
+                radial-gradient(var(--c-ink) 25%, transparent 25%);
+            background-size: 12px 12px;
+            background-position: 0 0, 6px 6px;
+            color: var(--c-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        /* Contenedor principal con efecto de doble hoja */
+        .comic-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 650px;
+        }
+
+        .comic-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 15px; left: -10px; right: 10px; bottom: -15px;
+            background: var(--c-cyan);
+            border: var(--b-thick);
+            transform: rotate(-2deg);
+            z-index: -1;
+        }
+
+        .main-card {
+            background: var(--c-blue);
+            border: var(--b-thick);
+            padding: 2.5rem 1.5rem;
+            position: relative;
+            transform: rotate(1deg);
+            box-shadow: inset -5px -5px 0px rgba(0,0,0,0.2);
+        }
+
+        /* Etiqueta superior dinámica */
+        .top-tag {
+            position: absolute;
+            top: -20px;
+            right: 15px;
+            background: var(--c-yellow);
+            color: var(--c-ink);
+            padding: 8px 20px;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            border: var(--b-thick);
+            box-shadow: var(--shadow-hard);
+            transform: skewX(-15deg) rotate(-3deg);
+            z-index: 10;
+        }
+
+        /* Animaciones optimizadas */
+        .step {
+            display: none;
+            opacity: 0;
+            transform: scale(0.95) translateY(10px);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .step.active {
+            display: block;
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            animation: popIn 0.4s ease-out forwards;
+        }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.9) translateY(20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* Barra de progreso estilo medidor de energía */
+        .power-bar-container {
+            width: 100%;
+            height: 30px;
+            background: var(--c-dark);
+            border: var(--b-thick);
+            margin-bottom: 2rem;
+            position: relative;
+            box-shadow: 4px 4px 0px var(--c-ink);
+        }
+        
+        .power-fill {
+            height: 100%;
+            background: repeating-linear-gradient(
+                45deg,
+                var(--c-green),
+                var(--c-green) 10px,
+                #00d14a 10px,
+                #00d14a 20px
+            );
+            width: 25%;
+            transition: width 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border-right: var(--b-thin);
+        }
+
+        .power-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.9rem;
+            color: var(--c-light);
+            text-shadow: 2px 2px 0px var(--c-ink);
+            z-index: 2;
+        }
+
+        h2 {
+            font-size: 1.6rem;
+            margin-bottom: 0.5rem;
+            color: var(--c-light);
+            text-align: center;
+            text-transform: uppercase;
+            text-shadow: 3px 3px 0px var(--c-ink), -1px -1px 0 var(--c-ink);
+        }
+
+        p.subtitle {
+            color: var(--c-yellow);
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: 800;
+            font-size: 1rem;
+            text-transform: uppercase;
+        }
+
+        /* Grilla mejorada */
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .scroll-box {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 12px;
+        }
+
+        .scroll-box::-webkit-scrollbar { width: 12px; }
+        .scroll-box::-webkit-scrollbar-track { background: var(--c-dark); border: var(--b-thin); }
+        .scroll-box::-webkit-scrollbar-thumb { background: var(--c-yellow); border: var(--b-thin); }
+
+        .option-btn {
+            background: var(--c-light);
+            border: var(--b-thick);
+            color: var(--c-ink);
+            padding: 0.8rem;
+            font-size: 0.9rem;
+            text-align: left;
+            cursor: pointer;
+            box-shadow: 4px 4px 0px var(--c-ink);
+            transition: transform 0.1s, box-shadow 0.1s, background 0.2s;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #step2 .options-grid, #step3 .options-grid { grid-template-columns: 1fr; }
+        #step2 .option-btn, #step3 .option-btn { padding: 1.2rem; font-size: 1.1rem; justify-content: center; }
+
+        .option-btn:hover {
+            background: var(--c-yellow);
+            transform: translate(-3px, -3px);
+            box-shadow: 7px 7px 0px var(--c-ink);
+        }
+
+        .option-btn.selected {
+            background: var(--c-orange);
+            color: var(--c-light);
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px var(--c-ink);
+        }
+
+        .btn-action {
+            width: 100%; 
+            background: var(--c-yellow); 
+            color: var(--c-ink);
+            padding: 1.2rem; 
+            border: var(--b-thick); 
+            font-size: 1.3rem;
+            cursor: pointer; 
+            box-shadow: var(--shadow-hard);
+            text-transform: uppercase;
+            position: relative;
+        }
+
+        .btn-action:hover:not(:disabled) { 
+            transform: translate(-3px, -3px) skewX(-2deg); 
+            box-shadow: var(--shadow-hover); 
+            background: var(--c-orange);
+            color: var(--c-light);
+        }
+
+        .btn-action:disabled {
+            background: #64748b;
+            color: #334155;
+            cursor: not-allowed;
+            box-shadow: 2px 2px 0px var(--c-ink);
+            transform: none;
+        }
+
+        /* --- RESULTADOS ESTILO GLOBO DE CÓMIC --- */
+        .speech-bubble {
+            background: var(--c-light);
+            border: var(--b-thick);
+            padding: 2rem 1rem;
+            box-shadow: var(--shadow-hard);
+            color: var(--c-ink);
+            text-align: center;
+            margin-bottom: 2.5rem;
+            position: relative;
+            border-radius: 10px;
+        }
+
+        /* Punta del globo de diálogo */
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            margin-left: -15px;
+            border-width: 20px 15px 0;
+            border-style: solid;
+            border-color: var(--c-light) transparent transparent transparent;
+            z-index: 2;
+        }
+        /* Borde de la punta del globo */
+        .speech-bubble::before {
+            content: '';
+            position: absolute;
+            bottom: -26px;
+            left: 50%;
+            margin-left: -19px;
+            border-width: 24px 19px 0;
+            border-style: solid;
+            border-color: var(--c-ink) transparent transparent transparent;
+            z-index: 1;
+        }
+
+        .salary-val {
+            font-size: 2.5rem;
+            color: var(--c-orange);
+            margin: 10px 0;
+            text-shadow: 2px 2px 0px var(--c-ink);
+            -webkit-text-stroke: 1.5px var(--c-ink);
+        }
+
+        .promo-box {
+            background: var(--c-dark);
+            border: 4px dashed var(--c-cyan);
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            transform: rotate(-1deg);
+        }
+
+        .promo-box h3 { color: var(--c-cyan); font-size: 1.3rem; margin-bottom: 5px; }
+        .promo-box p { font-family: 'Segoe UI', sans-serif; font-size: 1rem; font-weight: bold; }
+
+        .btn-restart {
+            display: inline-block;
+            width: 100%;
+            text-align: center;
+            margin-top: 1rem;
+            color: var(--c-light);
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 1rem;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+        }
+        .btn-restart:hover { color: var(--c-yellow); text-decoration: underline; }
+
+        @media (max-width: 500px) {
+            .options-grid { grid-template-columns: 1fr; }
+            .main-card { padding: 1.5rem 1rem; }
+            .salary-val { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="comic-wrapper">
+        <div class="main-card">
+            <div class="top-tag">¡Calculadora XP!</div>
+
+            <!-- Medidor de Energía -->
+            <div class="power-bar-container" id="barContainer">
+                <div class="power-fill" id="barFill"></div>
+                <div class="power-text" id="barText">NIVEL 1 / 4</div>
+            </div>
+
+            <!-- PASO 1 -->
+            <div id="step1" class="step active">
+                <h2>¿Qué habilidad querés dominar?</h2>
+                <p class="subtitle">Elegí la rama de tu futuro oficio.</p>
+                
+                <div class="options-grid scroll-box">
+                    <div class="option-btn" onclick="selectOpt('skill', 'barberia', this)">💈 Barbería</div>
+                    <div class="option-btn" onclick="selectOpt('skill', 'peluqueria', this)">✂️ Peluquería</div>
+                    <div class="option-btn" onclick="selectOpt('skill', 'unas', this)">💅 Arte de Uñas</div>
+                    <div class="option-btn" onclick="selectOpt('skill', 'belleza', this)">💄 Belleza Integral</div>
+                    <div class="option-btn" onclick="selectOpt('skill', 'farmacia', this)">💊 Aux. Farmacia</div>
+                    <div class="option-btn" onclick="selectOpt('skill', 'sec_medico', this)">🏥 Sec. Médico</div>
+                    <div class="option-btn" onclick="selectOpt('skill', 'asist_terapeutico', this)">🤝 Acomp. Terapéutico</div>
+                    <div class="option-btn" onclick="selectOpt('skill', 'masaje', this)">💆 Masajes</div>
+                    <div class="option-btn" onclick="selectOpt('skill', 'asist_materno', this)">🍼 Asist. Materno</div>
+                    <div class="option-btn" onclick="selectOpt('skill', 'electricidad', this)">⚡ Electricidad</div>
+                    <div class="option-btn" onclick="selectOpt('skill', 'aires', this)">❄️ Aires Acond.</div>
+                    <div class="option-btn" onclick="selectOpt('skill', 'heladeras_lavarropas', this)">🔧 Heladeras/Lavarropas</div>
+                    <div class="option-btn" onclick="selectOpt('skill', 'celulares', this)">📱 Rep. Celulares</div>
+                    <div class="option-btn" onclick="selectOpt('skill', 'operador_pc', this)">💻 Operador PC</div>
+                    <div class="option-btn" onclick="selectOpt('skill', 'bancario_contable', this)">🏦 Aux. Bancario</div>
+                    <div class="option-btn" onclick="selectOpt('skill', 'sec_contable', this)">📊 Sec. Contable</div>
+                    <div class="option-btn" onclick="selectOpt('skill', 'diseno_visual', this)">🎨 Diseño Gráfico</div>
+                    <div class="option-btn" onclick="selectOpt('skill', 'ingles', this)">🇬🇧 Inglés</div>
+                    <div class="option-btn" onclick="selectOpt('skill', 'senas', this)">🤟 Lengua de Señas</div>
+                </div>
+                
+                <button class="btn-action" id="btn1" onclick="goStep(2)" disabled>AVANZAR 🚀</button>
+            </div>
+
+            <!-- PASO 2 -->
+            <div id="step2" class="step">
+                <h2>¿Con qué nivel arrancarías?</h2>
+                <p class="subtitle">La calle que tenés en el rubro manda.</p>
+                
+                <div class="options-grid">
+                    <div class="option-btn" onclick="selectOpt('exp', 'aprendiz', this)">👶 Aprendiz (0 - 1 año)</div>
+                    <div class="option-btn" onclick="selectOpt('exp', 'oficial', this)">🛠️ Oficial (1 - 3 años)</div>
+                    <div class="option-btn" onclick="selectOpt('exp', 'maestro', this)">🧙‍♂️ Maestro (+3 años)</div>
+                </div>
+                
+                <button class="btn-action" id="btn2" onclick="goStep(3)" disabled>AVANZAR 🚀</button>
+            </div>
+
+            <!-- PASO 3 -->
+            <div id="step3" class="step">
+                <h2>¿Cómo te gustaría laburar?</h2>
+                <p class="subtitle">El formato cambia tu ingreso.</p>
+                
+                <div class="options-grid">
+                    <div class="option-btn" onclick="selectOpt('modality', 'dependencia', this)">🏢 Empleado Fijo</div>
+                    <div class="option-btn" onclick="selectOpt('modality', 'freelance', this)">🚐 Freelance / Changas</div>
+                    <div class="option-btn" onclick="selectOpt('modality', 'dueño', this)">🏪 Dueño de Local</div>
+                </div>
+                
+                <button class="btn-action" id="btn3" onclick="calcLoot()" disabled>¡CALCULAR MI LOOT! 💰</button>
+            </div>
+
+            <!-- PASO 4: RESULTADO -->
+            <div id="step4" class="step">
+                <h2>TU BOTÍN MENSUAL</h2>
+                
+                <div class="speech-bubble">
+                    <p style="font-family:'Segoe UI', sans-serif; font-weight:800;">ESTIMADO EN TU BOLSILLO (JUN 2026):</p>
+                    <div class="salary-val" id="resVal">$0 - $0</div>
+                    <p style="font-size: 0.8rem; font-family:'Segoe UI', sans-serif;">(Valores referenciales del mercado ARS)</p>
+                </div>
+
+                <div class="promo-box">
+                    <h3>🔥 ¡HACELO REALIDAD!</h3>
+                    <p>Dominá <span id="resName" style="color:var(--c-yellow);">ESTA RAMA</span> con nuestras capacitaciones y escalá tu propio sueldo.</p>
+                </div>
+                
+                <button class="btn-action" style="background:var(--c-green);" onclick="alert('Redirigiendo...')">VER CURSOS 🎯</button>
+                <button class="btn-restart" onclick="location.reload()">[ REINICIAR SIMULACIÓN ]</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data del usuario estructurada
+        const user = { skill: null, exp: null, modality: null };
+        
+        // Cacheo de elementos DOM (Optimización)
+        const DOM = {
+            barFill: document.getElementById('barFill'),
+            barText: document.getElementById('barText'),
+            barCont: document.getElementById('barContainer'),
+            resVal: document.getElementById('resVal'),
+            resName: document.getElementById('resName'),
+            btns: { 1: document.getElementById('btn1'), 2: document.getElementById('btn2'), 3: document.getElementById('btn3') }
+        };
+
+        // Bases salariales simplificadas (Junio 2026)
+        const salaryDB = {
+            masaje: {min: 40, max: 60, n: "Masajes"}, barberia: {min: 45, max: 65, n: "Barbería"},
+            belleza: {min: 40, max: 60, n: "Belleza"}, unas: {min: 40, max: 60, n: "Uñas"},
+            peluqueria: {min: 45, max: 70, n: "Peluquería"}, farmacia: {min: 90, max: 120, n: "Farmacia"},
+            sec_medico: {min: 50, max: 70, n: "Sec. Médico"}, asist_terapeutico: {min: 60, max: 85, n: "Acomp. Terapéutico"},
+            asist_materno: {min: 45, max: 65, n: "Asist. Materno"}, ingles: {min: 50, max: 75, n: "Inglés"},
+            senas: {min: 45, max: 65, n: "Señas"}, bancario_contable: {min: 95, max: 130, n: "Bancario/Contable"},
+            operador_pc: {min: 50, max: 70, n: "Operador PC"}, sec_contable: {min: 55, max: 80, n: "Sec. Contable"},
+            diseno_visual: {min: 55, max: 80, n: "Diseño"}, celulares: {min: 50, max: 80, n: "Rep. Celulares"},
+            aires: {min: 60, max: 90, n: "Aires Acond."}, electricidad: {min: 60, max: 95, n: "Electricidad"},
+            heladeras_lavarropas: {min: 60, max: 90, n: "Línea Blanca"}
+        };
+
+        // Lógica de selección
+        function selectOpt(cat, val, el) {
+            user[cat] = val;
+            Array.from(el.parentNode.children).forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+            
+            if(cat === 'skill') DOM.btns[1].disabled = false;
+            if(cat === 'exp') DOM.btns[2].disabled = false;
+            if(cat === 'modality') DOM.btns[3].disabled = false;
+        }
+
+        // Navegación
+        function goStep(num) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('step' + num).classList.add('active');
+            
+            DOM.barFill.style.width = (num * 25) + '%';
+            DOM.barText.innerText = num <= 3 ? `NIVEL ${num} / 3` : '¡CÁLCULO LISTO!';
+            
+            if (num === 4) DOM.barCont.style.display = 'none';
+        }
+
+        // Cálculo
+        function calcLoot() {
+            const data = salaryDB[user.skill];
+            // Multiplicadores (Base x10.000 para simplificar los ceros en la DB)
+            const expM = user.exp === 'maestro' ? 2.0 : (user.exp === 'oficial' ? 1.4 : 1);
+            const modM = user.modality === 'dueño' ? 1.8 : (user.modality === 'freelance' ? 1.2 : 1);
+
+            const fMin = Math.round(data.min * 10000 * expM * modM);
+            const fMax = Math.round(data.max * 10000 * expM * modM);
+
+            const fmt = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
+            
+            DOM.resVal.innerText = `${fmt.format(fMin)} - ${fmt.format(fMax)}`;
+            DOM.resName.innerText = data.n;
+
+            goStep(4);
+        }
+    </script>
+</body>
+</html>

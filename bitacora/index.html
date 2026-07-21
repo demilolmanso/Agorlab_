@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Área en construcción | Agorlab</title>
+    
+    <link rel="icon" type="image/png" href="/favicon.png">
+
+    <style>
+        /* ================= TEMA TERMINAL / CAPTURA ================= */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050300; 
+            background-image: radial-gradient(circle at center, #1a0a00 0%, #030200 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center; /* Centrado horizontal */
+            align-items: center;     /* Centrado vertical */
+            color: #ca630e; 
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .mensaje-construccion {
+            font-size: clamp(1.5rem, 5vw, 3.5rem);
+            font-weight: bold;
+            color: #ff7300; 
+            text-shadow: 0px 0px 15px rgba(255, 115, 0, 0.2);
+            letter-spacing: -1px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Animación del cursor de consola */
+        .cursor {
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body> 
+
+    <div class="mensaje-construccion">
+        > área en construcción<span class="cursor">_</span>
+    </div>
+
+</body>
+</html>

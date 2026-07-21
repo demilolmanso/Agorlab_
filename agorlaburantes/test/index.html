@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agorlaburantes</title>
+    
+    <!-- Etiquetas PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#121824">
+    <link rel="apple-touch-icon" href="/icon-192x192.png">
+
+    <style>
+        :root {
+            --neon-orange: #ff5500;
+            --neon-yellow: #ffe600;
+            --comic-black: #000000;
+            --comic-white: #ffffff;
+            --bg-dark: #121824;
+            --panel-bg: #1e293b;
+        }
+        
+        * { 
+            box-sizing: border-box; 
+            font-family: 'Arial Black', 'Impact', sans-serif;
+            letter-spacing: -0.5px;
+        }
+        
+        body {
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(var(--panel-bg) 20%, transparent 20%),
+                              radial-gradient(var(--panel-bg) 20%, transparent 20%);
+            background-size: 16px 16px;
+            background-position: 0 0, 8px 8px;
+            color: var(--comic-white);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1.5rem;
+        }
+
+        .main-card {
+            background: #2563eb; 
+            border: 4px solid var(--comic-black);
+            padding: 2.5rem 1.5rem;
+            border-radius: 0px; 
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 10px 10px 0px var(--comic-black);
+            position: relative;
+            transform: rotate(-0.5deg);
+        }
+
+        .top-tag {
+            position: absolute;
+            top: -15px;
+            left: 5%;
+            background: var(--neon-yellow);
+            color: var(--comic-black);
+            padding: 6px 16px;
+            font-size: 0.9rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            border: 3px solid var(--comic-black);
+            box-shadow: 4px 4px 0px var(--comic-black);
+            transform: skewX(-10deg);
+        }
+
+        .progress-bar-flat {
+            width: 100%;
+            height: 24px;
+            background: var(--panel-bg);
+            border: 3px solid var(--comic-black);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--neon-yellow);
+            width: 5%;
+            transition: width 0.15s steps(4);
+        }
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.8rem;
+            color: var(--comic-white);
+            font-weight: 900;
+            text-shadow: 2px 2px 0px var(--comic-black);
+        }
+
+        h2 { 
+            font-size: 1.25rem; 
+            margin-bottom: 2rem; 
+            font-weight: 900; 
+            line-height: 1.4; 
+            color: var(--comic-white);
+            text-align: left;
+            text-transform: uppercase;
+            text-shadow: 3px 3px 0px var(--comic-black);
+            -webkit-text-stroke: 1px var(--comic-black);
+        }
+
+        .meme-option {
+            background: var(--comic-white);
+            border: 3px solid var(--comic-black);
+            color: var(--comic-black);
+            padding: 1.2rem 1rem;
+            width: 100%;
+            font-size: 0.95rem;
+            font-weight: 900;
+            text-align: left;
+            cursor: pointer;
+            margin-bottom: 0.9rem;
+            box-shadow: 4px 4px 0px var(--comic-black);
+            transition: transform 0.05s, box-shadow 0.05s;
+            text-transform: uppercase;
+        }
+        .meme-option:hover {
+            background: var(--neon-yellow);
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--comic-black);
+        }
+        .meme-option:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px var(--comic-black);
+        }
+
+        .hidden { display: none !important; }
+
+        .input-group { text-align: left; margin-bottom: 1.5rem; }
+        .input-group label {
+            font-size: 0.9rem; color: var(--comic-white); font-weight: 900;
+            text-transform: uppercase; text-shadow: 2px 2px 0px var(--comic-black);
+            display: block; margin-bottom: 0.5rem;
+        }
+        input {
+            width: 100%; padding: 1.1rem; background: var(--comic-white);
+            border: 3px solid var(--comic-black); color: var(--comic-black);
+            font-size: 1rem; font-weight: 900; box-shadow: 4px 4px 0px var(--comic-black);
+        }
+        input:focus { outline: none; background: var(--neon-yellow); }
+        input.input-error { background: #ff4444 !important; }
+        
+        .btn-trigger {
+            width: 100%; background: var(--neon-orange); color: var(--comic-white);
+            padding: 1.2rem; border: 3px solid var(--comic-black); font-size: 1.2rem;
+            font-weight: 900; cursor: pointer; box-shadow: 5px 5px 0px var(--comic-black);
+            text-transform: uppercase; margin-top: 1rem;
+        }
+        .btn-trigger:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0px var(--comic-black); }
+
+        /* --- DISEÑO DE CARTA DE PERSONAJE --- */
+        .result-card-box {
+            background: #f8fafc;
+            border: 4px solid var(--comic-black);
+            padding: 1.5rem 1rem;
+            box-shadow: 8px 8px 0px var(--comic-black);
+            color: var(--comic-black);
+            transform: rotate(1deg);
+            position: relative;
+        }
+        
+        /* Contenedor del Avatar/Personaje */
+        .character-portrait {
+            width: 100%; max-width: 300px; height: 320px;
+            margin: 0 auto 1.5rem auto;
+            border: 4px solid var(--comic-black);
+            background: var(--bg-dark);
+            box-shadow: 6px 6px 0px var(--neon-orange);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .character-portrait img { 
+            width: 100%; height: 100%; 
+            object-fit: cover; 
+            object-position: center top;
+            display: block;
+        }
+        
+        /* Decoración de la carta */
+        .character-portrait::after {
+            content: ''; position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 25%;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+        }
+
+        .result-title { 
+            font-size: 1.8rem; font-weight: 900; margin: 0 0 0.2rem 0; 
+            text-transform: uppercase; -webkit-text-stroke: 1px var(--comic-black); 
+            color: var(--neon-orange); text-align: center;
+        }
+        .sub-arquetipo { 
+            font-size: 0.95rem; color: var(--comic-black); font-weight: 900; 
+            background: var(--neon-yellow); display: block; width: fit-content;
+            margin: 0 auto 1.2rem auto; padding: 4px 12px; border: 2px solid var(--comic-black); 
+            text-transform: uppercase; 
+        }
+        
+        .mbti-traits {
+            display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-bottom: 1.2rem;
+        }
+        .trait-badge {
+            background: var(--comic-black); color: var(--comic-white);
+            padding: 5px 10px; font-size: 0.75rem; border-radius: 0px;
+            text-transform: uppercase; letter-spacing: 0;
+        }
+
+        .mbti-text-box {
+            background: rgba(0,0,0,0.04);
+            border-left: 4px solid var(--neon-orange);
+            padding: 1rem; text-align: left; margin-bottom: 1rem;
+        }
+        .mbti-text-box p {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+            font-weight: 500; font-size: 0.95rem; line-height: 1.5; color: #1e293b;
+            margin: 0; letter-spacing: 0; text-transform: none;
+        }
+        .mbti-highlight { font-family: inherit; font-weight: 800; color: var(--neon-orange); }
+
+        .course-highlight {
+            background: var(--comic-black); border: 3px solid var(--comic-black);
+            padding: 1.2rem; text-align: center; margin-top: 1rem; box-shadow: 4px 4px 0px var(--neon-yellow);
+        }
+
+        /* --- CAJA DE AVISO NUEVA --- */
+        .info-notice {
+            background: var(--panel-bg);
+            border: 3px dashed var(--neon-orange);
+            padding: 1rem;
+            margin-top: 1.2rem;
+            text-align: center;
+            box-shadow: 4px 4px 0px var(--comic-black);
+        }
+        
+        .info-notice p {
+            color: var(--comic-white);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 0;
+            line-height: 1.4;
+            letter-spacing: 0;
+            text-transform: none;
+        }
+        .info-notice strong {
+            color: var(--neon-yellow);
+            font-family: inherit;
+        }
+
+        .loader-ring {
+            border: 6px solid var(--comic-black); border-top: 6px solid var(--neon-yellow);
+            border-radius: 0px; width: 45px; height: 45px; animation: spin 0.6s linear infinite; margin: 2.5rem auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="main-card">
+    <div class="top-tag">AGORLABurantes🗿</div>
+
+    <div class="progress-bar-flat" id="progress-container">
+        <div class="progress-fill" id="progress-bar-fill"></div>
+        <div class="progress-text" id="progress-label-text">FASE: 1 / 20</div>
+    </div>
+
+    <!-- 20 PREGUNTAS TIPO MBTI -->
+    <div id="q1" class="question-container">
+        <h2>1. En un grupo grande donde no conocés a nadie, tu energía natural tiende a...</h2>
+        <button class="meme-option" onclick="submitAnswer(['barberia', 'peluqueria', 'ingles', 'asist_materno'])">🗣️ Tomar la iniciativa, charlar y conectar rápido con el entorno.</button>
+        <button class="meme-option" onclick="submitAnswer(['masaje', 'asist_terapeutico', 'celulares', 'operador_pc', 'sec_contable'])">👁️ Observar primero, escuchar y preferir conversaciones uno a uno.</button>
+    </div>
+    <div id="q2" class="question-container hidden">
+        <h2>2. Cuando te toca aprender una herramienta nueva, preferís...</h2>
+        <button class="meme-option" onclick="submitAnswer(['electricidad', 'aires', 'heladeras_lavarropas', 'celulares', 'unas', 'belleza'])">🛠️ Ir directo a la práctica, ensuciarte las manos y probar hasta que salga.</button>
+        <button class="meme-option" onclick="submitAnswer(['diseno_visual', 'ingles', 'bancario_contable', 'sec_contable'])">🧠 Entender la lógica, el concepto o el manual antes de mandarte a tocar algo.</button>
+    </div>
+    <div id="q3" class="question-container hidden">
+        <h2>3. Un amigo te llama llorando por un problema. Vos instintivamente...</h2>
+        <button class="meme-option" onclick="submitAnswer(['asist_terapeutico', 'masaje', 'asist_materno', 'senas'])">❤️ Lo escuchás, validás lo que siente y le das contención emocional.</button>
+        <button class="meme-option" onclick="submitAnswer(['operador_pc', 'bancario_contable', 'sec_medico', 'farmacia'])">⚙️ Lo escuchás, pero enseguida le armás un plan de acción lógico para resolverlo.</button>
+    </div>
+    <div id="q4" class="question-container hidden">
+        <h2>4. ¿Cómo manejás tu espacio personal o de trabajo diario?</h2>
+        <button class="meme-option" onclick="submitAnswer(['farmacia', 'sec_medico', 'sec_contable', 'bancario_contable', 'electricidad'])">🗂️ Soy metódico/a. Cada cosa tiene su lugar exacto y no soporto el desorden.</button>
+        <button class="meme-option" onclick="submitAnswer(['diseno_visual', 'barberia', 'peluqueria', 'senas', 'asist_materno'])">🌪️ Es un caos ordenado. Me adapto al momento y funciono bien improvisando.</button>
+    </div>
+    <div id="q5" class="question-container hidden">
+        <h2>5. Al mirar un objeto o proyecto, lo primero que tu cerebro escanea es...</h2>
+        <button class="meme-option" onclick="submitAnswer(['belleza', 'unas', 'diseno_visual', 'peluqueria'])">🎨 La estética: colores, simetría, proporciones y si visualmente impacta.</button>
+        <button class="meme-option" onclick="submitAnswer(['aires', 'heladeras_lavarropas', 'celulares', 'electricidad'])">🔧 La funcionalidad: para qué sirve, si está bien construido y cómo opera.</button>
+    </div>
+    <div id="q6" class="question-container hidden">
+        <h2>6. Frente a una urgencia donde todo se sale de control, vos...</h2>
+        <button class="meme-option" onclick="submitAnswer(['sec_medico', 'sec_contable', 'farmacia', 'operador_pc'])">📋 Tomás el control de la información, organizás los recursos y delegás tareas.</button>
+        <button class="meme-option" onclick="submitAnswer(['aires', 'electricidad', 'celulares', 'asist_terapeutico'])">⚡ Vas directo a la trinchera a arreglar el problema físico o humano con tus manos.</button>
+    </div>
+    <div id="q7" class="question-container hidden">
+        <h2>7. ¿Cuál de estas habilidades considerás que tenés más desarrollada?</h2>
+        <button class="meme-option" onclick="submitAnswer(['senas', 'masaje', 'asist_terapeutico', 'belleza'])">👀 Leer el lenguaje no verbal, el cuerpo y saber qué siente el otro sin que hable.</button>
+        <button class="meme-option" onclick="submitAnswer(['ingles', 'operador_pc', 'bancario_contable', 'diseno_visual'])">🗣️ Traducir conceptos complejos y comunicarlos de forma clara y directa.</button>
+    </div>
+    <div id="q8" class="question-container hidden">
+        <h2>8. Te dan una tarea que exige 4 horas de extrema concentración en un detalle diminuto...</h2>
+        <button class="meme-option" onclick="submitAnswer(['unas', 'celulares', 'bancario_contable', 'belleza'])">🧘 Me encanta, entro en "la zona" y me olvido del mundo exterior.</button>
+        <button class="meme-option" onclick="submitAnswer(['peluqueria', 'asist_materno', 'barberia', 'ingles'])">🏃 Me cuesta, necesito moverme, interactuar con otros y ver el panorama general.</button>
+    </div>
+    <div id="q9" class="question-container hidden">
+        <h2>9. Si te toca liderar un grupo de personas vulnerables o niños, tu rol es...</h2>
+        <button class="meme-option" onclick="submitAnswer(['asist_materno', 'asist_terapeutico', 'senas'])">🧸 Ser el escudo protector: educar, contener y crear un ambiente cálido.</button>
+        <button class="meme-option" onclick="submitAnswer(['farmacia', 'sec_medico'])">💊 Ser el proveedor: asegurar que tengan medicamentos, insumos y reglas claras.</button>
+    </div>
+    <div id="q10" class="question-container hidden">
+        <h2>10. A la hora de resolver un problema mecánico o técnico...</h2>
+        <button class="meme-option" onclick="submitAnswer(['sec_contable', 'farmacia', 'bancario_contable', 'operador_pc'])">📖 Sigo las instrucciones paso a paso, verificando que no haya margen de error.</button>
+        <button class="meme-option" onclick="submitAnswer(['electricidad', 'heladeras_lavarropas', 'aires', 'diseno_visual'])">💡 Uso mi intuición espacial, desarmó y pruebo lógicas hasta encontrar la falla.</button>
+    </div>
+    <div id="q11" class="question-container hidden">
+        <h2>11. Si pudieras tener una habilidad al instante como en la Matrix, elegirías:</h2>
+        <button class="meme-option" onclick="submitAnswer(['belleza', 'barberia', 'peluqueria', 'masaje'])">✨ Poder alterar la estética, el estilo o el bienestar físico de alguien con tocarlo.</button>
+        <button class="meme-option" onclick="submitAnswer(['operador_pc', 'celulares', 'ingles', 'bancario_contable'])">💻 Poder hackear y decodificar cualquier máquina, sistema, número o idioma.</button>
+    </div>
+    <div id="q12" class="question-container hidden">
+        <h2>12. Tu mayor satisfacción después de un día agotador de trabajo es:</h2>
+        <button class="meme-option" onclick="submitAnswer(['bancario_contable', 'sec_contable', 'sec_medico', 'operador_pc'])">✅ Ver que todo cuadró perfectamente, las cuentas cierran y mi lista está tachada.</button>
+        <button class="meme-option" onclick="submitAnswer(['masaje', 'peluqueria', 'belleza', 'asist_terapeutico'])">😌 Ver que alguien se fue con una sonrisa, relajado y transformado por mi culpa.</button>
+    </div>
+    <div id="q13" class="question-container hidden">
+        <h2>13. Ante un equipo electrónico que se apaga de la nada, tu mente deduce:</h2>
+        <button class="meme-option" onclick="submitAnswer(['heladeras_lavarropas', 'electricidad', 'aires'])">🔌 "Debe ser un corto en la fuente, el motor o un tema de voltaje pesado."</button>
+        <button class="meme-option" onclick="submitAnswer(['celulares', 'operador_pc'])">🔬 "Seguro colapsó la placa madre, el software o un microcomponente soldable."</button>
+    </div>
+    <div id="q14" class="question-container hidden">
+        <h2>14. ¿Cuál es tu canal principal para expresar quién sos?</h2>
+        <button class="meme-option" onclick="submitAnswer(['diseno_visual', 'belleza', 'unas', 'barberia'])">🎨 A través de la estética, mi ropa, imágenes, colores o mi estilo personal.</button>
+        <button class="meme-option" onclick="submitAnswer(['ingles', 'senas', 'asist_materno'])">🗣️ A través de la palabra, gestos, enseñando y conectando verbal o físicamente.</button>
+    </div>
+    <div id="q15" class="question-container hidden">
+        <h2>15. Si tuvieras que elegir tu rutina laboral ideal:</h2>
+        <button class="meme-option" onclick="submitAnswer(['sec_medico', 'sec_contable', 'farmacia'])">📅 Prefiero previsibilidad: saber mis horarios, tener mi oficina y mi sistema en orden.</button>
+        <button class="meme-option" onclick="submitAnswer(['barberia', 'asist_terapeutico', 'aires', 'celulares'])">🎢 Prefiero movimiento: que cada día traiga clientes, desafíos y problemas distintos.</button>
+    </div>
+    <div id="q16" class="question-container hidden">
+        <h2>16. Un día realmente productivo para vos significa:</h2>
+        <button class="meme-option" onclick="submitAnswer(['aires', 'heladeras_lavarropas', 'peluqueria', 'masaje'])">🏋️ Haber puesto el cuerpo, moviéndome de un lado a otro y usando mis manos.</button>
+        <button class="meme-option" onclick="submitAnswer(['unas', 'celulares', 'operador_pc', 'diseno_visual', 'bancario_contable'])">🧠 Haber estado quieto/a, pero gastando muchísima energía mental y enfoque.</button>
+    </div>
+    <div id="q17" class="question-container hidden">
+        <h2>17. En una discusión grupal, tu principal aporte suele ser:</h2>
+        <button class="meme-option" onclick="submitAnswer(['masaje', 'asist_terapeutico', 'asist_materno'])">🕊️ Mantener la paz, mediar y asegurar que nadie salga lastimado emocionalmente.</button>
+        <button class="meme-option" onclick="submitAnswer(['sec_contable', 'bancario_contable', 'electricidad'])">⚖️ Separar las emociones de los hechos y buscar la solución más lógica y justa.</button>
+    </div>
+    <div id="q18" class="question-container hidden">
+        <h2>18. Lo que más te motiva a seguir estudiando o aprendiendo es:</h2>
+        <button class="meme-option" onclick="submitAnswer(['ingles', 'senas', 'diseno_visual'])">🌍 Expandir mis fronteras, entender otras culturas y comunicarme con más personas.</button>
+        <button class="meme-option" onclick="submitAnswer(['operador_pc', 'celulares', 'bancario_contable'])">📈 Entender cómo avanza la tecnología, dominar sistemas nuevos y optimizar recursos.</button>
+    </div>
+    <div id="q19" class="question-container hidden">
+        <h2>19. Cuando mirás una película, prestás muchísima atención a:</h2>
+        <button class="meme-option" onclick="submitAnswer(['belleza', 'diseno_visual', 'barberia', 'unas'])">🎬 La fotografía, el maquillaje de los actores, la ropa y el diseño del set.</button>
+        <button class="meme-option" onclick="submitAnswer(['asist_terapeutico', 'asist_materno', 'senas'])">🎭 Las motivaciones ocultas de los personajes, sus traumas y cómo se relacionan.</button>
+    </div>
+    <div id="q20" class="question-container hidden">
+        <h2>20. Si pudieras definir tu misión profesional final, sería:</h2>
+        <button class="meme-option" onclick="submitAnswer(['belleza', 'unas', 'peluqueria', 'barberia', 'masaje', 'asist_terapeutico', 'asist_materno'])">🌟 Ser una persona que transformó, cuidó e impactó directamente en el bienestar de otros.</button>
+        <button class="meme-option" onclick="submitAnswer(['electricidad', 'aires', 'heladeras_lavarropas', 'celulares', 'operador_pc', 'bancario_contable', 'sec_contable', 'diseno_visual'])">🛠️ Ser el experto fundamental al que todos acudían porque resolvía lo que nadie más podía.</button>
+    </div>
+
+    <!-- REGISTRO -->
+    <div id="stepForm" class="hidden">
+        <h2>FASE FINAL ACABADA 🏁</h2>
+        <p style="color: var(--comic-white); font-size: 0.95rem; margin-bottom: 1.5rem; font-weight: 900; text-transform: uppercase;">Registrate gratis para desbloquear tu Arquetipo Psicológico y tu ruta de habilidades.</p>
+        
+        <form id="ajaxForm">
+            <input type="hidden" id="calculatedInterest" name="Curso_Especifico" value="">
+
+            <div class="input-group">
+                <label>Tu Nombre</label>
+                <input type="text" id="inputName" name="Nombre" placeholder="PRIMER NOMBRE" required>
+            </div>
+            
+            <div class="input-group">
+                <label>Número</label>
+                <input type="tel" id="inputPhone" name="Telefono" placeholder="Ej: 2236960547" required>
+            </div>
+            
+            <button type="submit" class="btn-trigger">DESBLOQUEAR MI ARQUETIPO 🚀</button>
+        </form>
+    </div>
+
+    <div id="stepLoading" class="hidden">
+        <h2>CALCULANDO ARQUETIPO...</h2>
+        <div class="loader-ring"></div>
+    </div>
+
+    <!-- PANTALLA RESULTADO -->
+    <div id="stepResult" class="hidden">
+        <div class="result-card-box">
+            <h3 class="result-title" id="resTitle">ANALIZANDO...</h3>
+            <div class="sub-arquetipo" id="resArch">ARQUETIPO</div>
+            
+            <div class="character-portrait">
+                <img id="resGif" src="" alt="Avatar del Arquetipo">
+            </div>
+
+            <div class="mbti-traits" id="resTraits">
+            </div>
+            
+            <div class="mbti-text-box">
+                <p id="resMbtiText"></p>
+            </div>
+        </div>
+        
+        <div class="course-highlight">
+            <span style="font-size: 0.8rem; color: var(--neon-yellow); font-weight: 900; text-transform: uppercase; display: block; margin-bottom: 0.3rem;">ENTRENAMIENTO ÓPTIMO SUGERIDO:</span>
+            <strong id="matchedCourseText" style="color: var(--comic-white); font-size: 1.1rem; display: block; font-weight: 900; text-transform: uppercase;"></strong>
+        </div>
+        
+        <!-- CAJA DE AVISO AGREGADA ACÁ -->
+        <div class="info-notice">
+            <p>📢 <strong>¡ATENCIÓN!</strong> Próximamente nos vamos a estar contactando con vos para brindarte más información sobre las capacitaciones que te pueden interesar y el programa de becas al que podés aplicar. ¡Mantenete atento/a!</p>
+        </div>
+        
+        <button id="btnShare" class="btn-trigger hidden" style="background: var(--neon-yellow); color: var(--comic-black); margin-top: 1rem; border-color: var(--comic-black);">
+            🔥 COMPARTIR MI RESULTADO 📲
+        </button>
+    </div>
+</div>
+
+<script>
+    let currentStep = 1;
+    const totalSteps = 20; 
+    
+    let scoringMatrix = {
+        'masaje': 0, 'barberia': 0, 'belleza': 0, 'unas': 0, 'peluqueria': 0,
+        'farmacia': 0, 'sec_medico': 0, 'asist_terapeutico': 0, 'asist_materno': 0,
+        'ingles': 0, 'senas': 0, 'bancario_contable': 0, 'operador_pc': 0,
+        'sec_contable': 0, 'diseno_visual': 0, 'celulares': 0, 'aires': 0,
+        'electricidad': 0, 'heladeras_lavarropas': 0
+    };
+
+    const specificCoursesData = {
+        'masaje': { 
+            title: 'Masaje y Reflexología 💆', arch: 'Guardián del Equilibrio',
+            traits: ['Intuitivo', 'Sensorial (S)', 'Pacificador'],
+            desc_long: 'A nivel cognitivo, tu mente funciona como un radar de tensiones. <span class="mbti-highlight">Procesás el mundo a través de la intuición física y emocional.</span> Sos la persona que baja las revoluciones cuando todo explota. Tu mayor fortaleza es leer lo que el cuerpo del otro dice en silencio.',
+            gif: 'https://media1.tenor.com/m/wN65PNfEhVQAAAAd/cat-woman.gif' 
+        },
+        'barberia': { 
+            title: 'Barbería 💈', arch: 'Escultor Urbano',
+            traits: ['Extrovertido (E)', 'Detallista', 'Vanguardista'],
+            desc_long: 'Tenés la combinación perfecta entre un ojo clínico para la simetría y una inteligencia social altísima. <span class="mbti-highlight">Sos el psicólogo del barrio pero con una navaja en la mano.</span> Tu energía es dinámica, te gusta el ruido, el estilo y el impacto inmediato.',
+            gif: 'https://media1.tenor.com/m/ezJSY4FGjjYAAAAd/eric-brooks-beard.gif' 
+        },
+        'belleza': { 
+            title: 'Belleza Integral 💋', arch: 'Perfeccionista de Rasgos',
+            traits: ['Esteta', 'Precisión Visual', 'Transformador (F)'],
+            desc_long: 'Tu función principal es la optimización estética. <span class="mbti-highlight">Tu cerebro descompone rostros en luces, sombras y proportions.</span> Sos implacable con los detalles y tenés una sensibilidad artística que te permite sacar la mejor versión de cualquier persona.',
+            gif: 'https://media.tenor.com/2RWXNtgcOYIAAAAi/squidward-handsome-squidward.gif' 
+        },
+        'unas': { 
+            title: 'Diseño y Arte de Uñas 💅', arch: 'Micro-Artista Visual',
+            traits: ['Introvertido (I)', 'Foco Láser', 'Minucioso'],
+            desc_long: 'Poseés una paciencia de hierro y un control motor envidiable. <span class="mbti-highlight">Tu mente es un lienzo hiperactivo que necesita expresarse en escalas milimétricas.</span> Entrar en tu "zona" de enfoque mientras creás micro-arte es tu forma natural de meditar.',
+            gif: 'https://media1.tenor.com/m/b8uT2ztuWLwAAAAd/pink-nails.gif' 
+        },
+        'peluqueria': { 
+            title: 'Peluquería Unisex 💇', arch: 'Arquitecto Capilar',
+            traits: ['Extrovertido (E)', 'Intuitivo (N)', 'Resolutivo'],
+            desc_long: 'Entendés la identidad como algo maleable. <span class="mbti-highlight">Tu visión tridimensional te permite calcular volúmenes, caídas y colorimetría en segundos.</span> Sos una persona altamente adaptable que se nutre de la interacción constante y el cambio.',
+            gif: 'https://media1.tenor.com/m/ETAnEX09v5wAAAAd/haircut-meme.gif' 
+        },
+        'farmacia': { 
+            title: 'Atención Farmacéutica 💊', arch: 'Estratega de Suministros',
+            traits: ['Juzgador (J)', 'Metódico', 'Confiable'],
+            desc_long: 'Operás bajo una matriz lógica estricta. <span class="mbti-highlight">El caos te incomoda; tu cerebro busca clasificar, ordenar y proveer soluciones exactas.</span> Tenés una inclinación natural hacia el cuidado, pero desde una perspectiva pragmática y científica.',
+            gif: 'https://media1.tenor.com/m/kRoWlxwkAysAAAAC/pharmacist.gif' 
+        },
+        'sec_medico': { 
+            title: 'Secretariado Médico 📋', arch: 'Navegador Logístico',
+            traits: ['Multitasking', 'Lógico (T)', 'Estructurado (J)'],
+            desc_long: 'Sos el pilar invisible que sostiene cualquier estructura. <span class="mbti-highlight">Tenés una tolerancia al estrés administrativo superior al 90% de la población.</span> Tu mente es un tablero de ajedrez donde organizás agendas y urgencias sin perder el control.',
+            gif: 'https://media.tenor.com/yKHp_afDtrUAAAAi/medatixx-drdoxx.gif' 
+        },
+        'asist_terapeutico': { 
+            title: 'Asistente Terapéutico 🤝', arch: 'Soporte Psicosocial',
+            traits: ['Sentimental (F)', 'Alta Empatía', 'Guía'],
+            desc_long: 'Tu inteligencia emocional es tu herramienta de mayor impacto. <span class="mbti-highlight">Sos capaz de absorber, procesar y redirigir la angustia ajena sin quebrarte.</span> Tenés un instinto protector nato que te convierte en el ancla durante las peores tormentas.',
+            gif: 'https://media1.tenor.com/m/395OZ5cSKNkAAAAd/mahni-mi-se-ot.gif' 
+        },
+        'asist_materno': { 
+            title: 'Asistente Materno Infantil 🧸', arch: 'Desarrollador de Potencial',
+            traits: ['Cálido', 'Didáctico', 'Protector (F)'],
+            desc_long: 'Ves el mundo con ojos de potencial y crecimiento. <span class="mbti-highlight">Tenés la capacidad única de simplificar conceptos y generar entornos 100% seguros.</span> Tu personalidad irradia confianza y contención, atributos vitales para moldear el desarrollo humano.',
+            gif: 'https://media1.tenor.com/m/5tKPCgpSpvwAAAAC/gru-despicable.gif' 
+        },
+        'ingles': { 
+            title: 'Inglés 🌐', arch: 'Conector Interfaz Global',
+            traits: ['Curioso', 'Comunicador', 'Intuitivo (N)'],
+            desc_long: 'Para vos, los límites son una ilusión. <span class="mbti-highlight">Tu cerebro es una esponja lingüística impulsada por el deseo de decodificar información y conectar.</span> Buscás expandir tu disco duro mental absorbiendo culturas y sistemas de pensamiento.',
+            gif: 'https://media.tenor.com/8WyrenISIQwAAAAi/zhot-english-speak-english.gif' 
+        },
+        'senas': { 
+            title: 'Lengua de Señas 🤟', arch: 'Estratega Inclusivo',
+            traits: ['Perceptivo (P)', 'Kinestésico', 'Integrador'],
+            desc_long: 'Procesás la información de manera visual y corporal. <span class="mbti-highlight">Para vos, las palabras no dichas hacen más ruido que los gritos.</span> Tenés un sentido de la justicia espacial muy fuerte, y usás tu cuerpo para conectar mundos aislados.',
+            gif: 'https://media1.tenor.com/m/fzCFbvUxT8MAAAAd/sign-language-waka.gif' 
+        },
+        'bancario_contable': { 
+            title: 'Auxiliar Bancario 📊', arch: 'Ingeniero de Recursos',
+            traits: ['Analítico (T)', 'Calculador', 'Juzgador (J)'],
+            desc_long: 'Tus emociones no nublan tu juicio. <span class="mbti-highlight">Ves el dinero, los recursos y el tiempo como datos crudos que necesitan ser optimizados.</span> Poseés una capacidad innata para encontrar errores lógicos y garantizar la seguridad del sistema.',
+            gif: 'https://media1.tenor.com/m/Jqr5Gm1rg9wAAAAC/silver-silversqueeze-wallstreetsilver-money.gif' 
+        },
+        'operador_pc': { 
+            title: 'Operador de PC 💻', arch: 'Comandante de Software',
+            traits: ['Tecnológico', 'Introvertido (I)', 'Optimizador'],
+            desc_long: 'Tu lógica es binaria y orientada a la eficiencia. <span class="mbti-highlight">Tu entorno natural es la interfaz digital, donde tu velocidad mental empata con el procesador.</span> Disfrutás dominar las herramientas que hacen girar el mundo moderno desde las sombras.',
+            gif: 'https://media1.tenor.com/m/DldnJaNJaG0AAAAd/teclado-elevado-techno.gif' 
+        },
+        'sec_contable': { 
+            title: 'Secretariado Contable 📈', arch: 'Estructurador Corporativo',
+            traits: ['Auditor Nato', 'Lógico (T)', 'Impecable (J)'],
+            desc_long: 'Sos el enemigo natural del caos. <span class="mbti-highlight">Tu mente funciona con reglas, auditorías y comprobaciones cruzadas.</span> Sos una persona en la que se puede confiar ciegamente porque tu superpoder es la administración estricta de los detalles.',
+            gif: 'https://media1.tenor.com/m/etQ2XYp5b_cAAAAd/stonks-meme-man.gif' 
+        },
+        'diseno_visual': { 
+            title: 'Diseño y Comunicación 📐', arch: 'Ideólogo Gráfico',
+            traits: ['Innovador (N)', 'Conceptual', 'Esteta'],
+            desc_long: 'Pensás en paletas de colores y retículas antes de dormir. <span class="mbti-highlight">Sos capaz de agarrar una idea abstracta y convertirla en una bala visual.</span> Tu perfil es altamente creativo pero estratégico: hacés piezas que funcionan y penetran la mente.',
+            gif: 'https://media1.tenor.com/m/otI7ELReHHwAAAAC/vinesauce-vargskelethor.gif' 
+        },
+        'celulares': { 
+            title: 'Reparación de Celulares 🛠️', arch: 'Cirujano de Microelectrónica',
+            traits: ['Foco Absoluto (I)', 'Paciente', 'Lógico (T)'],
+            desc_long: 'Tenés pulso de cirujano y paciencia de monje. <span class="mbti-highlight">Tu cerebro ama desarmar un problema enorme en componentes diminutos hasta encontrar la falla lógica.</span> Donde otros ven una pantalla negra, vos ves un puzzle fascinante.',
+            gif: 'https://media1.tenor.com/m/uXtp8GLXvxYAAAAC/mobile-break.gif' 
+        },
+        'aires': { 
+            title: 'Reparación de Aires ❄️', arch: 'Ingeniero Climático',
+            traits: ['Pragmático (S)', 'Físico', 'Resolutivo'],
+            desc_long: 'Entendés el mundo en términos de presiones, temperaturas y física aplicada. <span class="mbti-highlight">Sos el salvador del confort humano en situaciones extremas.</span> Te gusta el trabajo que requiere poner el cuerpo y dejar un problema solucionado en el acto.',
+            gif: 'https://media1.tenor.com/m/HG3uyER8m-gAAAAC/ac-air-conditioning.gif' 
+        },
+        'electricidad': { 
+            title: 'Electricidad Domiciliaria ⚡', arch: 'Controlador de Potencia',
+            traits: ['Lógico (T)', 'Precavido (J)', 'Analítico'],
+            desc_long: 'Respetás la energía porque la entendés. <span class="mbti-highlight">Sos capaz de mapear redes invisibles de corriente en las paredes de cualquier estructura.</span> Tu personalidad es metódica, calculada y extremadamente centrada en la prevención de riesgos.',
+            gif: 'https://media1.tenor.com/m/PIzi7y05DNAAAAAd/nikola-tesla-the-prestige.gif' 
+        },
+        'heladeras_lavarropas': { 
+            title: 'Electromecánico 🧺', arch: 'Detective Mecánico',
+            traits: ['Investigador', 'Mecánico (S)', 'Práctico'],
+            desc_long: 'Tu cerebro se activa cuando escucha un motor fallando. <span class="mbti-highlight">Trabajás mediante un árbol de diagnóstico mental de ensayo y error súper veloz.</span> Sos una persona enfocada en devolverle la vida a las máquinas pesadas que sostienen un hogar.',
+            gif: 'https://media1.tenor.com/m/2aVq_bMAfdsAAAAd/drunk-dummy.gif' 
+        }
+    };
+
+    function updateProgressBar() {
+        const fill = document.getElementById('progress-bar-fill');
+        const text = document.getElementById('progress-label-text');
+        
+        const percentage = ((currentStep - 1) / totalSteps) * 100;
+        fill.style.width = `${percentage}%`;
+        text.innerText = currentStep <= totalSteps ? `FASE: ${currentStep} / 20` : 'ANÁLISIS OK';
+    }
+
+    function submitAnswer(courseCodesArray) {
+        courseCodesArray.forEach(code => {
+            if(scoringMatrix[code] !== undefined) {
+                scoringMatrix[code]++;
+            }
+        });
+        
+        document.getElementById(`q${currentStep}`).classList.add('hidden');
+        currentStep++;
+        
+        if (currentStep <= totalSteps) {
+            document.getElementById(`q${currentStep}`).classList.remove('hidden');
+            updateProgressBar();
+        } else {
+            let finalWinner = Object.keys(scoringMatrix).reduce((a, b) => scoringMatrix[a] > scoringMatrix[b] ? a : b);
+            document.getElementById('calculatedInterest').value = specificCoursesData[finalWinner].title;
+            
+            document.getElementById('progress-container').classList.add('hidden');
+            document.getElementById('stepForm').classList.remove('hidden');
+        }
+    }
+
+    document.getElementById('ajaxForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const phoneField = document.getElementById('inputPhone');
+        const nameField = document.getElementById('inputName');
+        
+        phoneField.classList.remove('input-error');
+        nameField.classList.remove('input-error');
+
+        if (!phoneField.value.trim() || phoneField.value.trim().length < 6) {
+            phoneField.classList.add('input-error');
+            phoneField.focus();
+            return false;
+        }
+
+        if (!nameField.value.trim()) {
+            nameField.classList.add('input-error');
+            nameField.focus();
+            return false;
+        }
+
+        document.getElementById('stepForm').classList.add('hidden');
+        document.getElementById('stepLoading').classList.remove('hidden');
+        
+        const formData = new FormData(this);
+        let finalWinner = Object.keys(scoringMatrix).reduce((a, b) => scoringMatrix[a] > scoringMatrix[b] ? a : b);
+
+        fetch('https://formspree.io/f/xeeyabnw', {
+            method: 'POST',
+            body: formData,
+            headers: { 'Accept': 'application/json' }
+        })
+        .then(response => {
+            document.getElementById('stepLoading').classList.add('hidden');
+            document.getElementById('stepResult').classList.remove('hidden');
+            
+            const profile = specificCoursesData[finalWinner];
+            
+            document.getElementById('resTitle').innerText = profile.arch;
+            document.getElementById('resArch').innerText = 'PERFIL: ' + profile.title.split(' ')[0];
+            document.getElementById('resGif').src = profile.gif;
+            
+            document.getElementById('resTraits').innerHTML = profile.traits.map(t => `<span class="trait-badge">${t}</span>`).join('');
+            document.getElementById('resMbtiText').innerHTML = profile.desc_long;
+            document.getElementById('matchedCourseText').innerText = profile.title;
+
+            const btnShare = document.getElementById('btnShare');
+            btnShare.classList.remove('hidden');
+            
+            btnShare.onclick = () => {
+                const shareText = `Descubrí que mi arquetipo psicológico es "${profile.arch}". Mis atributos: ${profile.traits.join(', ')} 🚀. Fijate qué te toca a vos 👇`;
+                const shareUrl = "https://agorlab.com/"; 
+
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Test de Arquetipos Psicológicos',
+                        text: shareText,
+                        url: shareUrl
+                    }).catch(console.error);
+                } else {
+                    const waLink = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
+                    window.open(waLink, '_blank');
+                }
+            };
+        })
+        .catch(error => {
+            alert('Fallo de red cósmico. Reintentá porfa.');
+            document.getElementById('stepLoading').classList.add('hidden');
+            document.getElementById('stepForm').classList.remove('hidden');
+        });
+    });
+
+    updateProgressBar();
+    
+    // Script agregado para el registro del Service Worker (PWA)
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => {
+                    console.log('Service Worker registrado de diez. Scope:', registration.scope);
+                })
+                .catch(error => {
+                    console.log('Fallo en el registro del Service Worker:', error);
+                });
+        });
+    }
+</script>
+
+</body>
+</html>

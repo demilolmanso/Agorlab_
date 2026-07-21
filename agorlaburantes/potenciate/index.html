@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orientación Laboral | Agorlab Ultra</title>
+    <style>
+        :root {
+            /* Paleta Cómic Vibrante */
+            --c-orange: #ff4700;
+            --c-yellow: #ffde00;
+            --c-green:  #00f055;
+            --c-blue:   #2563eb;
+            --c-cyan:   #00e5ff;
+            --c-dark:   #0f172a;
+            --c-light:  #f8fafc;
+            --c-ink:    #000000;
+            
+            /* Grosores y sombras */
+            --b-thick: 4px solid var(--c-ink);
+            --b-thin:  2px solid var(--c-ink);
+            --shadow-hard: 6px 6px 0px var(--c-ink);
+            --shadow-hover: 10px 10px 0px var(--c-ink);
+            --shadow-input: 4px 4px 0px var(--c-ink);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial Black', 'Impact', sans-serif;
+            letter-spacing: -0.5px;
+        }
+
+        /* Fondo Halftone (Puntos de cómic) */
+        body {
+            background-color: var(--c-dark);
+            background-image: 
+                radial-gradient(var(--c-ink) 25%, transparent 25%),
+                radial-gradient(var(--c-ink) 25%, transparent 25%);
+            background-size: 12px 12px;
+            background-position: 0 0, 6px 6px;
+            color: var(--c-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        /* Contenedor principal con efecto de doble hoja */
+        .comic-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 550px;
+        }
+
+        .comic-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 15px; left: -10px; right: 10px; bottom: -15px;
+            background: var(--c-green); /* Verde para diferenciarlo de la calculadora */
+            border: var(--b-thick);
+            transform: rotate(-2deg);
+            z-index: -1;
+        }
+
+        .main-card {
+            background: var(--c-blue);
+            border: var(--b-thick);
+            padding: 2.5rem 1.5rem;
+            position: relative;
+            transform: rotate(1deg);
+            box-shadow: inset -5px -5px 0px rgba(0,0,0,0.2);
+        }
+
+        /* Etiqueta superior dinámica */
+        .top-tag {
+            position: absolute;
+            top: -20px;
+            right: 15px;
+            background: var(--c-yellow);
+            color: var(--c-ink);
+            padding: 8px 20px;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            border: var(--b-thick);
+            box-shadow: var(--shadow-hard);
+            transform: skewX(-15deg) rotate(-3deg);
+            z-index: 10;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--c-light);
+            text-align: center;
+            text-transform: uppercase;
+            text-shadow: 3px 3px 0px var(--c-ink), -1px -1px 0 var(--c-ink);
+            line-height: 1.1;
+        }
+
+        p.subtitle {
+            color: var(--c-yellow);
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: 800;
+            font-size: 1rem;
+            text-transform: uppercase;
+        }
+
+        /* Paneles de Propuesta de Valor (Features) */
+        .comic-panels {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .panel {
+            background: var(--c-light);
+            border: var(--b-thick);
+            color: var(--c-ink);
+            padding: 1rem;
+            box-shadow: var(--shadow-input);
+            text-align: center;
+            transform: rotate(-1deg);
+        }
+
+        .panel:nth-child(2) { transform: rotate(1deg); background: var(--c-cyan); }
+        .panel:nth-child(3) { transform: rotate(-2deg); background: var(--c-yellow); }
+
+        .panel-icon {
+            font-size: 1.8rem;
+            display: block;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+        }
+
+        .panel p {
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: 800;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            line-height: 1.2;
+        }
+
+        /* Formulario */
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            background: var(--c-dark);
+            padding: 1.5rem;
+            border: 4px dashed var(--c-cyan);
+            transform: rotate(-1deg);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        label {
+            font-size: 1.1rem;
+            color: var(--c-cyan);
+            text-transform: uppercase;
+            text-shadow: 1px 1px 0px var(--c-ink);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: var(--b-thick);
+            background: var(--c-light);
+            color: var(--c-ink);
+            font-size: 1rem;
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: bold;
+            box-shadow: var(--shadow-input);
+            transition: transform 0.1s, box-shadow 0.1s;
+            outline: none;
+            appearance: none; /* Limpia el estilo nativo del select */
+        }
+
+        input:focus, select:focus {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--c-orange);
+            background: #fffdf0;
+        }
+
+        .input-hint {
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.8rem;
+            color: var(--c-light);
+            font-weight: 600;
+        }
+
+        /* Botón de Submit */
+        button[type="submit"] {
+            width: 100%; 
+            background: var(--c-yellow); 
+            color: var(--c-ink);
+            padding: 1.2rem; 
+            border: var(--b-thick); 
+            font-size: 1.3rem;
+            cursor: pointer; 
+            box-shadow: var(--shadow-hard);
+            text-transform: uppercase;
+            margin-top: 0.5rem;
+            transition: all 0.1s;
+        }
+
+        button[type="submit"]:hover {
+            transform: translate(-3px, -3px) skewX(-2deg); 
+            box-shadow: var(--shadow-hover); 
+            background: var(--c-orange);
+            color: var(--c-light);
+        }
+
+        /* Estados de Formspree estilo Globo de Cómic */
+        .status-box {
+            display: none;
+            background: var(--c-light);
+            border: var(--b-thick);
+            padding: 2rem 1.5rem;
+            box-shadow: var(--shadow-hard);
+            color: var(--c-ink);
+            text-align: center;
+            margin-bottom: 1.5rem;
+            position: relative;
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: 800;
+            font-size: 1.1rem;
+            border-radius: 10px;
+            animation: popIn 0.4s ease-out forwards;
+        }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.9) translateY(20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .status-box::after {
+            content: ''; position: absolute; bottom: -20px; left: 50%; margin-left: -15px;
+            border-width: 20px 15px 0; border-style: solid;
+            border-color: var(--c-light) transparent transparent transparent; z-index: 2;
+        }
+        .status-box::before {
+            content: ''; position: absolute; bottom: -26px; left: 50%; margin-left: -19px;
+            border-width: 24px 19px 0; border-style: solid;
+            border-color: var(--c-ink) transparent transparent transparent; z-index: 1;
+        }
+
+        .status-success { background: var(--c-green); }
+        .status-success::after { border-color: var(--c-green) transparent transparent transparent; }
+        .status-error { background: var(--c-orange); color: var(--c-light); }
+        .status-error::after { border-color: var(--c-orange) transparent transparent transparent; }
+
+        .footer {
+            margin-top: 1.5rem;
+            text-align: center;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.85rem;
+            color: var(--c-light);
+            font-weight: bold;
+        }
+
+        .footer span { color: var(--c-yellow); text-transform: uppercase; font-family: 'Arial Black', sans-serif; display: block; margin-top: 5px; }
+
+        @media (max-width: 500px) {
+            .main-card { padding: 1.5rem 1rem; }
+            h1 { font-size: 1.6rem; }
+            .comic-panels { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="comic-wrapper">
+        <div class="main-card">
+            <div class="top-tag">ASISTENCIA & ORIENTACIÓN</div>
+            
+            <div class="header">
+                <h1>¡ARMÁ TU CAMINO LABORAL!</h1>
+                <p class="subtitle">Registrate para analizar tu perfil y darte una mano real.</p>
+            </div>
+
+            <!-- Alertas de Formspree (Globos de Cómic) -->
+            <div id="form-success" class="status-box status-success" data-fs-success>
+                🎉 ¡BOOM! Datos registrados. En breve te hablo por WhatsApp con todo el material.
+            </div>
+            <div id="form-error" class="status-box status-error" data-fs-error>
+                ⚠️ ¡CRASH! Algo falló al enviar los datos. Revisá que esté todo completo e intentá de nuevo.
+            </div>
+
+            <div id="form-content">
+                <!-- Ventajas (Viñetas) -->
+                <div class="comic-panels">
+                    <div class="panel">
+                        <span class="panel-icon">📄</span>
+                        <p>Plantilla CV Pro Lista para usar</p>
+                    </div>
+                    <div class="panel">
+                        <span class="panel-icon">🎯</span>
+                        <p>Orientación Personalizada</p>
+                    </div>
+                    <div class="panel">
+                        <span class="panel-icon">⚡</span>
+                        <p>Opciones de Capacitación</p>
+                    </div>
+                </div>
+
+                <!-- Formulario Formspree -->
+                <form id="orientacion-form">
+                    
+                    <div class="form-group">
+                        <label for="name">¿CÓMO TE LLAMÁS?</label>
+                        <input type="text" id="name" name="nombre" placeholder="Tu nombre y apellido..." required data-fs-field>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="whatsapp">TU WHATSAPP</label>
+                        <input type="tel" id="whatsapp" name="whatsapp" placeholder="Ej: 223 1234567" required data-fs-field>
+                        <span class="input-hint">Por acá te voy a mandar el material.</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="curso">ÁREA PARA POTENCIAR</label>
+                        <select id="curso" name="curso_interes" required data-fs-field>
+                            <option value="" disabled selected>Elegí tu rama principal...</option>
+                            <optgroup label="ESTÉTICA Y BELLEZA">
+                                <option value="Masaje y Reflexología">Masaje y Reflexología</option>
+                                <option value="Barbería">Barbería</option>
+                                <option value="Belleza Integral">Belleza Integral</option>
+                                <option value="Diseño y Arte de Uñas">Diseño y Arte de Uñas</option>
+                                <option value="Peluquería Unisex">Peluquería Unisex</option>
+                            </optgroup>
+                            <optgroup label="SALUD Y ASISTENCIA">
+                                <option value="Atención y Gestión Farmacéutica">Gestión Farmacéutica</option>
+                                <option value="Secretariado Médico">Secretariado Médico</option>
+                                <option value="Asistente Terapéutico">Asistente Terapéutico</option>
+                                <option value="Asistente Materno Infantil">Asistente Materno</option>
+                            </optgroup>
+                            <optgroup label="ADMINISTRACIÓN Y NEGOCIOS">
+                                <option value="Auxiliar Bancario y Contable">Auxiliar Bancario/Contable</option>
+                                <option value="Secretariado Contable">Secretariado Contable</option>
+                            </optgroup>
+                            <optgroup label="TECNOLOGÍA Y DISEÑO">
+                                <option value="Operador de PC">Operador de PC</option>
+                                <option value="Diseño y Comunicación Visual">Diseño Gráfico</option>
+                                <option value="Reparación de Celulares">Reparación de Celulares</option>
+                            </optgroup>
+                            <optgroup label="OFICIOS TÉCNICOS">
+                                <option value="Instalación y Reparación de Aires Acondicionados">Aires Acondicionados</option>
+                                <option value="Electricidad Domiciliaria">Electricidad Domiciliaria</option>
+                                <option value="Electricidad con Reparación de Heladeras y Lavarropas">Línea Blanca</option>
+                            </optgroup>
+                            <optgroup label="IDIOMAS Y COMUNICACIÓN">
+                                <option value="Inglés">Inglés</option>
+                                <option value="Lengua de Señas">Lengua de Señas</option>
+                            </optgroup>
+                        </select>
+                        <span class="input-hint">Para buscar herramientas específicas para vos.</span>
+                    </div>
+
+                    <button type="submit" data-fs-submit-btn>¡QUIERO MI GUÍA! 🚀</button>
+                </form>
+            </div>
+
+            <div class="footer">
+                <p>Tus datos están seguros. Esto es para dar una mano real a la comunidad.</p>
+                <span>💬 Orientación Laboral</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Formspree -->
+    <script>
+        window.formspree = window.formspree || function () { (formspree.q = formspree.q || []).push(arguments); };
+        formspree('initForm', { 
+            formElement: '#orientacion-form', 
+            formId: 'xbdnglrr',
+            onSuccess: function() {
+                document.getElementById('form-content').style.display = 'none';
+                document.getElementById('form-success').style.display = 'block';
+                // Scrollea hacia arriba para ver el globo de éxito
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            },
+            onError: function() {
+                document.getElementById('form-error').style.display = 'block';
+            }
+        });
+    </script>
+    <script src="https://unpkg.com/@formspree/ajax@1" defer></script>
+
+</body>
+</html>

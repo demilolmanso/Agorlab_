@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central Agorlaburantes | Tu Búnker Laboral</title>
+    <style>
+        :root {
+            /* Paleta Cómic Vibrante */
+            --c-orange: #ff4700;
+            --c-yellow: #ffde00;
+            --c-green:  #00f055;
+            --c-blue:   #2563eb;
+            --c-cyan:   #00e5ff;
+            --c-dark:   #0f172a;
+            --c-light:  #f8fafc;
+            --c-ink:    #000000;
+            
+            /* Grosores y sombras */
+            --b-thick: 4px solid var(--c-ink);
+            --b-thin:  2px solid var(--c-ink);
+            --shadow-hard: 6px 6px 0px var(--c-ink);
+            --shadow-hover: 10px 10px 0px var(--c-ink);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial Black', 'Impact', sans-serif;
+            letter-spacing: -0.5px;
+        }
+
+        /* Fondo Halftone */
+        body {
+            background-color: var(--c-dark);
+            background-image: 
+                radial-gradient(var(--c-ink) 25%, transparent 25%),
+                radial-gradient(var(--c-ink) 25%, transparent 25%);
+            background-size: 12px 12px;
+            background-position: 0 0, 6px 6px;
+            color: var(--c-light);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 3rem 1rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        /* Header / Título Principal */
+        .hero {
+            background: var(--c-orange);
+            border: var(--b-thick);
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            box-shadow: var(--shadow-hard);
+            transform: rotate(-1deg);
+            margin-bottom: 3rem;
+        }
+
+        .hero::before {
+            content: 'BETA v1.0';
+            position: absolute;
+            top: -15px;
+            right: 20px;
+            background: var(--c-yellow);
+            color: var(--c-ink);
+            padding: 5px 15px;
+            font-size: 0.9rem;
+            border: var(--b-thick);
+            transform: rotate(3deg);
+            box-shadow: 3px 3px 0px var(--c-ink);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            color: var(--c-light);
+            text-shadow: 4px 4px 0px var(--c-ink);
+            text-transform: uppercase;
+            line-height: 1;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--c-ink);
+            background: var(--c-light);
+            display: inline-block;
+            padding: 5px 15px;
+            border: var(--b-thin);
+            transform: rotate(1deg);
+        }
+
+        /* Grilla de Herramientas */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 4rem;
+        }
+
+        .tool-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            border: var(--b-thick);
+            padding: 2rem 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow-hard);
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .tool-card:hover {
+            transform: translate(-4px, -4px) scale(1.02);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .tool-card h2 {
+            color: var(--c-ink);
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .tool-card p {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--c-ink);
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .tool-card .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            filter: drop-shadow(2px 2px 0px var(--c-ink));
+        }
+
+        /* Colores específicos por tarjeta */
+        .card-test { background: var(--c-yellow); transform: rotate(1deg); }
+        .card-calc { background: var(--c-cyan); transform: rotate(-1deg); }
+        .card-pot  { background: var(--c-green); transform: rotate(0.5deg); }
+
+        /* Sección de Tips Laborales */
+        .tips-section {
+            background: var(--c-blue);
+            border: var(--b-thick);
+            padding: 2.5rem;
+            box-shadow: var(--shadow-hard);
+            position: relative;
+            transform: rotate(-0.5deg);
+        }
+
+        .tips-section h2 {
+            font-size: 2.2rem;
+            color: var(--c-light);
+            text-shadow: 3px 3px 0px var(--c-ink);
+            margin-bottom: 2rem;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .tip-panel {
+            background: var(--c-light);
+            border: var(--b-thick);
+            padding: 1.5rem;
+            color: var(--c-ink);
+            box-shadow: 4px 4px 0px var(--c-ink);
+        }
+
+        .tip-panel h3 {
+            font-size: 1.2rem;
+            color: var(--c-orange);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .tip-panel p {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .tip-highlight {
+            background: var(--c-yellow);
+            padding: 2px 5px;
+            border: 1px solid var(--c-ink);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 3rem;
+            text-align: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--c-light);
+            font-weight: bold;
+            text-shadow: 1px 1px 0px var(--c-ink);
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 2.5rem; }
+            .tips-section { padding: 1.5rem; }
+            .tool-card { padding: 1.5rem 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- ENCABEZADO -->
+        <header class="hero">
+            <h1>AGORLABURANTES</h1>
+            <p>TU BÚNKER DE SUPERVIVENCIA LABORAL</p>
+        </header>
+
+        <!-- HERRAMIENTAS (LINKS) -->
+        <div class="tools-grid">
+            <a href="https://agorlab.com/agorlaburantes/test" class="tool-card card-test">
+                <div class="icon">🧠</div>
+                <h2>TEST LABORAL</h2>
+                <p>Descubrí tu Arquetipo Psicológico y tu ruta de habilidades ideal.</p>
+            </a>
+
+            <a href="https://agorlab.com/agorlaburantes/calculador" class="tool-card card-calc">
+                <div class="icon">💰</div>
+                <h2>CALCULAR LOOT</h2>
+                <p>Calculadora salarial. Simulá ingresos según tu rama y nivel de XP.</p>
+            </a>
+
+            <a href="https://agorlab.com/agorlaburantes/potenciate" class="tool-card card-pot">
+                <div class="icon">🚀</div>
+                <h2>POTENCIATE</h2>
+                <p>Ayuda real. Guía personalizada y plantillas de CV listas para usar.</p>
+            </a>
+        </div>
+
+        <!-- SECCIÓN DE TIPS (PENSA VOS) -->
+        <section class="tips-section">
+            <h2>⚡ CONSEJOS DE SUPERVIVENCIA ⚡</h2>
+            <div class="tips-grid">
+                
+                <div class="tip-panel" style="transform: rotate(-1deg);">
+                    <h3>1. Tu CV es un tráiler 🎬</h3>
+                    <p>El currículum no es tu autobiografía completa. Es un tráiler de película diseñado para <span class="tip-highlight">dejar al reclutador con ganas de ver más</span>. Poné lo más relevante arriba y sacá el relleno.</p>
+                </div>
+
+                <div class="tip-panel" style="transform: rotate(1deg);">
+                    <h3>2. "No tengo experiencia" 🧢</h3>
+                    <p>¡Mentira! Si no tenés experiencia formal, hablá de tus proyectos personales, trabajos prácticos grosos, voluntariados o <span class="tip-highlight">esa vez que le arreglaste el negocio a tu tío</span>. Todo suma.</p>
+                </div>
+
+                <div class="tip-panel" style="transform: rotate(-0.5deg);">
+                    <h3>3. Soft Skills > Hard Skills 🤝</h3>
+                    <p>Cualquiera puede aprender a usar un software, pero <span class="tip-highlight">tener buena actitud, llegar a hora y saber escuchar</span> es oro puro. En la entrevista, demostrá que sos alguien con quien da gusto laburar.</p>
+                </div>
+
+                <div class="tip-panel" style="transform: rotate(1deg);">
+                    <h3>4. Preguntá vos también 🕵️‍♂️</h3>
+                    <p>La entrevista es un ida y vuelta. Al final, preguntá: <span class="tip-highlight">"¿Cómo es un día normal en este puesto?"</span>. Eso demuestra proactividad brutal y te ayuda a ver si el lugar te sirve a vos.</p>
+                </div>
+
+            </div>
+        </section>
+
+        <footer>
+            <p>Diseñado con actitud. Agorlab Ultra 🗿</p>
+        </footer>
+
+    </div>
+
+</body>
+</html>

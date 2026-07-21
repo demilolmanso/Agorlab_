@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agorlab - Multi-Engine</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@400;700;900&family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { overflow-x: hidden; font-family: 'Inter', sans-serif; transition: background 0.5s; }
+        #app { min-height: 100vh; width: 100vw; position: relative; }
+
+        /* Estilos para el botón "a" */
+        #agorlab-toggle {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background-color: #000000;
+            color: #FF5F00;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 24px;
+            font-weight: bold;
+            border: 1px solid #FF5F00;
+            padding: 4px 12px;
+            cursor: pointer;
+            z-index: 9999;
+            box-shadow: 0 0 8px rgba(255, 95, 0, 0.4);
+            transition: all 0.2s ease;
+        }
+        #agorlab-toggle:hover {
+            background-color: #FF5F00;
+            color: #000000;
+            box-shadow: 0 0 12px rgba(255, 95, 0, 0.8);
+        }
+
+        /* Estilos para el cartel explicativo descartable */
+        #agorlab-tooltip {
+            position: fixed;
+            top: 55px;
+            left: 10px;
+            background-color: #ffffff;
+            color: #000000;
+            border: 2px solid #FF5F00;
+            border-radius: 10px;
+            padding: 10px 28px 10px 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.82rem;
+            font-weight: bold;
+            z-index: 10000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            max-width: 220px;
+            line-height: 1.3;
+            animation: tooltip-fade 0.3s ease-in-out;
+        }
+        #agorlab-tooltip::before {
+            content: '';
+            position: absolute;
+            top: -9px;
+            left: 12px;
+            border-width: 0 7px 9px 7px;
+            border-style: solid;
+            border-color: transparent transparent #FF5F00 transparent;
+        }
+        #agorlab-tooltip-close {
+            position: absolute;
+            top: 4px;
+            right: 6px;
+            background: none;
+            border: none;
+            font-size: 14px;
+            font-weight: bold;
+            color: #666;
+            cursor: pointer;
+            line-height: 1;
+            padding: 2px 4px;
+        }
+        #agorlab-tooltip-close:hover {
+            color: #FF5F00;
+        }
+
+        @keyframes tooltip-fade {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Estilos para el panel desplegable */
+        #agorlab-panel {
+            position: fixed;
+            top: 60px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.95);
+            color: #FF5F00;
+            font-family: 'Courier New', Courier, monospace;
+            border: 1px solid #FF5F00;
+            padding: 15px;
+            z-index: 9998;
+            box-shadow: 0 0 10px rgba(255, 95, 0, 0.3);
+            min-width: 250px;
+            display: none; 
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Clase para mostrar el panel cuando se hace clic */
+        #agorlab-panel.visible {
+            display: flex;
+        }
+
+        /* Estilos adaptados para los elementos internos del panel */
+        #agorlab-panel h3 { font-size: 1.1rem; letter-spacing: 1px; margin-bottom: 5px; margin-top: 0; }
+        #agorlab-panel label { font-size: 0.75rem; color: #aaa; text-transform: uppercase; font-family: 'Inter', sans-serif;}
+        #agorlab-panel select { padding: 8px; background: #181818; color: #fff; border: 1px solid #444; cursor: pointer; border-radius: 4px; font-size: 0.85rem; outline: none; font-family: 'Inter', sans-serif;}
+        #agorlab-panel select:focus { border-color: #FF5F00; }
+    </style>
+    <style id="dynamic-css"></style>
+</head>
+<body>
+
+    <div id="app"></div>
+
+    <!-- Botón minimalista de Agorlab -->
+    <button id="agorlab-toggle">a</button>
+
+    <!-- Cartel explicativo descartable -->
+    <div id="agorlab-tooltip">
+        <button id="agorlab-tooltip-close" title="Cerrar">&times;</button>
+        ¡Este botón te permite explorar ejemplos visuales de nuestras ofertas!¡Con un clic en el boton puedes abrir o cerrar el panel de selección de motores visuales! 
+    </div>
+    
+    <!-- El panel de cambio (oculto por defecto) -->
+    <div id="agorlab-panel" class="hidden">
+        <h3>[ Agorlab Engine ]</h3>
+        <label>Seleccionar Arquitectura:</label>
+        <select id="engine-select"></select>
+    </div>
+
+    <script>
+        // Funcionalidad del toggle (Botón "a") y cartel
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnToggle = document.getElementById('agorlab-toggle');
+            const panelAgorlab = document.getElementById('agorlab-panel');
+            const tooltip = document.getElementById('agorlab-tooltip');
+            const btnCloseTooltip = document.getElementById('agorlab-tooltip-close');
+
+            // Ocultar cartel al hacer clic en 'X'
+            if (btnCloseTooltip) {
+                btnCloseTooltip.addEventListener('click', () => {
+                    tooltip.style.display = 'none';
+                });
+            }
+
+            btnToggle.addEventListener('click', () => {
+                panelAgorlab.classList.toggle('visible');
+                
+                // Si abren el panel, ocultamos el cartel informativo
+                if (tooltip) tooltip.style.display = 'none';
+
+                if (panelAgorlab.classList.contains('visible')) {
+                    btnToggle.style.backgroundColor = '#FF5F00';
+                    btnToggle.style.color = '#000000';
+                } else {
+                    btnToggle.style.backgroundColor = '#000000';
+                    btnToggle.style.color = '#FF5F00';
+                }
+            });
+        });
+
+        // Configuración original de los motores y contenido
+        const CONTENT = {
+            brand: "AGORLAB",
+            hero: "Tu negocio en Mar del Plata merece ser encontrado.",
+            problem: "Instagram no es un buscador. Si no estás en Google, le regalás ventas a tu competencia.",
+            services: [
+                { id: "s1", title: "Landing Profesional", desc: "Diseño único, adaptado a celulares.", price: "$50 USD" },
+                { id: "s2", title: "Contacto Directo", desc: "Formulario vinculado a tu correo.", price: "Incluido" },
+                { id: "s3", title: "Hosting Ultra Rápido", desc: "Servidores seguros 24/7.", price: "Incluido" }
+            ],
+            cta: "Digitalizar mi negocio",
+            link: "https://wa.me/5491121722028?text=Hola,%20quiero%20digitalizar%20mi%20negocio."
+        };
+
+        const app = document.getElementById('app');
+        const styleTag = document.getElementById('dynamic-css');
+
+        const ENGINES = {
+            
+            "classic-base": {
+                name: "01. Agorlab Clásico Base (Naranja)",
+                render: () => {
+                    styleTag.innerHTML = `
+                        body {
+                            --primary: #ff7f00;
+                            --text-dim: #cc6600;
+                            --dark-bg: #050505;
+                            --bg-alt: #0a0a0a;
+                            --border-color: rgba(255, 127, 0, 0.3);
+                            --whatsapp: #25D366;
+                            --font-main: 'Courier New', Courier, monospace;
+                            --scanline: linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(255, 127, 0, 0.02) 50%);
+                            font-family: var(--font-main);
+                            color: var(--text-dim);
+                            line-height: 1.6;
+                            background-color: var(--dark-bg);
+                            background-image: var(--scanline);
+                            background-size: 100% 4px;
+                            margin: 0; padding: 0;
+                        }
+                        .c-header { background-color: var(--dark-bg); padding: 15px 20px; position: sticky; top: 0; z-index: 100; border-bottom: 2px solid var(--primary); }
+                        .c-nav { display: flex; justify-content: flex-end; align-items: center; max-width: 1100px; margin: 0 auto; gap: 15px; }
+                        .c-logo { font-size: 2rem; font-weight: bold; color: var(--primary); margin-right: auto; padding-left: 280px; }
+                        .c-logo::after { content: "_"; animation: c-blink 1s step-end infinite; }
+                        @keyframes c-blink { 50% { opacity: 0; } }
+                        .c-container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+                        .c-section { padding: 80px 0; border-bottom: 1px solid var(--border-color); }
+                        .c-bg-alt { background-color: var(--bg-alt); }
+                        .c-h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: bold; text-transform: uppercase; color: var(--primary); margin-bottom: 1rem; line-height: 1.2; }
+                        .c-h2 { font-size: clamp(1.5rem, 4vw, 2.2rem); text-align: center; text-transform: uppercase; color: var(--primary); margin-bottom: 1rem; font-weight: bold; }
+                        .c-h2::before, .c-h2::after { content: " // "; color: var(--border-color); }
+                        .c-p { margin-bottom: 1rem; font-size: 1.1rem; }
+                        .c-btn { display: inline-block; padding: 12px 24px; font-weight: bold; font-size: 1rem; text-align: center; cursor: pointer; text-transform: uppercase; font-family: var(--font-main); border: 2px solid var(--primary); color: var(--primary); background: transparent; text-decoration: none; }
+                        .c-btn:hover { background-color: var(--primary); color: var(--dark-bg); box-shadow: 0 0 15px var(--border-color); }
+                        .c-hero { min-height: 80vh; display: flex; align-items: center; text-align: center; justify-content: center; }
+                        .c-hero-inner { max-width: 850px; }
+                        .c-grid { display: grid; grid-template-columns: 1fr; gap: 30px; margin-top: 40px; }
+                        @media (min-width: 768px) { .c-grid { grid-template-columns: 1fr 1fr; align-items: center; } }
+                        .c-list li { padding: 15px; border: 1px solid var(--border-color); margin-bottom: 15px; display: flex; gap: 15px; background: rgba(255, 127, 0, 0.02); }
+                        .c-list li span { color: var(--primary); font-weight: bold; }
+                        .c-price-box { border: 2px solid var(--primary); padding: 40px; text-align: center; background: var(--bg-alt); }
+                        .c-price-box h3 { font-size: 2.5rem; color: var(--primary); margin: 10px 0; }
+                        .c-wa-float { position: fixed; width: 60px; height: 60px; bottom: 30px; right: 30px; background-color: var(--whatsapp); display: flex; align-items: center; justify-content: center; z-index: 100; text-decoration: none; }
+                        .c-wa-float svg { width: 35px; height: 35px; fill: #050505; }
+                        @media (max-width: 900px) { .c-logo { padding-left: 0; margin-top: 50px; } .c-nav { flex-direction: column; align-items: flex-start; } }
+                    `;
+                    app.innerHTML = `
+                        <header class="c-header">
+                            <nav class="c-nav">
+                                <div class="c-logo">${CONTENT.brand}</div>
+                                <a href="${CONTENT.link}" class="c-btn" style="padding: 8px 16px; font-size: 0.9rem;">[ CONTACTO ]</a>
+                            </nav>
+                        </header>
+
+                        <section class="c-hero c-container">
+                            <div class="c-hero-inner">
+                                <h1 class="c-h1">Tu negocio en Mar del Plata merece ser encontrado.</h1>
+                                <p class="c-p">> ${CONTENT.problem}</p>
+                                <a href="${CONTENT.link}" target="_blank" class="c-btn">> ${CONTENT.cta}_</a>
+                            </div>
+                        </section>
+
+                        <section class="c-section c-bg-alt">
+                            <div class="c-container" style="text-align: center; max-width: 800px;">
+                                <h2 class="c-h2">¿Solo estás en Instagram?</h2>
+                                <p class="c-p">Instagram es una gran vidriera, pero <strong style="color:var(--primary);">no es un buscador</strong>. Cuando un cliente tiene una urgencia o busca un servicio específico, va a Google. Si tu negocio no aparece ahí, le estás regalando ventas a tu competencia.</p>
+                                <p class="c-p">Además, tu contenido en redes sociales desaparece; <strong style="color:var(--primary);">una web es tu propiedad digital</strong>, siempre disponible, 24/7.</p>
+                            </div>
+                        </section>
+
+                        <section class="c-section c-container">
+                            <h2 class="c-h2">Soluciones Digitales</h2>
+                            <p class="c-p" style="text-align: center;">> Diseñamos landing pages optimizadas, rápidas y seguras.</p>
+                            
+                            <div class="c-grid">
+                                <ul class="c-list" style="list-style:none; padding:0;">
+                                    ${CONTENT.services.map(s => `
+                                        <li>
+                                            <span>[+]</span>
+                                            <div>
+                                                <strong style="color:var(--primary);">${s.title}:</strong><br>${s.desc}
+                                            </div>
+                                        </li>
+                                    `).join('')}
+                                </ul>
+
+                                <div class="c-price-box">
+                                    <p class="c-p" style="margin: 0;">Ofrecemos dominios gratuitos "tunegocio.agorlab.com" o te ayudamos a conseguir uno personalizado.</p>
+                                    <h3>$50 USD</h3>
+                                    <p class="c-p">¡Promo lanzamiento!</p>
+                                    <a href="${CONTENT.link}" class="c-btn" style="margin-top: 20px; width: 100%; display:block;">[ EMPEZAR AHORA ]</a>
+                                </div>
+                            </div>
+                        </section>
+
+                        <a href="${CONTENT.link}" class="c-wa-float" target="_blank">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                                <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157.1zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/>
+                            </svg>
+                        </a>
+                    `;
+                }
+            },
+
+            "3d-abeto": {
+                name: "02. Bestia 3D (Estilo Abeto)",
+                render: () => {
+                    styleTag.innerHTML = `
+                        body { background: #62c3b8; overflow: hidden; perspective: 1000px; }
+                        .space { width: 100vw; height: 100vh; transform-style: preserve-3d; display: flex; align-items: center; justify-content: center; }
+                        .island { transform-style: preserve-3d; animation: floatObj 20s infinite linear; }
+                        .block { position: absolute; background: #fff; border: 3px solid #333; padding: 20px; text-align: center; font-weight: 900; box-shadow: 10px 10px 0 rgba(0,0,0,0.1); transition: transform 0.3s; cursor: pointer; }
+                        .block:hover { background: #ffeb3b; }
+                        .b-title { transform: translate3d(-150px, -100px, 100px) rotateY(15deg); font-size: 3rem; }
+                        .b-serv1 { transform: translate3d(150px, 50px, 50px) rotateY(-15deg); }
+                        .b-serv2 { transform: translate3d(-100px, 150px, -50px) rotateX(15deg); }
+                        .b-cta { transform: translate3d(0, 250px, 150px); background: #ff4757; color: white; text-decoration: none; }
+                        @keyframes floatObj { 0% { transform: rotateY(0deg) rotateX(5deg); } 100% { transform: rotateY(360deg) rotateX(5deg); } }
+                    `;
+                    app.innerHTML = `
+                        <div class="space" id="space3d">
+                            <div class="island">
+                                <div class="block b-title">${CONTENT.brand}<br><small style="font-size:1rem">${CONTENT.hero}</small></div>
+                                ${CONTENT.services.map((s, i) => `<div class="block b-serv${i+1}"><b>${s.title}</b><br>${s.price}</div>`).join('')}
+                                <a href="${CONTENT.link}" class="block b-cta">${CONTENT.cta}</a>
+                            </div>
+                        </div>
+                    `;
+                    document.onmousemove = (e) => {
+                        let x = (window.innerWidth / 2 - e.pageX) / 30;
+                        let y = (window.innerHeight / 2 - e.pageY) / 30;
+                        const isl = document.querySelector('.island');
+                        if (isl) isl.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+                    };
+                }
+            },
+
+            "comic-fixed": {
+                name: "03. Cómic Pop-Art (Legible/Horiz)",
+                render: () => {
+                    styleTag.innerHTML = `
+                        body { 
+                            background-color: #ffeb3b;
+                            background-image: radial-gradient(#000000 15%, transparent 16%), radial-gradient(#000000 15%, transparent 16%);
+                            background-size: 15px 15px; background-position: 0 0, 7.5px 7.5px;
+                            overflow-y: hidden; overflow-x: auto; font-family: 'Bangers', cursive;
+                        }
+                        .comic-strip { display: flex; height: 100vh; padding: 40px 40px 40px 300px; gap: 40px; align-items: center; width: max-content; }
+                        .panel { 
+                            background: #ffffff;
+                            border: 6px solid #000; box-shadow: 12px 12px 0px #000;
+                            padding: 40px; width: 380px; height: 60vh; display: flex; flex-direction: column; justify-content: center;
+                            position: relative; font-family: 'Inter', sans-serif; font-weight: 900; font-size: 1.1rem;
+                        }
+                        .panel:nth-child(even) { transform: rotate(2deg); background: #4fc3f7; }
+                        .panel h2 { font-family: 'Bangers', cursive; font-size: 2.8rem; text-transform: uppercase; line-height: 1; margin-bottom: 20px;}
+                        .speech-bubble { background: #fff; border: 4px solid #000; border-radius: 50%; padding: 20px; position: absolute; top: -40px; right: -40px; font-family: 'Bangers'; font-size: 1.5rem; transform: rotate(15deg); box-shadow: 4px 4px 0 #000;}
+                        .btn-comic { background: #f44336; color: #fff; border: 4px solid #000; padding: 15px; font-family: 'Bangers'; font-size: 2rem; cursor: pointer; box-shadow: 6px 6px 0 #000; text-decoration: none; text-align: center; display: block; margin-top: auto;}
+                        .btn-comic:hover { transform: translate(4px, 4px); box-shadow: 2px 2px 0 #000; }
+                    `;
+                    app.innerHTML = `
+                        <div class="comic-strip">
+                            <div class="panel" style="background: #f44336; color: white;">
+                                <h2 style="font-size: 3.5rem; color: #ffeb3b; text-shadow: 4px 4px 0 #000;">${CONTENT.brand}</h2>
+                                <p style="font-size: 1.3rem; text-shadow: 2px 2px 0 #000;">${CONTENT.hero}</p>
+                            </div>
+                            <div class="panel">
+                                <h2>¡El Problema!</h2>
+                                <p>${CONTENT.problem}</p>
+                                <div class="speech-bubble">¡PUM!</div>
+                            </div>
+                            ${CONTENT.services.map(s => `
+                                <div class="panel">
+                                    <h2>${s.title}</h2>
+                                    <p>${s.desc}</p>
+                                    <h3 style="font-size: 2rem; margin-top: 20px; font-family: Bangers;">${s.price}</h3>
+                                </div>
+                            `).join('')}
+                            <div class="panel" style="background: #fff;">
+                                <h2>¡Tu turno!</h2>
+                                <a href="${CONTENT.link}" class="btn-comic">${CONTENT.cta}</a>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+
+            "roulette": {
+                name: "04. Ruleta Interactiva",
+                render: () => {
+                    styleTag.innerHTML = `
+                        body { background: #1a1a2e; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; font-family: sans-serif; padding: 20px; }
+                        .roulette-layout { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 40px; max-width: 900px; width: 100%; margin: 0 auto; }
+                        .wheel-container { position: relative; width: 320px; height: 320px; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
+                        .wheel { width: 100%; height: 100%; border-radius: 50%; border: 8px solid #e94560; position: relative; transition: transform 3s cubic-bezier(0.25, 0.1, 0.25, 1); background: conic-gradient(#16213e 0deg 120deg, #0f3460 120deg 240deg, #16213e 240deg 360deg); }
+                        .pointer { position: absolute; top: -18px; width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 30px solid #e94560; z-index: 10; }
+                        .spin-btn { position: absolute; width: 70px; height: 70px; background: #e94560; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; cursor: pointer; z-index: 5; border: 4px solid #1a1a2e; box-shadow: 0 0 20px rgba(233,69,96,0.5); user-select: none; }
+                        .info-board { background: rgba(255,255,255,0.08); padding: 30px; border-radius: 12px; width: 100%; max-width: 360px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); text-align: center; }
+                        .wheel-label { position: absolute; transform-origin: 50% 160px; top: 0; left: 50%; transform: translateX(-50%); font-weight: bold; padding-top: 15px; font-size: 1rem; }
+                        .wl-1 { transform: translateX(-50%) rotate(60deg); } .wl-2 { transform: translateX(-50%) rotate(180deg); } .wl-3 { transform: translateX(-50%) rotate(300deg); }
+                    `;
+                    app.innerHTML = `
+                        <div class="roulette-layout">
+                            <div class="info-board">
+                                <h1 style="color: #e94560; margin-bottom: 10px;">${CONTENT.brand}</h1>
+                                <p>${CONTENT.hero}</p>
+                                <div id="roulette-result" style="margin-top: 20px; color: #e94560; font-weight: bold; font-size: 1.1rem;">Giralo para ver qué ofrecemos...</div>
+                                <a href="${CONTENT.link}" style="display:block; margin-top: 20px; background: #e94560; color: white; padding: 12px; text-align: center; text-decoration:none; border-radius: 6px; font-weight:bold;">${CONTENT.cta}</a>
+                            </div>
+                            <div class="wheel-container">
+                                <div class="pointer"></div>
+                                <div class="wheel" id="wheel">
+                                    <div class="wheel-label wl-1">${CONTENT.services[0].title}</div>
+                                    <div class="wheel-label wl-2">${CONTENT.services[1].title}</div>
+                                    <div class="wheel-label wl-3">${CONTENT.services[2].title}</div>
+                                </div>
+                                <div class="spin-btn" onclick="spinWheel()">GIRAR</div>
+                            </div>
+                        </div>
+                    `;
+                    let deg = 0;
+                    window.spinWheel = () => {
+                        deg += Math.floor(Math.random() * 360) + 1080;
+                        const w = document.getElementById('wheel');
+                        if (w) w.style.transform = `rotate(${deg}deg)`;
+                        setTimeout(() => {
+                            let resultIndex = Math.floor(((deg % 360) / 120));
+                            const res = document.getElementById('roulette-result');
+                            if (res) {
+                                res.innerHTML = `¡Cae en!<br>${CONTENT.services[resultIndex].title}: ${CONTENT.services[resultIndex].desc}`;
+                            }
+                        }, 3000);
+                    };
+                }
+            },
+
+            "terminal": {
+                name: "05. CLI Terminal Hacking",
+                render: () => {
+                    styleTag.innerHTML = `
+                        body { background: #000; color: #0f0; font-family: 'Share Tech Mono', monospace; padding: 20px; padding-top: 80px; overflow: hidden; }
+                        #cli-output { height: 75vh; overflow-y: auto; margin-bottom: 20px; line-height: 1.5; font-size: 1.2rem;}
+                        .input-line { display: flex; font-size: 1.2rem; }
+                        .prompt { margin-right: 10px; color: #0aa; }
+                        input[type="text"] { background: transparent; border: none; color: #0f0; font-family: inherit; font-size: inherit; width: 100%; outline: none; }
+                        .hl { color: #fff; background: #0aa; padding: 0 5px; }
+                        a { color: #0f0; text-decoration: underline; }
+                    `;
+                    app.innerHTML = `
+                        <div id="cli-output">
+                            Initializing ${CONTENT.brand} kernel...<br>
+                            Type <span class="hl">help</span> to view available commands.<br><br>
+                        </div>
+                        <div class="input-line">
+                            <span class="prompt">root@agorlab:~$</span>
+                            <input type="text" id="cli-input" autofocus autocomplete="off">
+                        </div>
+                    `;
+                    const input = document.getElementById('cli-input');
+                    const output = document.getElementById('cli-output');
+                    if (input) {
+                        input.addEventListener('keypress', function(e) {
+                            if (e.key === 'Enter') {
+                                const val = this.value.toLowerCase().trim();
+                                output.innerHTML += `<br><span class="prompt">root@agorlab:~$</span> ${val}<br>`;
+                                if(val === 'help') output.innerHTML += `Comandos: <span class="hl">about</span>, <span class="hl">services</span>, <span class="hl">contact</span>, <span class="hl">clear</span>`;
+                                else if(val === 'about') output.innerHTML += `[INFO] ${CONTENT.hero} ${CONTENT.problem}`;
+                                else if(val === 'services') {
+                                    CONTENT.services.forEach(s => output.innerHTML += `> ${s.title}: ${s.desc} [${s.price}]<br>`);
+                                }
+                                else if(val === 'contact') output.innerHTML += `Ejecutando enlace cifrado... <a href="${CONTENT.link}" target="_blank">Abrir WhatsApp</a>`;
+                                else if(val === 'clear') output.innerHTML = '';
+                                else output.innerHTML += `Command not found. Type 'help'.`;
+                                
+                                this.value = '';
+                                output.scrollTop = output.scrollHeight;
+                            }
+                        });
+                    }
+                }
+            },
+
+            "ecommerce": {
+                name: "06. Catálogo Tienda (Grid)",
+                render: () => {
+                    styleTag.innerHTML = `
+                        body { background: #f8f9fa; color: #333; }
+                        .store-header { background: #fff; padding: 20px 40px; padding-left: 300px; display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; position: sticky; top:0; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.05);}
+                        .store-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; padding: 40px; max-width: 1200px; margin: 0 auto; }
+                        .product-card { background: #fff; border: 1px solid #eee; border-radius: 8px; padding: 20px; transition: 0.3s; display: flex; flex-direction: column; text-align: center;}
+                        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+                        .p-img { height: 150px; background: #e9ecef; margin-bottom: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #adb5bd; font-size: 3rem;}
+                        .p-price { font-size: 1.5rem; font-weight: 900; color: #2ecc71; margin: 15px 0; }
+                        .btn-buy { background: #000; color: #fff; border: none; padding: 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: auto; text-decoration: none;}
+                        .btn-buy:hover { background: #2ecc71; }
+                        .hero-banner { background: #111; color: #fff; padding: 60px 40px; text-align: center; }
+                        @media (max-width: 768px) { .store-header { padding-left: 20px; margin-top: 50px; } }
+                    `;
+                    app.innerHTML = `
+                        <header class="store-header">
+                            <h2 style="margin:0">${CONTENT.brand} STORE</h2>
+                            <div>🛒 Carrito (0)</div>
+                        </header>
+                        <div class="hero-banner">
+                            <h1 style="font-size: 3rem;">${CONTENT.hero}</h1>
+                            <p style="max-width: 600px; margin: 20px auto; color: #aaa;">${CONTENT.problem}</p>
+                        </div>
+                        <div class="store-grid">
+                            ${CONTENT.services.map((s) => `
+                                <div class="product-card">
+                                    <div class="p-img">📦</div>
+                                    <h3>${s.title}</h3>
+                                    <p style="color: #666; font-size: 0.9rem; margin-top: 10px;">${s.desc}</p>
+                                    <div class="p-price">${s.price}</div>
+                                    <a href="${CONTENT.link}" class="btn-buy">Agregar al Carrito</a>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+            },
+
+            "os-windows": {
+                name: "07. OS Escritorio (Arrastrable)",
+                render: () => {
+                    styleTag.innerHTML = `
+                        body { background: #008080; overflow: hidden; font-family: 'VT323', monospace; }
+                        .desktop-icon { position: absolute; color: white; text-align: center; width: 80px; cursor: pointer; }
+                        .win-window { position: absolute; width: 350px; background: #c0c0c0; border: 2px solid; border-color: #fff #000 #000 #fff; display: none; flex-direction: column; }
+                        .win-header { background: #000080; color: white; padding: 2px 5px; display: flex; justify-content: space-between; font-weight: bold; cursor: move; user-select: none;}
+                        .win-body { padding: 15px; font-size: 1.2rem; }
+                        .win-close { background: #c0c0c0; border: 1px solid; border-color: #fff #000 #000 #fff; width: 20px; text-align: center; cursor: pointer; color: black; font-weight: bold; font-family: sans-serif; font-size: 12px; line-height: 14px;}
+                        .win-close:active { border-color: #000 #fff #fff #000; }
+                    `;
+                    app.innerHTML = `
+                        <div class="desktop-icon" style="top: 80px; left: 20px;" onclick="openWin('w-about')">
+                            <div style="font-size: 40px;">📁</div><div>About.txt</div>
+                        </div>
+                        <div class="desktop-icon" style="top: 180px; left: 20px;" onclick="openWin('w-services')">
+                            <div style="font-size: 40px;">⚙️</div><div>Services.exe</div>
+                        </div>
+
+                        <div class="win-window" id="w-about" style="top: 80px; left: 150px; display: flex;">
+                            <div class="win-header" onmousedown="dragWin(event, 'w-about')"><span>About.txt</span><div class="win-close" onclick="closeWin('w-about')">X</div></div>
+                            <div class="win-body">
+                                <h1>${CONTENT.brand}</h1>
+                                <p>${CONTENT.hero}</p>
+                                <p style="margin-top: 10px;">${CONTENT.problem}</p>
+                            </div>
+                        </div>
+
+                        <div class="win-window" id="w-services" style="top: 220px; left: 350px; display: flex;">
+                            <div class="win-header" onmousedown="dragWin(event, 'w-services')"><span>Services.exe</span><div class="win-close" onclick="closeWin('w-services')">X</div></div>
+                            <div class="win-body">
+                                <ul>
+                                    ${CONTENT.services.map(s => `<li style="margin-bottom: 10px;"><b>${s.title}</b><br>${s.price}</li>`).join('')}
+                                </ul>
+                                <a href="${CONTENT.link}" style="display:block; text-align:center; margin-top:15px; background:#c0c0c0; border:2px solid; border-color:#fff #000 #000 #fff; padding:5px; text-decoration:none; color:black;">CONTRATAR</a>
+                            </div>
+                        </div>
+                    `;
+                    window.openWin = (id) => { const el = document.getElementById(id); if(el) el.style.display = 'flex'; };
+                    window.closeWin = (id) => { const el = document.getElementById(id); if(el) el.style.display = 'none'; };
+                    let activeWin = null, offsetX = 0, offsetY = 0;
+                    window.dragWin = (e, id) => {
+                        activeWin = document.getElementById(id);
+                        if (!activeWin) return;
+                        activeWin.style.zIndex = 1000;
+                        offsetX = e.clientX - activeWin.getBoundingClientRect().left;
+                        offsetY = e.clientY - activeWin.getBoundingClientRect().top;
+                        document.onmousemove = (e) => {
+                            if(activeWin) {
+                                activeWin.style.left = (e.clientX - offsetX) + 'px';
+                                activeWin.style.top = (e.clientY - offsetY) + 'px';
+                            }
+                        };
+                        document.onmouseup = () => { activeWin = null; document.onmousemove = null; };
+                    };
+                }
+            },
+
+            "chat": {
+                name: "08. App de Mensajería",
+                render: () => {
+                    styleTag.innerHTML = `
+                        body { background: #e5ddd5; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; padding: 20px 10px; font-family: sans-serif; }
+                        .phone { background: #fff; width: 100%; max-width: 400px; height: 85vh; max-height: 700px; border-radius: 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; border: 8px solid #333; margin: 0 auto; }
+                        .chat-header { background: #075e54; color: white; padding: 15px 20px; display: flex; align-items: center; font-weight: bold; }
+                        .chat-body { padding: 20px; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); }
+                        .msg { padding: 10px 15px; border-radius: 15px; max-width: 80%; line-height: 1.4; animation: popIn 0.3s forwards; opacity: 0; transform: translateY(20px);}
+                        .msg-in { background: #fff; align-self: flex-start; border-top-left-radius: 0; }
+                        .msg-out { background: #dcf8c6; align-self: flex-end; border-top-right-radius: 0; }
+                        .chat-input { background: #f0f0f0; padding: 12px; display: flex; gap: 10px; }
+                        .c-input { flex: 1; border: none; padding: 10px 15px; border-radius: 20px; outline: none; }
+                        .c-btn { background: #128c7e; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;}
+                        @keyframes popIn { to { opacity: 1; transform: translateY(0); } }
+                    `;
+                    app.innerHTML = `
+                        <div class="phone">
+                            <div class="chat-header">🤖 Asistente ${CONTENT.brand}</div>
+                            <div class="chat-body" id="cb"></div>
+                            <div class="chat-input">
+                                <input type="text" class="c-input" placeholder="Escribí 'info'..." id="ci">
+                                <button class="c-btn" id="cb-btn">➤</button>
+                            </div>
+                        </div>
+                    `;
+                    const cb = document.getElementById('cb');
+                    const addMsg = (text, type, delay) => {
+                        setTimeout(() => {
+                            if(!cb) return;
+                            cb.innerHTML += `<div class="msg msg-${type}">${text}</div>`;
+                            cb.scrollTop = cb.scrollHeight;
+                        }, delay);
+                    };
+                    addMsg(`¡Hola! Somos ${CONTENT.brand}.`, 'in', 500);
+                    addMsg(CONTENT.hero, 'in', 1500);
+                    
+                    const btn = document.getElementById('cb-btn');
+                    if (btn) {
+                        btn.onclick = () => {
+                            const v = document.getElementById('ci').value;
+                            if(!v) return;
+                            addMsg(v, 'out', 0);
+                            document.getElementById('ci').value = '';
+                            addMsg(`Ofrecemos: <br> ${CONTENT.services.map(s => `• ${s.title}: ${s.price}`).join('<br>')}`, 'in', 1000);
+                            addMsg(`<a href="${CONTENT.link}" style="color:#128c7e; font-weight:bold;">¡Hablemos por WhatsApp!</a>`, 'in', 2000);
+                        };
+                    }
+                }
+            },
+
+            "tinder": {
+                name: "09. Swipe Cards (Tipo Tinder)",
+                render: () => {
+                    styleTag.innerHTML = `
+                        body { background: #fd297b; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; overflow: hidden; }
+                        .card-stack { position: relative; width: 320px; height: 450px; margin-top: 20px; }
+                        .swipe-card { position: absolute; top:0; left:0; width: 100%; height: 100%; background: #fff; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px; text-align: center; transition: transform 0.4s, opacity 0.4s; }
+                        .controls { margin-top: 30px; display: flex; gap: 20px; }
+                        .btn-swipe { width: 65px; height: 65px; border-radius: 50%; border: none; background: #fff; font-size: 26px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: 0.2s;}
+                        .btn-swipe:active { transform: scale(0.9); }
+                        .c-red { color: #fd297b; } .c-green { color: #1ece7d; }
+                    `;
+                    const cardsData = [
+                        { t: CONTENT.brand, p: CONTENT.hero },
+                        ...CONTENT.services.map(s => ({ t: s.title, p: s.desc + "<br><br><b>" + s.price + "</b>" })),
+                        { t: "¡Hagámoslo!", p: `<a href="${CONTENT.link}" style="color:#fd297b; font-weight:bold;">Clic para Match</a>` }
+                    ];
+                    app.innerHTML = `
+                        <h1 style="color:white; margin-top: 40px;">¿Hacemos Match?</h1>
+                        <div class="card-stack" id="stack">
+                            ${cardsData.reverse().map((c, i) => `
+                                <div class="swipe-card" id="card-${i}" style="z-index: ${i}">
+                                    <h2>${c.t}</h2>
+                                    <p style="margin-top: 20px; font-size:1.1rem;">${c.p}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="controls">
+                            <button class="btn-swipe c-red" onclick="swipe('left')">✖</button>
+                            <button class="btn-swipe c-green" onclick="swipe('right')">♥</button>
+                        </div>
+                    `;
+                    let currentCard = cardsData.length - 1;
+                    window.swipe = (dir) => {
+                        if(currentCard < 0) return;
+                        const card = document.getElementById(`card-${currentCard}`);
+                        if(!card) return;
+                        const moveX = dir === 'left' ? -400 : 400;
+                        const rotate = dir === 'left' ? -30 : 30;
+                        card.style.transform = `translate(${moveX}px, 100px) rotate(${rotate}deg)`;
+                        card.style.opacity = '0';
+                        currentCard--;
+                    };
+                }
+            },
+
+            "bento": {
+                name: "10. Bento Box Grid (Apple UI)",
+                render: () => {
+                    styleTag.innerHTML = `
+                        body { background: #f5f5f7; display: flex; justify-content: center; padding: 80px 20px 50px 20px; font-family: 'Inter', sans-serif;}
+                        .bento-grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 220px; gap: 20px; max-width: 1000px; width: 100%; }
+                        .b-item { background: #fff; border-radius: 28px; padding: 35px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: center; overflow: hidden; position: relative;}
+                        .b-hero { grid-column: span 4; background: linear-gradient(135deg, #000, #333); color: white; text-align: center; }
+                        .b-hero h1 { font-size: 3.5rem; letter-spacing: -2px; }
+                        .b-sq { grid-column: span 2; }
+                        .b-cta { grid-column: span 4; background: #0066cc; color: white; align-items: center; text-decoration: none; font-size: 1.8rem; font-weight: bold;}
+                        .b-cta:hover { background: #005bb5; }
+                        @media(max-width: 768px){ .bento-grid { grid-template-columns: 1fr; } .b-sq { grid-column: span 1; } .b-hero { grid-column: span 1;} .b-cta {grid-column: span 1;} }
+                    `;
+                    app.innerHTML = `
+                        <div class="bento-grid">
+                            <div class="b-item b-hero">
+                                <h1>${CONTENT.brand}</h1>
+                                <p style="font-size: 1.3rem; opacity: 0.8; margin-top: 10px;">${CONTENT.hero}</p>
+                            </div>
+                            ${CONTENT.services.slice(0,2).map(s => `
+                                <div class="b-item b-sq">
+                                    <h3 style="font-size: 1.8rem; margin-bottom: 10px;">${s.title}</h3>
+                                    <p style="color: #666; font-size: 1.1rem;">${s.desc}</p>
+                                </div>
+                            `).join('')}
+                            <a href="${CONTENT.link}" class="b-item b-cta">
+                                ${CONTENT.cta} →
+                            </a>
+                        </div>
+                    `;
+                }
+            },
+
+            "timeline": {
+                name: "11. Parallax Timeline Vertical",
+                render: () => {
+                    styleTag.innerHTML = `
+                        body { background: #111; color: #fff; }
+                        .timeline { max-width: 800px; margin: 0 auto; padding: 60px 20px; position: relative; }
+                        .timeline::before { content:''; position: absolute; width: 4px; background: #333; top: 0; bottom: 0; left: 50%; transform: translateX(-50%); }
+                        .t-event { display: flex; justify-content: space-between; align-items: center; margin-bottom: 80px; position: relative; }
+                        .t-event:nth-child(even) { flex-direction: row-reverse; }
+                        .t-content { width: 45%; background: #222; padding: 25px; border-radius: 10px; position: relative; }
+                        .t-content::before { content:''; position: absolute; top: 20px; width: 16px; height: 16px; background: #e94560; border-radius: 50%; }
+                        .t-event:nth-child(odd) .t-content::before { right: -41px; }
+                        .t-event:nth-child(even) .t-content::before { left: -41px; }
+                        h2 { color: #e94560; font-size: 1.8rem; margin-bottom: 10px;}
+                    `;
+                    app.innerHTML = `
+                        <div style="height: 80vh; display:flex; align-items:center; justify-content:center; text-align:center; padding-top:40px;">
+                            <div>
+                                <h1 style="font-size: 4rem;">${CONTENT.brand}</h1>
+                                <p style="font-size: 1.3rem; color: #888;">Scrolleá para ver la propuesta ↓</p>
+                            </div>
+                        </div>
+                        <div class="timeline">
+                            <div class="t-event">
+                                <div class="t-content"><h2>El Problema</h2><p>${CONTENT.problem}</p></div>
+                                <div style="width: 45%"></div>
+                            </div>
+                            ${CONTENT.services.map((s) => `
+                                <div class="t-event">
+                                    <div class="t-content"><h2>${s.title}</h2><p>${s.desc}</p><strong>${s.price}</strong></div>
+                                    <div style="width: 45%"></div>
+                                </div>
+                            `).join('')}
+                            <div class="t-event">
+                                <div class="t-content" style="background:#e94560; text-align:center;">
+                                    <a href="${CONTENT.link}" style="color:white; font-size:1.5rem; font-weight:bold; text-decoration:none;">${CONTENT.cta}</a>
+                                </div>
+                                <div style="width: 45%"></div>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+
+            "netflix": {
+                name: "12. Netflix Row UI",
+                render: () => {
+                    styleTag.innerHTML = `
+                        body { background: #141414; color: white; overflow-x: hidden; font-family: sans-serif; }
+                        .n-hero { height: 75vh; display: flex; flex-direction: column; justify-content: center; padding: 50px; padding-left: 80px; background: linear-gradient(rgba(0,0,0,0.5), #141414); }
+                        .n-hero h1 { font-size: 4.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); margin-bottom: 20px;}
+                        .row { padding: 20px 50px; }
+                        .row-title { font-size: 1.5rem; margin-bottom: 15px; font-weight: bold; }
+                        .posters { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 20px; }
+                        .poster { min-width: 280px; height: 160px; background: #222; border-radius: 6px; padding: 20px; transition: 0.3s; cursor: pointer; position: relative; overflow: hidden; border: 1px solid #333; }
+                        .poster:hover { transform: scale(1.05); z-index: 10; background: #e50914; }
+                        .p-info { position: absolute; bottom: 20px; left: 20px; right: 20px; font-size: 0.9rem; color: #ddd; }
+                    `;
+                    app.innerHTML = `
+                        <div class="n-hero">
+                            <h1>${CONTENT.brand}</h1>
+                            <p style="font-size: 1.3rem; max-width: 600px; margin-bottom: 30px;">${CONTENT.hero} ${CONTENT.problem}</p>
+                            <a href="${CONTENT.link}" style="background: white; color: black; padding: 12px 28px; font-size: 1.1rem; font-weight: bold; text-decoration: none; width: max-content; border-radius: 4px;">▶ Contactar</a>
+                        </div>
+                        <div class="row">
+                            <div class="row-title">Nuestros Servicios</div>
+                            <div class="posters">
+                                ${CONTENT.services.map(s => `
+                                    <div class="poster">
+                                        <h3>${s.title}</h3>
+                                        <div class="p-info">${s.desc}<br><b>${s.price}</b></div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+
+            "brutalist-drag": {
+                name: "13. Neobrutalismo Caótico (Pegatinas)",
+                render: () => {
+                    styleTag.innerHTML = `
+                        body { background: #ffeb3b; overflow: hidden; font-family: 'Inter', sans-serif; }
+                        .huge-text { font-size: 14vw; font-weight: 900; line-height: 0.8; letter-spacing: -5px; position: absolute; top: 50%; transform: translateY(-50%); white-space: nowrap; animation: marquee 20s linear infinite; mix-blend-mode: overlay; opacity: 0.4; pointer-events: none;}
+                        @keyframes marquee { 0% { transform: translate(0, -50%); } 100% { transform: translate(-100%, -50%); } }
+                        .sticker { position: absolute; border: 4px solid #000; box-shadow: 8px 8px 0 #000; padding: 20px; background: #fff; cursor: grab; user-select: none; max-width: 300px;}
+                        .sticker:active { cursor: grabbing; box-shadow: 4px 4px 0 #000; transform: translate(4px, 4px); }
+                        .s-blue { background: #4fc3f7; } .s-pink { background: #ff90e8; }
+                    `;
+                    app.innerHTML = `
+                        <div class="huge-text">${CONTENT.brand} ${CONTENT.brand} ${CONTENT.brand}</div>
+                        <div class="sticker" style="top: 15%; left: 25%;" onmousedown="drag(event, this)">
+                            <h2 style="font-size:1.8rem; text-transform:uppercase;">${CONTENT.hero}</h2>
+                        </div>
+                        ${CONTENT.services.map((s, i) => `
+                            <div class="sticker ${i%2==0 ? 's-blue':'s-pink'}" style="top: ${35 + i*15}%; left: ${30 + i*12}%;" onmousedown="drag(event, this)">
+                                <h3>${s.title}</h3><p style="margin-top:5px;">${s.desc}</p><strong style="display:block; margin-top:10px;">${s.price}</strong>
+                            </div>
+                        `).join('')}
+                        <a href="${CONTENT.link}" class="sticker" style="bottom: 12%; right: 10%; background: #f44336; color: white; text-decoration:none; font-size: 1.8rem; font-weight:bold;">${CONTENT.cta}</a>
+                    `;
+                    window.drag = (e, el) => {
+                        let offsetX = e.clientX - el.getBoundingClientRect().left;
+                        let offsetY = e.clientY - el.getBoundingClientRect().top;
+                        el.style.zIndex = 100;
+                        document.onmousemove = (e) => { el.style.left = (e.clientX - offsetX) + 'px'; el.style.top = (e.clientY - offsetY) + 'px'; };
+                        document.onmouseup = () => { document.onmousemove = null; el.style.zIndex = 1; };
+                    };
+                }
+            },
+
+            "slides": {
+                name: "14. Presentación (Tipo PPT / Snap)",
+                render: () => {
+                    styleTag.innerHTML = `
+                        body { margin: 0; font-family: sans-serif; overflow-y: scroll; scroll-snap-type: y mandatory; }
+                        .slide { height: 100vh; width: 100vw; scroll-snap-align: start; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; }
+                        .s1 { background: #000; color: #fff; }
+                        .s2 { background: #fff; color: #000; }
+                        .s3 { background: #0066cc; color: #fff; }
+                        h1 { font-size: 3.5rem; margin-bottom: 20px; }
+                        p { font-size: 1.4rem; max-width: 800px; }
+                        .scroll-indicator { position: absolute; bottom: 30px; font-size: 2rem; animation: bounce 2s infinite; }
+                        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(10px); } }
+                    `;
+                    app.innerHTML = `
+                        <div class="slide s1">
+                            <h1>${CONTENT.brand}</h1>
+                            <p>${CONTENT.hero}</p>
+                            <div class="scroll-indicator">↓</div>
+                        </div>
+                        <div class="slide s2">
+                            <h1 style="color: #d32f2f;">El Problema</h1>
+                            <p>${CONTENT.problem}</p>
+                            <div class="scroll-indicator">↓</div>
+                        </div>
+                        ${CONTENT.services.map((s, i) => `
+                            <div class="slide ${i%2==0 ? 's3' : 's1'}">
+                                <h1>${s.title}</h1>
+                                <p>${s.desc}</p>
+                                <h2 style="margin-top:20px;">${s.price}</h2>
+                                <div class="scroll-indicator">↓</div>
+                            </div>
+                        `).join('')}
+                        <div class="slide s2">
+                            <h1>¿Empezamos?</h1>
+                            <a href="${CONTENT.link}" style="background: #000; color: white; padding: 18px 36px; font-size: 1.3rem; text-decoration: none; border-radius: 50px;">${CONTENT.cta}</a>
+                        </div>
+                    `;
+                }
+            },
+
+            "linktree": {
+                name: "15. Link-in-Bio (Mobile First)",
+                render: () => {
+                    styleTag.innerHTML = `
+                        body { background: #fafafa; display: flex; justify-content: center; }
+                        .mobile-container { width: 100%; max-width: 480px; min-height: 100vh; padding: 80px 20px 40px 20px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+                        .avatar { width: 100px; height: 100px; background: #ff7f00; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold; margin-bottom: 15px; }
+                        .link-btn { width: 100%; background: #fff; border: 2px solid #eaeaea; padding: 18px; margin-bottom: 12px; border-radius: 20px; text-decoration: none; color: #333; font-weight: bold; font-size: 1rem; transition: 0.2s; display: flex; flex-direction: column; box-shadow: 0 4px 6px rgba(0,0,0,0.02);}
+                        .link-btn:hover { border-color: #ff7f00; transform: translateY(-2px); }
+                        .link-desc { font-size: 0.85rem; font-weight: normal; color: #666; margin-top: 4px; }
+                    `;
+                    app.innerHTML = `
+                        <div class="mobile-container">
+                            <div class="avatar">AG</div>
+                            <h1 style="font-size: 1.8rem; margin-bottom: 5px;">@${CONTENT.brand.toLowerCase()}</h1>
+                            <p style="margin-bottom: 25px; color: #666;">${CONTENT.hero}</p>
+                            
+                            ${CONTENT.services.map(s => `
+                                <div class="link-btn">
+                                    <span>${s.title} - ${s.price}</span>
+                                    <span class="link-desc">${s.desc}</span>
+                                </div>
+                            `).join('')}
+                            
+                            <a href="${CONTENT.link}" class="link-btn" style="background: #000; color: white; border: none; margin-top: 15px;">
+                                ${CONTENT.cta}
+                            </a>
+                        </div>
+                    `;
+                }
+            },
+
+            "map": {
+                name: "16. Mapa Interactivo",
+                render: () => {
+                    styleTag.innerHTML = `
+                        body { background: #1a2a3a; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; color: white; font-family: sans-serif; }
+                        .map-bg { position: absolute; top:0; left:0; width: 100%; height: 100%; background: repeating-linear-gradient(0deg, transparent, transparent 48px, rgba(255,255,255,0.05) 50px), repeating-linear-gradient(90deg, transparent, transparent 48px, rgba(255,255,255,0.05) 50px); }
+                        .pin { position: absolute; width: 30px; height: 30px; background: #e74c3c; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); cursor: pointer; box-shadow: -2px 2px 10px rgba(0,0,0,0.5); transition: 0.3s; z-index: 10;}
+                        .pin:hover { transform: rotate(-45deg) scale(1.2); background: #f1c40f;}
+                        .pin-info { position: absolute; top: -110px; left: -100px; width: 230px; background: white; color: black; padding: 12px; border-radius: 6px; transform: rotate(45deg); display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+                        .pin:hover .pin-info { display: block; }
+                        .h1-map { position: absolute; top: 25px; right: 30px; font-size: 2.5rem; text-shadow: 2px 2px 0 #000; z-index: 5; }
+                    `;
+                    const pos = [ {x: 35, y: 45}, {x: 55, y: 35}, {x: 65, y: 65} ];
+                    app.innerHTML = `
+                        <div class="map-bg"></div>
+                        <h1 class="h1-map">${CONTENT.brand}</h1>
+                        ${CONTENT.services.map((s, i) => `
+                            <div class="pin" style="left: ${pos[i].x}%; top: ${pos[i].y}%;">
+                                <div class="pin-info">
+                                    <h3 style="margin-bottom: 5px;">${s.title}</h3>
+                                    <p style="font-size: 0.85rem; color: #555;">${s.desc}</p>
+                                </div>
+                            </div>
+                        `).join('')}
+                        <a href="${CONTENT.link}" style="position: absolute; bottom: 30px; right: 30px; background: white; color: black; padding: 12px 25px; text-decoration: none; font-weight: bold; border-radius: 50px; z-index: 5;">${CONTENT.cta}</a>
+                    `;
+                }
+            },
+
+            "accordion": {
+                name: "17. Acordeón Pantalla Completa",
+                render: () => {
+                    styleTag.innerHTML = `
+                        body { display: flex; height: 100vh; overflow: hidden; margin: 0; }
+                        .acc-panel { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; transition: flex 0.5s cubic-bezier(0.25, 1, 0.5, 1); cursor: pointer; color: white; text-align: center; border-right: 2px solid rgba(0,0,0,0.2); position: relative; overflow: hidden;}
+                        .acc-panel:hover { flex: 4; }
+                        .acc-panel h2 { font-size: 2vw; white-space: nowrap; transition: 0.5s; transform: rotate(-90deg); position: absolute; }
+                        .acc-panel:hover h2 { transform: rotate(0deg); position: static; font-size: 2.5rem; margin-bottom: 20px; }
+                        .acc-content { opacity: 0; transition: 0.5s; max-width: 400px; display: none;}
+                        .acc-panel:hover .acc-content { opacity: 1; display: block; }
+                        .p1 { background: #2c3e50; } .p2 { background: #e74c3c; } .p3 { background: #f39c12; } .p4 { background: #27ae60; } .p5 { background: #8e44ad; }
+                    `;
+                    const sections = [
+                        { t: CONTENT.brand, c: CONTENT.hero },
+                        ...CONTENT.services.map(s => ({ t: s.title, c: s.desc + " - <b>" + s.price + "</b>" })),
+                        { t: "Contacto", c: `<a href="${CONTENT.link}" style="color:white; border: 2px solid white; padding: 10px 20px; text-decoration:none; display:inline-block; margin-top:10px;">${CONTENT.cta}</a>` }
+                    ];
+                    app.innerHTML = sections.map((s, i) => `
+                        <div class="acc-panel p${i+1}">
+                            <h2>${s.t}</h2>
+                            <div class="acc-content"><p style="font-size: 1.2rem;">${s.c}</p></div>
+                        </div>
+                    `).join('');
+                }
+            },
+
+            "video-game": {
+                name: "18. Retro RPG Menu",
+                render: () => {
+                    styleTag.innerHTML = `
+                        body { background: #000; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'VT323', monospace; color: white; padding: 20px; }
+                        .rpg-wrapper { width: 100%; max-width: 600px; margin: 0 auto; }
+                        .rpg-box { border: 4px solid white; background: #0000aa; width: 100%; padding: 30px; border-radius: 8px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); position: relative; }
+                        .rpg-title { font-size: 3.5rem; text-align: center; margin-bottom: 20px; color: #ffff00; text-shadow: 2px 2px #000; }
+                        .menu-list { list-style: none; font-size: 1.8rem; padding-left: 30px; }
+                        .menu-list li { margin-bottom: 12px; cursor: pointer; position: relative; }
+                        .menu-list li:hover::before { content: '▶'; position: absolute; left: -25px; color: white; }
+                        .rpg-dialog { border: 4px solid white; background: #000; margin-top: 20px; padding: 20px; min-height: 100px; font-size: 1.4rem; display: none; }
+                    `;
+                    app.innerHTML = `
+                        <div class="rpg-wrapper">
+                            <div class="rpg-title">${CONTENT.brand} QUEST</div>
+                            <div class="rpg-box">
+                                <ul class="menu-list">
+                                    <li onmouseover="showRPG('${CONTENT.problem}')">1. La Misión</li>
+                                    ${CONTENT.services.map((s, i) => `
+                                        <li onmouseover="showRPG('${s.desc} [${s.price}]')">${i+2}. Inventario: ${s.title}</li>
+                                    `).join('')}
+                                    <li onmouseover="showRPG('¡Es peligroso ir solo! Toma esto.')" onclick="window.location='${CONTENT.link}'">5. Guardar partida y Contactar</li>
+                                </ul>
+                            </div>
+                            <div class="rpg-dialog" id="rpg-d"></div>
+                        </div>
+                    `;
+                    window.showRPG = (text) => {
+                        const d = document.getElementById('rpg-d');
+                        if(!d) return;
+                        d.style.display = 'block';
+                        d.innerHTML = '';
+                        let i = 0;
+                        clearInterval(window.typer);
+                        window.typer = setInterval(() => {
+                            if(i < text.length) d.innerHTML += text.charAt(i);
+                            else clearInterval(window.typer);
+                            i++;
+                        }, 30);
+                    };
+                }
+            },
+
+            "masonry": {
+                name: "19. Pinterest Masonry",
+                render: () => {
+                    styleTag.innerHTML = `
+                        body { background: #eee; padding: 80px 20px 40px 20px; font-family: sans-serif; }
+                        .masonry { column-count: 3; column-gap: 20px; max-width: 1100px; margin: 0 auto; }
+                        .m-item { break-inside: avoid; background: white; margin-bottom: 20px; border-radius: 15px; padding: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+                        .m-hero { background: #ff4757; color: white; padding: 35px; }
+                        .m-hero h1 { font-size: 2.8rem; line-height: 1; margin-bottom: 10px; }
+                        @media(max-width: 900px) { .masonry { column-count: 2; } }
+                        @media(max-width: 600px) { .masonry { column-count: 1; } }
+                    `;
+                    app.innerHTML = `
+                        <div class="masonry">
+                            <div class="m-item m-hero">
+                                <h1>${CONTENT.brand}</h1>
+                                <p style="font-size: 1.1rem; margin-top: 10px;">${CONTENT.hero}</p>
+                            </div>
+                            <div class="m-item">
+                                <h3 style="color: #ff4757; margin-bottom:10px;">⚠️ El Problema</h3>
+                                <p>${CONTENT.problem}</p>
+                            </div>
+                            ${CONTENT.services.map(s => `
+                                <div class="m-item" style="padding-top: 30px; padding-bottom: 30px;">
+                                    <h2>${s.title}</h2>
+                                    <p style="color: #666; margin: 12px 0;">${s.desc}</p>
+                                    <strong style="font-size: 1.4rem;">${s.price}</strong>
+                                </div>
+                            `).join('')}
+                            <div class="m-item" style="background: #2ed573; color: white; display: flex; align-items:center; justify-content:center; height: 160px;">
+                                <a href="${CONTENT.link}" style="color: white; font-size: 1.8rem; font-weight: bold; text-decoration: none;">${CONTENT.cta} →</a>
+                            </div>
+                        </div>
+                    `;
+                }
+            },
+
+            "newspaper": {
+                name: "20. Diario Clásico Editorial",
+                render: () => {
+                    styleTag.innerHTML = `
+                        body { background: #fdfaf6; color: #111; font-family: 'Times New Roman', serif; padding: 80px 20px 40px 20px; }
+                        .paper-container { max-width: 950px; margin: 0 auto; border: 1px solid #ccc; padding: 40px; background: #fff; box-shadow: 0 0 20px rgba(0,0,0,0.05);}
+                        .p-header { text-align: center; border-bottom: 4px solid #111; padding-bottom: 20px; margin-bottom: 30px; }
+                        .p-header h1 { font-size: 4.5rem; text-transform: uppercase; letter-spacing: -2px; margin: 0;}
+                        .p-columns { column-count: 3; column-gap: 30px; text-align: justify; }
+                        .p-columns h2 { font-family: sans-serif; text-transform: uppercase; font-size: 1.1rem; border-bottom: 1px solid #111; margin-bottom: 10px; break-after: avoid; }
+                        .dropcap { float: left; font-size: 3.8rem; line-height: 0.8; padding-right: 8px; font-weight: bold; }
+                        @media(max-width: 768px) { .p-columns { column-count: 1; } }
+                    `;
+                    app.innerHTML = `
+                        <div class="paper-container">
+                            <div class="p-header">
+                                <p style="text-transform: uppercase; letter-spacing: 2px;">Edición Especial - Mar del Plata</p>
+                                <h1>${CONTENT.brand}</h1>
+                                <p style="font-style: italic; font-size: 1.3rem;">"${CONTENT.hero}"</p>
+                            </div>
+                            <div class="p-columns">
+                                <p><span class="dropcap">I</span>nstagram no es un buscador... ${CONTENT.problem} Por eso, hemos desarrollado soluciones definitivas para el mercado local.</p>
+                                ${CONTENT.services.map(s => `
+                                    <h2>${s.title}</h2>
+                                    <p>${s.desc} <b>Inversión: ${s.price}.</b></p>
+                                `).join('')}
+                                <div style="border: 2px dashed #111; padding: 15px; text-align: center; margin-top: 15px;">
+                                    <h3 style="margin-bottom: 5px; font-family: sans-serif;">ANUNCIO CLASIFICADO</h3>
+                                    <a href="${CONTENT.link}" style="color: black; font-weight: bold; font-family: sans-serif;">${CONTENT.cta} AQUÍ</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        };
+
+        const select = document.getElementById('engine-select');
+        
+        Object.keys(ENGINES).forEach(key => {
+            const option = document.createElement('option');
+            option.value = key;
+            option.textContent = ENGINES[key].name;
+            select.appendChild(option);
+        });
+
+        function mountEngine(key) {
+            if(window.typer) clearInterval(window.typer);
+            document.onmousemove = null;
+            ENGINES[key].render();
+        }
+
+        select.addEventListener('change', (e) => mountEngine(e.target.value));
+
+        mountEngine('classic-base');
+    </script>
+</body>
+</html>
