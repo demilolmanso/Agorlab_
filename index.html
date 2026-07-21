@@ -8,23 +8,160 @@
     <title>Agorlab | Un laboratorio digital a la vista de todos</title>
     
     <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
 
     <style>
-       
+        :root {
+            --primary-color: #FF5F00;
+            --primary-rgb: 255, 95, 0;
+            --primary-glow: rgba(255, 95, 0, 0.4);
+            --text-secondary: #ff8533;
+            --text-muted: rgba(255, 140, 66, 0.92);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
-            margin: 0;
-            padding: 0;
-            background-color: #050300; 
-            
-            background-image: radial-gradient(circle at center, #1a0a00 0%, #030200 100%);
+            background-color: #030303;
+            /* Filtro tipo CRT más oscuro, sutil y constante, tintado ligeramente con el color principal */
+            background-image: linear-gradient(rgba(0, 0, 0, 0.45) 50%, rgba(var(--primary-rgb), 0.07) 50%);
+            background-size: 100% 4px;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            color: #ca630e; 
+            color: var(--text-secondary); 
             font-family: 'Courier New', Courier, monospace;
+            overflow-x: hidden;
+            transition: color 0.3s ease;
         }
 
+        /* --- ESTILOS DE NAVEGACIÓN / BOTÓN "A" --- */
+        #agorlab-toggle {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background-color: #000000;
+            color: var(--primary-color);
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 24px;
+            font-weight: bold;
+            border: 1px solid var(--primary-color);
+            padding: 4px 12px;
+            cursor: pointer;
+            z-index: 9999;
+            box-shadow: 0 0 8px var(--primary-glow);
+            transition: all 0.2s ease;
+        }
+        #agorlab-toggle:hover {
+            background-color: var(--primary-color);
+            color: #000000;
+            box-shadow: 0 0 12px var(--primary-color);
+        }
+
+        #agorlab-tooltip {
+            position: fixed;
+            top: 55px;
+            left: 10px;
+            background-color: #ffffff;
+            color: #000000;
+            border: 2px solid var(--primary-color);
+            border-radius: 10px;
+            padding: 10px 28px 10px 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.82rem;
+            font-weight: bold;
+            z-index: 10000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            max-width: 240px;
+            line-height: 1.3;
+            animation: tooltip-fade 0.3s ease-in-out;
+        }
+        #agorlab-tooltip::before {
+            content: '';
+            position: absolute;
+            top: -9px;
+            left: 12px;
+            border-width: 0 7px 9px 7px;
+            border-style: solid;
+            border-color: transparent transparent var(--primary-color) transparent;
+        }
+        #agorlab-tooltip-close {
+            position: absolute;
+            top: 4px;
+            right: 6px;
+            background: none;
+            border: none;
+            font-size: 14px;
+            font-weight: bold;
+            color: #666;
+            cursor: pointer;
+            line-height: 1;
+            padding: 2px 4px;
+        }
+        #agorlab-tooltip-close:hover {
+            color: var(--primary-color);
+        }
+
+        @keyframes tooltip-fade {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #agorlab-panel {
+            position: fixed;
+            top: 60px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.95);
+            color: var(--primary-color);
+            font-family: 'Courier New', Courier, monospace;
+            border: 1px solid var(--primary-color);
+            padding: 15px;
+            z-index: 9998;
+            box-shadow: 0 0 10px var(--primary-glow);
+            min-width: 250px;
+            display: none; 
+            flex-direction: column;
+            gap: 10px;
+        }
+        #agorlab-panel.visible {
+            display: flex;
+        }
+        #agorlab-panel h3 { font-size: 1.1rem; letter-spacing: 1px; margin-bottom: 5px; margin-top: 0; color: var(--primary-color); }
+        #agorlab-panel label { font-size: 0.75rem; color: #aaa; text-transform: uppercase; font-family: 'Inter', sans-serif;}
+        
+        /* Estilos del selector de color tipo ruedita */
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #181818;
+            padding: 8px;
+            border: 1px solid #444;
+            border-radius: 4px;
+        }
+        #color-picker-input {
+            appearance: none;
+            -webkit-appearance: none;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            background: transparent;
+        }
+        #color-picker-input::-webkit-color-swatch-wrapper { padding: 0; }
+        #color-picker-input::-webkit-color-swatch { border: 2px solid var(--primary-color); border-radius: 50%; }
+        
+        .color-picker-text {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            color: #fff;
+        }
+
+        /* --- CONTENIDO PRINCIPAL --- */
         .main-container {
             max-width: 800px;
             width: 100%;
@@ -33,14 +170,24 @@
             margin-top: 8vh;
         }
 
-        
         .logo-text {
             font-size: clamp(4rem, 12vw, 8rem);
             font-weight: bold;
             margin: 0 0 50px 0;
-            color: #ff7300; 
-            text-shadow: 0px 0px 15px rgba(255, 115, 0, 0.2);
+            color: var(--primary-color); 
+            text-shadow: 0px 0px 20px var(--primary-glow);
             letter-spacing: -3px;
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        /* Animación del cursor parpadeante */
+        .cursor {
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
         }
 
         .prologo {
@@ -54,15 +201,18 @@
         }
 
         .prologo p {
-            font-size: 1.2rem;   
+            font-size: 1.25rem;
             line-height: 1.8;    
-            letter-spacing: 1px;
-            margin-bottom: 2rem; 
+            letter-spacing: 0.5px;
+            margin-bottom: 2rem;
+            color: var(--text-secondary); 
+            transition: color 0.3s ease;
         }
 
         .prologo strong {
             font-weight: bold;
-            color: #ff7300;
+            color: var(--primary-color);
+            transition: color 0.3s ease;
         }
 
         /* --- CONTENEDOR DE ENLACES --- */
@@ -84,40 +234,59 @@
 
         .btn-interactivo {
             display: inline-block;
-            color: #ca630e;
+            color: var(--primary-color);
             text-decoration: none;
             font-weight: bold;
             font-size: 1.3rem;
             letter-spacing: 2px;
-            border: 1px dashed #ca630e;
+            border: 1px dashed var(--primary-color);
             padding: 12px 30px;
-            background-color: transparent;
+            background-color: rgba(255, 95, 0, 0.03);
             transition: all 0.2s ease-in-out;
         }
 
         .btn-interactivo:hover {
-            background-color: #ca630e;
-            color: #030200;
-            box-shadow: 0px 0px 20px rgba(202, 99, 14, 0.3);
-            border: 1px solid #ca630e;
+            background-color: var(--primary-color);
+            color: #050505;
+            box-shadow: 0px 0px 20px var(--primary-glow);
+            border: 1px solid var(--primary-color);
             cursor: pointer;
         }
 
-        /* Descripciones sutiles */
         .desc-sutil {
-            font-size: 0.95rem;
-            color: rgba(202, 99, 14, 0.7);
-            max-width: 400px;
+            font-size: 1.12rem;
+            color: var(--text-muted);
+            max-width: 500px;
             text-align: center;
-            line-height: 1.4;
+            line-height: 1.6;
+            transition: color 0.3s ease;
         }
     </style>
 </head>
 <body> 
 
+    <!-- Botón minimalista de Agorlab -->
+    <button id="agorlab-toggle">a</button>
+
+    <!-- Cartel explicativo descartable actualizado -->
+    <div id="agorlab-tooltip">
+        <button id="agorlab-tooltip-close" title="Cerrar">&times;</button>
+        ¡Este botón despliega un panel con una rueda cromática para cambiar el color de acento de todo el sitio en tiempo real!
+    </div>
+    
+    <!-- El panel de cambio de color -->
+    <div id="agorlab-panel" class="hidden">
+        <h3>[ Agorlab Engine ]</h3>
+        <label>Rueda Cromática:</label>
+        <div class="color-picker-wrapper">
+            <input type="color" id="color-picker-input" value="#FF5F00">
+            <span class="color-picker-text" id="color-hex-label">#FF5F00</span>
+        </div>
+    </div>
+
     <div class="main-container">
         
-        <h1 class="logo-text">Agorlab.</h1>
+        <h1 class="logo-text">Agorlab<span class="cursor">_</span></h1>
         
         <section class="prologo">
             <p>Hola, mi nombre es <strong>Demián</strong>.</p>
@@ -127,7 +296,6 @@
             <p>Para mí, la mejor forma de aprender es creando, rompiendo cosas y arreglándolas, así que acá documento todo mi proceso.</p>
         </section>
 
-        
         <div class="contenedor-enlaces">
             
             <div class="enlace-item">
@@ -153,5 +321,62 @@
         </div>
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnToggle = document.getElementById('agorlab-toggle');
+            const panelAgorlab = document.getElementById('agorlab-panel');
+            const tooltip = document.getElementById('agorlab-tooltip');
+            const btnCloseTooltip = document.getElementById('agorlab-tooltip-close');
+            const colorPicker = document.getElementById('color-picker-input');
+            const colorHexLabel = document.getElementById('color-hex-label');
+
+            if (btnCloseTooltip) {
+                btnCloseTooltip.addEventListener('click', () => {
+                    tooltip.style.display = 'none';
+                });
+            }
+
+            btnToggle.addEventListener('click', () => {
+                panelAgorlab.classList.toggle('visible');
+                if (tooltip) tooltip.style.display = 'none';
+
+                if (panelAgorlab.classList.contains('visible')) {
+                    btnToggle.style.backgroundColor = colorPicker.value;
+                    btnToggle.style.color = '#000000';
+                } else {
+                    btnToggle.style.backgroundColor = '#000000';
+                    btnToggle.style.color = colorPicker.value;
+                }
+            });
+
+            // Función para convertir HEX a RGB y actualizar dinámicamente el tema y el filtro sutil
+            function updateThemeColor(hex) {
+                colorHexLabel.textContent = hex;
+                
+                let r = parseInt(hex.substring(1, 3), 16);
+                let g = parseInt(hex.substring(3, 5), 16);
+                let b = parseInt(hex.substring(5, 7), 16);
+
+                let root = document.documentElement;
+                root.style.setProperty('--primary-color', hex);
+                root.style.setProperty('--primary-rgb', `${r}, ${g}, ${b}`);
+                root.style.setProperty('--primary-glow', `rgba(${r}, ${g}, ${b}, 0.4)`);
+                
+                root.style.setProperty('--text-secondary', hex);
+                root.style.setProperty('--text-muted', `rgba(${r}, ${g}, ${b}, 0.92)`);
+
+                if (panelAgorlab.classList.contains('visible')) {
+                    btnToggle.style.backgroundColor = hex;
+                } else {
+                    btnToggle.style.color = hex;
+                    btnToggle.style.borderColor = hex;
+                }
+            }
+
+            colorPicker.addEventListener('input', (e) => {
+                updateThemeColor(e.target.value);
+            });
+        });
+    </script>
 </body>
 </html>
