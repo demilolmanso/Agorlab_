@@ -216,15 +216,7 @@
       // NUEVO: Cartel indicador de navegación
       const NavHint = (!isAdmin && editor)
         ? el("div", { id: "nav-hint" },
-            el("span", { className: "desktop-hint" }, "Navegar:"),
-            el("div", { className: "keys desktop-hint" },
-              el("span", { className: "key" }, "←"),
-              el("span", { className: "key" }, "↑"),
-              el("span", { className: "key" }, "↓"),
-              el("span", { className: "key" }, "→")
-            ),
-            el("span", { className: "desktop-hint" }, "o"),
-            el("span", null, "-Arrastra para navegar por el lienzo,<br> puedes pellizcar para hacer zoom en dispositivos móviles-")
+            el("span", null, "-Arrastra para navegar por el lienzo,puedes pellizcar para hacer zoom en dispositivos móviles-")
           )
         : null;
 
