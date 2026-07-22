@@ -1,53 +1,168 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Área en construcción | Agorlab</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agorlab | Bitácora</title>
+  
+  <!-- CSS de Tldraw (El lienzo) y tipografía -->
+  <link rel="stylesheet" href="https://unpkg.com/tldraw@2.4.2/tldraw.css" />
+  <style>
+    /* Estética base Agorlab */
+    body, html { margin: 0; padding: 0; height: 100%; width: 100%; background-color: #000; color: #ff6a00; font-family: monospace; overflow: hidden; }
     
-    <link rel="icon" type="image/png" href="/favicon.png">
+    /* UI Flotante para el Administrador */
+    #admin-panel {
+      position: absolute; bottom: 20px; left: 20px; z-index: 9999;
+      display: flex; gap: 10px; flex-direction: column;
+    }
+    .btn-agorlab {
+      background: #000; color: #ff6a00; border: 1px solid #ff6a00;
+      padding: 10px 15px; cursor: pointer; font-family: monospace;
+      text-transform: uppercase; font-weight: bold; transition: 0.2s;
+    }
+    .btn-agorlab:hover { background: #ff6a00; color: #000; }
+    
+    /* Cartel de carga inicial */
+    #loading {
+      position: absolute; inset: 0; display: flex; justify-content: center; align-items: center;
+      background: #000; z-index: 10000; font-size: 1.5rem; letter-spacing: 2px;
+    }
+  </style>
 
-    <style>
-        /* ================= TEMA TERMINAL / CAPTURA ================= */
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #050300; 
-            background-image: radial-gradient(circle at center, #1a0a00 0%, #030200 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center; /* Centrado horizontal */
-            align-items: center;     /* Centrado vertical */
-            color: #ca630e; 
-            font-family: 'Courier New', Courier, monospace;
-        }
-
-        .mensaje-construccion {
-            font-size: clamp(1.5rem, 5vw, 3.5rem);
-            font-weight: bold;
-            color: #ff7300; 
-            text-shadow: 0px 0px 15px rgba(255, 115, 0, 0.2);
-            letter-spacing: -1px;
-            text-align: center;
-            padding: 20px;
-        }
-
-        /* Animación del cursor de consola */
-        .cursor {
-            animation: blink 1s step-end infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
-    </style>
+  <!-- Import Map para usar módulos modernos nativamente sin compiladores -->
+  <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18",
+        "react-dom/client": "https://esm.sh/react-dom@18/client",
+        "tldraw": "https://esm.sh/tldraw@2.4.2?external=react,react-dom",
+        "firebase/app": "https://esm.sh/firebase@10.8.1/app",
+        "firebase/firestore": "https://esm.sh/firebase@10.8.1/firestore",
+        "firebase/auth": "https://esm.sh/firebase@10.8.1/auth"
+      }
+    }
+  </script>
 </head>
-<body> 
+<body>
+  <div id="loading">Sincronizando ágora...</div>
+  <div id="root" style="width: 100vw; height: 100vh;"></div>
 
-    <div class="mensaje-construccion">
-        > área en construcción<span class="cursor">_</span>
-    </div>
+  <script type="module">
+    import React, { useState, useEffect } from 'react';
+    import { createRoot } from 'react-dom/client';
+    import { Tldraw } from 'tldraw';
+    
+    // Importaciones de Firebase
+    import { initializeApp } from 'firebase/app';
+    import { getFirestore, doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
 
+    // 1. REEMPLAZA ESTO CON TU CONFIGURACIÓN DE FIREBASE
+    const firebaseConfig = {
+    apiKey: "AIzaSyAdjZeH1XHPXZK0uNXFCE59ApP01me-gTw",
+    authDomain: "agorbitacora.firebaseapp.com",
+    projectId: "agorbitacora",
+    storageBucket: "agorbitacora.firebasestorage.app",
+    messagingSenderId: "162174261518",
+    appId: "1:162174261518:web:fd3f10899f8ec5b46c5f5f"
+  };
+
+    // Inicializamos Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const PIZARRA_ID = "blog_principal"; // El documento donde se guarda todo
+
+    // Creamos la Aplicación en React puro (sin JSX para evitar compiladores)
+    const el = React.createElement;
+
+    function AgorlabPizarra() {
+      const [editor, setEditor] = useState(null);
+      const [isAdmin, setIsAdmin] = useState(false);
+      const [isSyncing, setIsSyncing] = useState(false);
+
+      // Listener de Autenticación
+      useEffect(() => {
+        onAuthStateChanged(auth, (user) => {
+          setIsAdmin(!!user);
+        });
+      }, []);
+
+      // Listener de la Base de Datos (Tiempo Real)
+      useEffect(() => {
+        if (!editor) return;
+        document.getElementById('loading').style.display = 'none';
+
+        const unsubscribe = onSnapshot(doc(db, "pizarras", PIZARRA_ID), (docSnap) => {
+          if (docSnap.exists() && docSnap.data().canvasState) {
+            // Si el admin no es quien está mirando, cargamos el mapa en tiempo real
+            if (!isAdmin) {
+              editor.store.loadSnapshot(docSnap.data().canvasState);
+            }
+          }
+        });
+        return () => unsubscribe();
+      }, [editor, isAdmin]);
+
+      // Función para guardar el estado en la nube
+      const guardarEnNube = async () => {
+        if (!editor || !isAdmin) return;
+        setIsSyncing(true);
+        const snapshot = editor.store.getSnapshot();
+        try {
+          await setDoc(doc(db, "pizarras", PIZARRA_ID), {
+            canvasState: snapshot,
+            updatedAt: new Date()
+          });
+          alert("Progreso del laboratorio guardado con éxito.");
+        } catch (error) {
+          console.error("Error al guardar:", error);
+          alert("Hubo un error al guardar. Revisa la consola.");
+        }
+        setIsSyncing(false);
+      };
+
+      // Función de Login Secreto
+      const intentarLogin = () => {
+        const email = prompt("Credencial [Email]:");
+        if (!email) return;
+        const password = prompt("Credencial [Password]:");
+        if (!password) return;
+
+        signInWithEmailAndPassword(auth, email, password)
+          .then(() => alert("Acceso concedido al Laboratorio."))
+          .catch((err) => alert("Acceso denegado: " + err.message));
+      };
+
+      // UI del Administrador
+      const AdminPanel = isAdmin 
+        ? el("div", { id: "admin-panel" }, 
+            el("button", { className: "btn-agorlab", onClick: guardarEnNube }, isSyncing ? "Sincronizando..." : "[ Guardar en la Nube ]"),
+            el("button", { className: "btn-agorlab", onClick: () => signOut(auth) }, "[ Cerrar Sesión ]")
+          )
+        : null;
+
+      // El botón secreto aparece si agregas "?admin" a la URL (ej: agorlab.com/blog?admin)
+      const SecretLogin = (!isAdmin && window.location.search.includes("admin"))
+        ? el("div", { id: "admin-panel" }, el("button", { className: "btn-agorlab", onClick: intentarLogin }, "[ Entrar al Lab ]"))
+        : null;
+
+      // Renderizamos el lienzo de Tldraw
+      return el("div", { style: { position: "fixed", inset: 0 } },
+        el(Tldraw, {
+          darkMode: true,
+          readOnly: !isAdmin, // La magia: si no es admin, no se puede editar
+          onMount: (ed) => setEditor(ed)
+        }),
+        AdminPanel,
+        SecretLogin
+      );
+    }
+
+    // Inyectamos la App en el HTML
+    const root = createRoot(document.getElementById('root'));
+    root.render(el(AgorlabPizarra));
+  </script>
 </body>
 </html>
