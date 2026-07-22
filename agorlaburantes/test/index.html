@@ -268,10 +268,10 @@
 
     <div class="progress-bar-flat" id="progress-container">
         <div class="progress-fill" id="progress-bar-fill"></div>
-        <div class="progress-text" id="progress-label-text">FASE: 1 / 20</div>
+        <div class="progress-text" id="progress-label-text">FASE: 1 / 25</div>
     </div>
 
-    <!-- 20 PREGUNTAS TIPO MBTI -->
+    <!-- 25 PREGUNTAS TIPO MBTI -->
     <div id="q1" class="question-container">
         <h2>1. En un grupo grande donde no conocés a nadie, tu energía natural tiende a...</h2>
         <button class="meme-option" onclick="submitAnswer(['barberia', 'peluqueria', 'ingles', 'asist_materno'])">🗣️ Tomar la iniciativa, charlar y conectar rápido con el entorno.</button>
@@ -373,6 +373,33 @@
         <button class="meme-option" onclick="submitAnswer(['electricidad', 'aires', 'heladeras_lavarropas', 'celulares', 'operador_pc', 'bancario_contable', 'sec_contable', 'diseno_visual'])">🛠️ Ser el experto fundamental al que todos acudían porque resolvía lo que nadie más podía.</button>
     </div>
 
+    <!-- PREGUNTAS NUEVAS (21 A 25) -->
+    <div id="q21" class="question-container hidden">
+        <h2>21. ¿Cómo te sentís cuando tenés que tomar una decisión que afecta el futuro de otras personas?</h2>
+        <button class="meme-option" onclick="submitAnswer(['sec_medico', 'bancario_contable', 'sec_contable'])">📊 Analizo los riesgos y tomo la decisión basándome en datos duros.</button>
+        <button class="meme-option" onclick="submitAnswer(['asist_terapeutico', 'asist_materno', 'senas'])">🤝 Busco el consenso y priorizo cómo se van a sentir los demás.</button>
+    </div>
+    <div id="q22" class="question-container hidden">
+        <h2>22. Ante un desafío complejo que nunca antes viste, tu primer impulso es...</h2>
+        <button class="meme-option" onclick="submitAnswer(['operador_pc', 'celulares', 'diseno_visual'])">🔍 Investigar en internet, buscar referencias y diseñar una estrategia propia.</button>
+        <button class="meme-option" onclick="submitAnswer(['electricidad', 'aires', 'heladeras_lavarropas', 'barberia'])">⚙️ Agarrar las herramientas y empezar a desarmar para ver cómo funciona por dentro.</button>
+    </div>
+    <div id="q23" class="question-container hidden">
+        <h2>23. Cuando trabajás en equipo, ¿qué rol preferís adoptar naturalmente?</h2>
+        <button class="meme-option" onclick="submitAnswer(['sec_medico', 'sec_contable', 'farmacia'])">🗂️ El organizador que mantiene los tiempos, el orden y los papeles al día.</button>
+        <button class="meme-option" onclick="submitAnswer(['barberia', 'peluqueria', 'ingles', 'diseno_visual'])">💡 El creativo que aporta ideas frescas, estilo y conecta con los demás.</button>
+    </div>
+    <div id="q24" class="question-container hidden">
+        <h2>24. ¿Qué tanto te atrae la idea de emprender un proyecto propio desde cero?</h2>
+        <button class="meme-option" onclick="submitAnswer(['barberia', 'peluqueria', 'masaje', 'unas', 'belleza'])">🚀 Me encanta la independencia, manejar mis horarios y atender a mis propios clientes.</button>
+        <button class="meme-option" onclick="submitAnswer(['sec_contable', 'bancario_contable', 'sec_medico', 'operador_pc'])">🏢 Prefiero un entorno laboral estable, estructurado y con roles definidos.</button>
+    </div>
+    <div id="q25" class="question-container hidden">
+        <h2>25. ¿Te gustaría que te contactemos algún día para otorgarte más información sobre tu resultado[cite: 1]?</h2>
+        <button class="meme-option" onclick="submitAnswer(['asist_terapeutico', 'asist_materno', 'ingles', 'operador_pc'])">🔥 ¡Sí, de una! Quiero recibir más info y asesoramiento personalizado.</button>
+        <button class="meme-option" onclick="submitAnswer(['sec_contable', 'bancario_contable', 'farmacia'])">👀 Prefiero ver solo mi resultado por ahora, gracias.</button>
+    </div>
+
     <!-- REGISTRO -->
     <div id="stepForm" class="hidden">
         <h2>FASE FINAL ACABADA 🏁</h2>
@@ -436,7 +463,7 @@
 
 <script>
     let currentStep = 1;
-    const totalSteps = 20; 
+    const totalSteps = 25; // Actualizado a 25 preguntas
     
     let scoringMatrix = {
         'masaje': 0, 'barberia': 0, 'belleza': 0, 'unas': 0, 'peluqueria': 0,
@@ -569,7 +596,7 @@
         
         const percentage = ((currentStep - 1) / totalSteps) * 100;
         fill.style.width = `${percentage}%`;
-        text.innerText = currentStep <= totalSteps ? `FASE: ${currentStep} / 20` : 'ANÁLISIS OK';
+        text.innerText = currentStep <= totalSteps ? `FASE: ${currentStep} / ${totalSteps}` : 'ANÁLISIS OK';
     }
 
     function submitAnswer(courseCodesArray) {
