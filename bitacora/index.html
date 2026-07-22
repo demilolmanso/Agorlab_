@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Agorlab | Bitácora</title>
   
-  <!-- CSS de Tldraw (El lienzo) y tipografía -->
+  <!-- CSS de Tldraw y tipografía -->
   <link rel="stylesheet" href="https://unpkg.com/tldraw@2.4.2/tldraw.css" />
   <style>
     /* Estética base Agorlab */
@@ -28,9 +28,45 @@
       position: absolute; inset: 0; display: flex; justify-content: center; align-items: center;
       background: #000; z-index: 10000; font-size: 1.5rem; letter-spacing: 2px;
     }
+
+    /* NUEVO: Cartel de navegación para visitantes */
+    #nav-hint {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.85);
+      color: #ff6a00;
+      border: 1px solid #ff6a00;
+      padding: 10px 20px;
+      border-radius: 4px;
+      font-family: monospace;
+      z-index: 9998;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      pointer-events: none; /* Permite que los clics traspasen el cartel */
+      user-select: none;
+      box-shadow: 0 4px 10px rgba(255, 106, 0, 0.1);
+    }
+    .keys {
+      display: flex;
+      gap: 5px;
+    }
+    .key {
+      border: 1px solid #ff6a00;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    
+    /* Ocultar en pantallas muy pequeñas para no estorbar en móviles */
+    @media (max-width: 600px) {
+      .desktop-hint { display: none; }
+    }
   </style>
 
-  <!-- Import Map para usar módulos modernos nativamente sin compiladores -->
+  <!-- Import Map con Firebase Oficial -->
   <script type="importmap">
     {
       "imports": {
@@ -60,15 +96,15 @@
     import { getFirestore, doc, setDoc, onSnapshot } from 'firebase/firestore';
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
 
-    // 1. REEMPLAZA ESTO CON TU CONFIGURACIÓN DE FIREBASE (La que funcionó)
+    // Configuración activa de Firebase
     const firebaseConfig = {
-    apiKey: "AIzaSyAdjZeH1XHPXZK0uNXFCE59ApP01me-gTw",
-    authDomain: "agorbitacora.firebaseapp.com",
-    projectId: "agorbitacora",
-    storageBucket: "agorbitacora.firebasestorage.app",
-    messagingSenderId: "162174261518",
-    appId: "1:162174261518:web:fd3f10899f8ec5b46c5f5f"
-  };
+      apiKey: "AIzaSyAdjZeH1XHPXZK0uNXFCE59ApP01me-gTw",
+      authDomain: "agorbitacora.firebaseapp.com",
+      projectId: "agorbitacora",
+      storageBucket: "agorbitacora.firebasestorage.app",
+      messagingSenderId: "162174261518",
+      appId: "1:162174261518:web:fd3f10899f8ec5b46c5f5f"
+    };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -82,7 +118,6 @@
       const [isAdmin, setIsAdmin] = useState(false);
       const [isSyncing, setIsSyncing] = useState(false);
       
-      // Ref para saber si es la primera vez que carga y hacer auto-zoom
       const firstLoadRef = useRef(true); 
 
       // Listener de Autenticación
@@ -92,6 +127,19 @@
         });
       }, []);
 
+      // Configurar el editor según el rol
+      useEffect(() => {
+        if (!editor) return;
+        
+        // Aplica el modo solo lectura
+        editor.updateInstanceState({ isReadonly: !isAdmin });
+        
+        // NUEVO: Si es visitante, lo forzamos a usar la herramienta "Mano"
+        if (!isAdmin) {
+          editor.setCurrentTool('hand');
+        }
+      }, [editor, isAdmin]);
+
       // Listener de la Base de Datos
       useEffect(() => {
         if (!editor) return;
@@ -99,12 +147,9 @@
 
         const unsubscribe = onSnapshot(doc(db, "pizarras", PIZARRA_ID), (docSnap) => {
           if (docSnap.exists() && docSnap.data().canvasState) {
-            
-            // Si es un visitante, cargamos el estado
             if (!isAdmin) {
               editor.store.loadSnapshot(docSnap.data().canvasState);
               
-              // Si es la primera vez que el visitante entra, encuadramos la cámara
               if (firstLoadRef.current) {
                 setTimeout(() => {
                   editor.zoomToFit({ animation: { duration: 800 } });
@@ -147,7 +192,7 @@
           .catch((err) => alert("Acceso denegado: " + err.message));
       };
 
-      // UI del Administrador
+      // Componentes de la UI
       const AdminPanel = isAdmin 
         ? el("div", { id: "admin-panel" }, 
             el("button", { className: "btn-agorlab", onClick: guardarEnNube }, isSyncing ? "Sincronizando..." : "[ Guardar en la Nube ]"),
@@ -159,7 +204,6 @@
         ? el("div", { id: "admin-panel" }, el("button", { className: "btn-agorlab", onClick: intentarLogin }, "[ Entrar al Lab ]"))
         : null;
 
-      // Botón salvavidas para visitantes
       const CentrarBtn = (!isAdmin && editor)
         ? el("div", { style: { position: "absolute", top: "20px", right: "20px", zIndex: 9999 } }, 
             el("button", { 
@@ -169,15 +213,31 @@
           )
         : null;
 
+      // NUEVO: Cartel indicador de navegación
+      const NavHint = (!isAdmin && editor)
+        ? el("div", { id: "nav-hint" },
+            el("span", { className: "desktop-hint" }, "Navegar:"),
+            el("div", { className: "keys desktop-hint" },
+              el("span", { className: "key" }, "←"),
+              el("span", { className: "key" }, "↑"),
+              el("span", { className: "key" }, "↓"),
+              el("span", { className: "key" }, "→")
+            ),
+            el("span", { className: "desktop-hint" }, "o"),
+            el("span", null, "Arrastrar lienzo")
+          )
+        : null;
+
       return el("div", { style: { position: "fixed", inset: 0 } },
         el(Tldraw, {
           darkMode: true,
-          isReadonly: !isAdmin, // CORRECCIÓN: Ahora sí oculta las herramientas y bloquea la edición
+          hideUi: !isAdmin,
           onMount: (ed) => setEditor(ed)
         }),
         AdminPanel,
         SecretLogin,
-        CentrarBtn
+        CentrarBtn,
+        NavHint // Añadimos el cartel a la UI
       );
     }
 
