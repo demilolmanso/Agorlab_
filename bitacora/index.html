@@ -51,16 +51,16 @@
   <div id="root" style="width: 100vw; height: 100vh;"></div>
 
   <script type="module">
-    import React, { useState, useEffect } from 'react';
+    import React, { useState, useEffect, useRef } from 'react';
     import { createRoot } from 'react-dom/client';
     import { Tldraw } from 'tldraw';
     
     // Importaciones de Firebase
     import { initializeApp } from 'firebase/app';
-    import { getFirestore, doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
+    import { getFirestore, doc, setDoc, onSnapshot } from 'firebase/firestore';
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
 
-    // 1. REEMPLAZA ESTO CON TU CONFIGURACIÓN DE FIREBASE
+    // 1. REEMPLAZA ESTO CON TU CONFIGURACIÓN DE FIREBASE (La que funcionó)
     const firebaseConfig = {
     apiKey: "AIzaSyAdjZeH1XHPXZK0uNXFCE59ApP01me-gTw",
     authDomain: "agorbitacora.firebaseapp.com",
@@ -70,19 +70,20 @@
     appId: "1:162174261518:web:fd3f10899f8ec5b46c5f5f"
   };
 
-    // Inicializamos Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
-    const PIZARRA_ID = "blog_principal"; // El documento donde se guarda todo
+    const PIZARRA_ID = "bitacora_principal"; 
 
-    // Creamos la Aplicación en React puro (sin JSX para evitar compiladores)
     const el = React.createElement;
 
     function AgorlabPizarra() {
       const [editor, setEditor] = useState(null);
       const [isAdmin, setIsAdmin] = useState(false);
       const [isSyncing, setIsSyncing] = useState(false);
+      
+      // Ref para saber si es la primera vez que carga y hacer auto-zoom
+      const firstLoadRef = useRef(true); 
 
       // Listener de Autenticación
       useEffect(() => {
@@ -91,23 +92,32 @@
         });
       }, []);
 
-      // Listener de la Base de Datos (Tiempo Real)
+      // Listener de la Base de Datos
       useEffect(() => {
         if (!editor) return;
         document.getElementById('loading').style.display = 'none';
 
         const unsubscribe = onSnapshot(doc(db, "pizarras", PIZARRA_ID), (docSnap) => {
           if (docSnap.exists() && docSnap.data().canvasState) {
-            // Si el admin no es quien está mirando, cargamos el mapa en tiempo real
+            
+            // Si es un visitante, cargamos el estado
             if (!isAdmin) {
               editor.store.loadSnapshot(docSnap.data().canvasState);
+              
+              // Si es la primera vez que el visitante entra, encuadramos la cámara
+              if (firstLoadRef.current) {
+                setTimeout(() => {
+                  editor.zoomToFit({ animation: { duration: 800 } });
+                }, 100);
+                firstLoadRef.current = false;
+              }
             }
           }
         });
         return () => unsubscribe();
       }, [editor, isAdmin]);
 
-      // Función para guardar el estado en la nube
+      // Función para guardar
       const guardarEnNube = async () => {
         if (!editor || !isAdmin) return;
         setIsSyncing(true);
@@ -125,7 +135,7 @@
         setIsSyncing(false);
       };
 
-      // Función de Login Secreto
+      // Login
       const intentarLogin = () => {
         const email = prompt("Credencial [Email]:");
         if (!email) return;
@@ -145,24 +155,32 @@
           )
         : null;
 
-      // El botón secreto aparece si agregas "?admin" a la URL (ej: agorlab.com/blog?admin)
       const SecretLogin = (!isAdmin && window.location.search.includes("admin"))
         ? el("div", { id: "admin-panel" }, el("button", { className: "btn-agorlab", onClick: intentarLogin }, "[ Entrar al Lab ]"))
         : null;
 
-      // Renderizamos el lienzo de Tldraw
+      // Botón salvavidas para visitantes
+      const CentrarBtn = (!isAdmin && editor)
+        ? el("div", { style: { position: "absolute", top: "20px", right: "20px", zIndex: 9999 } }, 
+            el("button", { 
+              className: "btn-agorlab", 
+              onClick: () => editor.zoomToFit({ animation: { duration: 500 } }) 
+            }, "[ Centrar Vista ]")
+          )
+        : null;
+
       return el("div", { style: { position: "fixed", inset: 0 } },
         el(Tldraw, {
           darkMode: true,
-          readOnly: !isAdmin, // La magia: si no es admin, no se puede editar
+          isReadonly: !isAdmin, // CORRECCIÓN: Ahora sí oculta las herramientas y bloquea la edición
           onMount: (ed) => setEditor(ed)
         }),
         AdminPanel,
-        SecretLogin
+        SecretLogin,
+        CentrarBtn
       );
     }
 
-    // Inyectamos la App en el HTML
     const root = createRoot(document.getElementById('root'));
     root.render(el(AgorlabPizarra));
   </script>
