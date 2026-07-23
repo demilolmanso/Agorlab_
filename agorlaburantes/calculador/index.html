@@ -409,7 +409,7 @@
                     <p>Dominá <span id="resName" style="color:var(--c-yellow);">ESTA RAMA</span> con nuestras capacitaciones y escalá tu propio sueldo.</p>
                 </div>
                 
-                <button class="btn-action" style="background:var(--c-green);" onclick="alert('Redirigiendo...')">VER CURSOS 🎯</button>
+                <button class="btn-action" style="background:var(--c-green);" onclick="contactWhatsApp()">VER CURSOS 🎯</button>
                 <button class="btn-restart" onclick="location.reload()">[ REINICIAR SIMULACIÓN ]</button>
             </div>
         </div>
@@ -481,6 +481,14 @@
             DOM.resName.innerText = data.n;
 
             goStep(4);
+        }
+
+        // Redirección a WhatsApp con mensaje personalizado
+        function contactWhatsApp() {
+            const skillName = DOM.resName.innerText || 'Cursos';
+            const phone = "5492236960547";
+            const message = encodeURIComponent(`¡Hola! Hice la simulación en la Calculadora de Loot y me gustaría recibir información sobre las capacitaciones de ${skillName}.`);
+            window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
         }
     </script>
 </body>
