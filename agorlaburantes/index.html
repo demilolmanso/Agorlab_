@@ -61,7 +61,7 @@
             position: relative;
             box-shadow: var(--shadow-hard);
             transform: rotate(-1deg);
-            margin-bottom: 3rem;
+            margin-bottom: 2.5rem;
         }
 
         .hero::before {
@@ -97,6 +97,72 @@
             padding: 5px 15px;
             border: var(--b-thin);
             transform: rotate(1deg);
+        }
+
+        /* SECCIÓN DE PRESENTACIÓN / MANIFIESTO */
+        .manifesto-section {
+            background: var(--c-cyan);
+            border: var(--b-thick);
+            padding: 2.5rem;
+            box-shadow: var(--shadow-hard);
+            margin-bottom: 3rem;
+            transform: rotate(0.5deg);
+            color: var(--c-ink);
+        }
+
+        .manifesto-section h2 {
+            font-size: 2rem;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 0px rgba(255,255,255,0.6);
+        }
+
+        .manifesto-section p {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-weight: 700;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            margin-bottom: 1.2rem;
+        }
+
+        .manifesto-highlight {
+            background: var(--c-yellow);
+            padding: 2px 6px;
+            border: 1.5px solid var(--c-ink);
+        }
+
+        .cta-box {
+            background: var(--c-light);
+            border: var(--b-thick);
+            padding: 1.2rem;
+            text-align: center;
+            margin-top: 1.5rem;
+            box-shadow: 4px 4px 0px var(--c-ink);
+        }
+
+        .cta-box p {
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
+        }
+
+        .cta-btn {
+            display: inline-block;
+            background: var(--c-orange);
+            color: var(--c-light);
+            padding: 0.8rem 1.8rem;
+            border: var(--b-thick);
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            text-decoration: none;
+            box-shadow: 4px 4px 0px var(--c-ink);
+            transition: all 0.1s ease;
+        }
+
+        .cta-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--c-ink);
+            background: var(--c-yellow);
+            color: var(--c-ink);
         }
 
         /* Grilla de Herramientas */
@@ -149,9 +215,10 @@
 
         /* Colores específicos por tarjeta */
         .card-test  { background: var(--c-yellow); transform: rotate(1deg); }
-        .card-calc  { background: var(--c-cyan);   transform: rotate(-1deg); }
-        .card-pot   { background: var(--c-green);  transform: rotate(0.5deg); }
-        .card-radar { background: var(--c-orange); transform: rotate(-1.5deg); }
+        .card-calc  { background: var(--c-green);  transform: rotate(-1deg); }
+        .card-pot   { background: var(--c-orange); transform: rotate(0.5deg); }
+        .card-radar { background: var(--c-blue);   transform: rotate(-1.5deg); color: var(--c-light) !important; }
+        .card-radar h2, .card-radar p { color: var(--c-light) !important; }
 
         /* Sección de Tips Laborales */
         .tips-section {
@@ -178,7 +245,6 @@
             gap: 15px;
         }
 
-        /* Garantiza matriz de 3 columnas en computadoras */
         @media (min-width: 820px) {
             .tips-grid {
                 grid-template-columns: repeat(3, 1fr);
@@ -230,6 +296,7 @@
             .hero h1 { font-size: 2.5rem; }
             .tips-section { padding: 1.5rem; }
             .tool-card { padding: 1.5rem 1rem; }
+            .manifesto-section { padding: 1.5rem; }
         }
     </style>
 </head>
@@ -242,6 +309,22 @@
             <h1>AGORLABURANTES</h1>
             <p>TU BÚNKER DE SUPERVIVENCIA LABORAL</p>
         </header>
+
+        <!-- SECCIÓN DE PRESENTACIÓN (EL MANIFIESTO DE LA AGENCIA) -->
+        <section class="manifesto-section">
+            <h2>🗿 ¿QUÉ ES AGORLABURANTES?</h2>
+            <p>
+                Nacimos para dar vuelta el déficit laboral de Mar del Plata. <span class="manifesto-highlight">No somos otra bolsa de empleo vacía</span> ni una consultora fría que te deja en visto: somos la red de defensa y conexión para quienes quieren insertarse de una vez por todas en el mercado formal.
+            </p>
+            <p>
+                Analizamos el mercado local, <span class="manifesto-highlight">te conectamos con capacitaciones en las áreas más requeridas del mercado actual</span> y un representante de nuestro equipo te acompaña de la mano durante todo el proceso hasta asegurar tu ingreso al mercado de trabajo.
+            </p>
+            
+            <div class="cta-box">
+                <p>¿Buscás laburo y querés entrar a nuestra bolsa de derivación?</p>
+                <a href="https://wa.me/5492236960547" target="_blank" class="cta-btn">¡HABLÁ CON UN REPRESENTANTE 🚀!</a>
+            </div>
+        </section>
 
         <!-- HERRAMIENTAS (LINKS) -->
         <div class="tools-grid">
