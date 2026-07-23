@@ -49,7 +49,7 @@
 
         .container {
             width: 100%;
-            max-width: 950px;
+            max-width: 980px;
         }
 
         /* Header / Título Principal */
@@ -174,8 +174,15 @@
 
         .tips-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 15px;
+        }
+
+        /* Garantiza matriz de 3 columnas en computadoras */
+        @media (min-width: 820px) {
+            .tips-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }
 
         .tip-panel {
@@ -184,6 +191,9 @@
             padding: 1.5rem;
             color: var(--c-ink);
             box-shadow: 4px 4px 0px var(--c-ink);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
         }
 
         .tip-panel h3 {
@@ -260,7 +270,7 @@
             </a>
         </div>
 
-        <!-- SECCIÓN DE TIPS (PENSA VOS) -->
+        <!-- SECCIÓN DE TIPS (6 CONSEJOS EN FORMATO 3x2 EN PC) -->
         <section class="tips-section">
             <h2>⚡ CONSEJOS DE SUPERVIVENCIA ⚡</h2>
             <div class="tips-grid">
@@ -283,6 +293,16 @@
                 <div class="tip-panel" style="transform: rotate(1deg);">
                     <h3>4. Preguntá vos también 🕵️‍♂️</h3>
                     <p>La entrevista es un ida y vuelta. Al final, preguntá: <span class="tip-highlight">"¿Cómo es un día normal en este puesto?"</span>. Eso demuestra proactividad brutal y te ayuda a ver si el lugar te sirve a vos.</p>
+                </div>
+
+                <div class="tip-panel" style="transform: rotate(-1deg);">
+                    <h3>5. Contactá en frío 📲</h3>
+                    <p>No esperes a que abran búsquedas. Buscá referentes o gente del rubro en redes laborales y mandá un mensaje directo y respetuoso: <span class="tip-highlight">"Me interesa lo que hacen y quiero ofrecer mi trabajo"</span>.</p>
+                </div>
+
+                <div class="tip-panel" style="transform: rotate(0.8deg);">
+                    <h3>6. Usá la IA a tu favor 🤖</h3>
+                    <p>La inteligencia artificial no te va a sacar el trabajo, pero <span class="tip-highlight">alguien que sepa usar IA sí</span>. Apalancate en herramientas digitales para redactar cartas, practicar entrevistas y optimizar tu tiempo.</p>
                 </div>
 
             </div>
