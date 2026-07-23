@@ -49,7 +49,7 @@
 
         .container {
             width: 100%;
-            max-width: 900px;
+            max-width: 950px;
         }
 
         /* Header / Título Principal */
@@ -102,7 +102,7 @@
         /* Grilla de Herramientas */
         .tools-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 20px;
             margin-bottom: 4rem;
         }
@@ -128,7 +128,7 @@
 
         .tool-card h2 {
             color: var(--c-ink);
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             margin-bottom: 0.5rem;
             text-transform: uppercase;
         }
@@ -137,7 +137,8 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: var(--c-ink);
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            line-height: 1.3;
         }
 
         .tool-card .icon {
@@ -147,9 +148,10 @@
         }
 
         /* Colores específicos por tarjeta */
-        .card-test { background: var(--c-yellow); transform: rotate(1deg); }
-        .card-calc { background: var(--c-cyan); transform: rotate(-1deg); }
-        .card-pot  { background: var(--c-green); transform: rotate(0.5deg); }
+        .card-test  { background: var(--c-yellow); transform: rotate(1deg); }
+        .card-calc  { background: var(--c-cyan);   transform: rotate(-1deg); }
+        .card-pot   { background: var(--c-green);  transform: rotate(0.5deg); }
+        .card-radar { background: var(--c-orange); transform: rotate(-1.5deg); }
 
         /* Sección de Tips Laborales */
         .tips-section {
@@ -249,6 +251,12 @@
                 <div class="icon">🚀</div>
                 <h2>POTENCIATE</h2>
                 <p>Ayuda real. Guía personalizada y plantillas de CV listas para usar.</p>
+            </a>
+
+            <a href="https://agorlab.com/agorlaburantes/radar" class="tool-card card-radar">
+                <div class="icon">📡</div>
+                <h2>RADAR MDQ</h2>
+                <p>Diagnóstico en tiempo real. Evaluación de demanda y mapa de oficios.</p>
             </a>
         </div>
 
