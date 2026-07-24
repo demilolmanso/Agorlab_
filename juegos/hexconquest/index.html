@@ -2,53 +2,58 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Agorlab_ | Hex</title>
     <style>
         :root {
-            --bg: #050200;
-            --text-main: #d96b30;
+            --bg: #080402;
+            --panel-bg: rgba(20, 10, 5, 0.7);
+            --panel-border: rgba(217, 107, 48, 0.25);
+            --text-main: #e08b58;
             --agorlab-orange: #ff5500;
             --portal-blue: #00bfff;
-            --neutral: #1a0b00;
-            --border-style: 1px dashed var(--text-main);
-            --font-mono: 'Courier New', Courier, monospace;
+            --neutral: #1a0c05;
+            --neutral-border: #3a1c0d;
+            --font-mono: 'Space Mono', 'Courier New', monospace;
+            --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            touch-action: manipulation; /* Optimiza respuesta táctil en móviles */
         }
 
         body {
-            font-family: var(--font-mono);
+            font-family: var(--font-sans);
             background-color: var(--bg);
             color: var(--text-main);
             margin: 0;
-            /* Padding superior e inferior para evitar que el contenido pegue con los bordes del celular */
-            padding: 20px 10px;
+            padding: 16px 12px;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start; /* Permite scroll natural si la pantalla es muy pequeña verticalmente */
-            box-sizing: border-box;
-            background-image: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 2px,
-                rgba(0, 0, 0, 0.6) 2px,
-                rgba(0, 0, 0, 0.6) 4px
-            );
+            justify-content: center;
+            background-image: 
+                radial-gradient(circle at 50% 15%, rgba(255, 85, 0, 0.12) 0%, transparent 60%),
+                radial-gradient(circle at 50% 85%, rgba(0, 191, 255, 0.08) 0%, transparent 60%),
+                repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0, 0, 0, 0.4) 3px, rgba(0, 0, 0, 0.4) 6px);
+            background-attachment: fixed;
         }
 
         .game-wrapper {
             display: flex;
             flex-direction: column;
             align-items: center;
-            background: rgba(5, 2, 0, 0.9);
-            padding: 16px;
-            border: var(--border-style);
-            z-index: 2;
+            background: var(--panel-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 24px 18px;
+            border: 1px solid var(--panel-border);
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
             width: 100%;
-            max-width: 360px; /* Tamaño adaptado a anchos estándar de móviles */
-            box-sizing: border-box;
-            margin-bottom: 30px; /* Margen inferior extra para el celular */
+            max-width: 440px; /* Tamaño ampliado para una vista óptima en smartphones */
         }
 
         header {
@@ -56,157 +61,219 @@
             flex-direction: column;
             align-items: center;
             width: 100%;
-            margin-bottom: 15px;
-            gap: 10px;
+            margin-bottom: 20px;
+            gap: 14px;
         }
 
         h1 {
             margin: 0;
-            font-size: 1.6rem;
-            font-weight: normal;
-            letter-spacing: 2px;
+            font-family: var(--font-mono);
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 3px;
             color: var(--agorlab-orange);
-            text-shadow: 0 0 10px rgba(255, 85, 0, 0.6);
+            text-shadow: 0 0 16px rgba(255, 85, 0, 0.5);
         }
 
+        /* Marcadores estilo Badge Neón */
         .hud {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             width: 100%;
             justify-content: center;
         }
 
         .badge {
-            padding: 6px 10px;
-            font-size: 0.8rem;
+            flex: 1;
+            padding: 10px 14px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            font-weight: bold;
             display: flex;
             align-items: center;
-            gap: 6px;
-            border: 1px dashed transparent;
-            background: transparent;
-            transition: all 0.3s;
+            justify-content: center;
+            gap: 8px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .badge.player { color: var(--portal-blue); text-shadow: 0 0 5px rgba(0, 191, 255, 0.5); }
-        .badge.ai { color: var(--agorlab-orange); text-shadow: 0 0 5px rgba(255, 85, 0, 0.5); }
+        .badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            opacity: 0.4;
+        }
+
+        .badge.player { 
+            color: var(--portal-blue); 
+            border-color: rgba(0, 191, 255, 0.2);
+        }
+        .badge.ai { 
+            color: var(--agorlab-orange); 
+            border-color: rgba(255, 85, 0, 0.2);
+        }
         
         .badge.active-turn {
+            background: rgba(255, 255, 255, 0.08);
             border-color: currentColor;
-            box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.08), inset 0 0 10px rgba(255, 255, 255, 0.05);
+        }
+
+        .badge.active-turn .dot {
+            opacity: 1;
+            box-shadow: 0 0 8px currentColor;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.4); opacity: 0.5; }
+        }
+
+        /* Contenedor Responsivo del Tablero */
+        #grid-container {
+            width: 100%;
+            max-width: 380px;
+            aspect-ratio: 1 / 0.9;
+            position: relative;
+            margin: 10px 0 15px 0;
         }
 
         #hex-grid {
-            position: relative;
-            width: 300px;
-            height: 270px;
-            margin: 5px 0;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
         }
 
+        /* Nodos Hexagonales */
         .hex {
             position: absolute;
-            width: 48px;
-            height: 55px;
-            background-color: var(--neutral);
             clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.9rem;
+            font-family: var(--font-mono);
+            font-size: 1.15rem;
             font-weight: bold;
             cursor: pointer;
             user-select: none;
-            transition: filter 0.1s, transform 0.1s;
-            color: rgba(255, 255, 255, 0.3);
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.2s;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
         }
 
-        .hex:hover {
-            filter: brightness(1.5);
-            transform: scale(1.05);
-            z-index: 10;
+        .hex:active {
+            transform: scale(0.92) !important;
         }
 
         .hex.player { 
-            background-color: var(--portal-blue); 
-            color: #000; 
-            box-shadow: 0 0 12px var(--portal-blue);
+            background: linear-gradient(135deg, #00d5ff, #0077ff); 
+            color: #020b14;
+            text-shadow: 0 1px 1px rgba(255,255,255,0.4);
+            filter: drop-shadow(0 0 8px rgba(0, 191, 255, 0.4));
         }
         
         .hex.ai { 
-            background-color: var(--agorlab-orange); 
-            color: #000; 
-            box-shadow: 0 0 12px var(--agorlab-orange);
+            background: linear-gradient(135deg, #ff6600, #cc2200); 
+            color: #140500;
+            text-shadow: 0 1px 1px rgba(255,255,255,0.4);
+            filter: drop-shadow(0 0 8px rgba(255, 85, 0, 0.4));
         }
 
         .hex.neutral {
-            background-color: #1a0b00;
+            background: var(--neutral);
+            border: 1px solid var(--neutral-border);
             color: var(--text-main);
+            opacity: 0.85;
         }
         
         .hex.selected {
-            filter: brightness(1.8) contrast(1.2);
-            transform: scale(1.12);
+            transform: scale(1.15) !important;
             z-index: 20;
-            background-color: #fff;
-            color: #000;
+            background: #ffffff !important;
+            color: #000 !important;
+            filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.9)) !important;
+            animation: bounce 0.6s infinite alternate ease-in-out;
+        }
+
+        @keyframes bounce {
+            from { transform: scale(1.12); }
+            to { transform: scale(1.18); }
         }
 
         footer {
-            margin-top: 10px;
             width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
         }
 
         #tip {
-            font-size: 0.8rem;
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
             color: var(--text-main);
             text-align: center;
             letter-spacing: 0.5px;
-            min-height: 1.2rem;
+            min-height: 1.4rem;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 6px 12px;
+            border-radius: 8px;
+            width: 100%;
         }
 
         button {
-            background: transparent;
+            width: 100%;
+            background: rgba(255, 85, 0, 0.08);
             color: var(--agorlab-orange);
-            border: 1px dashed var(--agorlab-orange);
-            padding: 8px 16px;
+            border: 1px solid var(--agorlab-orange);
+            border-radius: 12px;
+            padding: 12px 20px;
             font-family: var(--font-mono);
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            font-weight: bold;
             cursor: pointer;
             transition: all 0.2s;
-            text-shadow: 0 0 5px rgba(255, 85, 0, 0.5);
-            letter-spacing: 1px;
+            text-shadow: 0 0 8px rgba(255, 85, 0, 0.4);
+            letter-spacing: 1.5px;
         }
 
         button:hover {
-            background: rgba(255, 85, 0, 0.1);
-            box-shadow: 0 0 15px rgba(255, 85, 0, 0.2);
+            background: rgba(255, 85, 0, 0.2);
+            box-shadow: 0 0 20px rgba(255, 85, 0, 0.3);
+            transform: translateY(-1px);
         }
 
         button:active {
-            transform: scale(0.95);
+            transform: translateY(1px);
         }
 
         .rules {
-            margin-top: 15px;
-            padding-top: 12px;
-            border-top: var(--border-style);
+            margin-top: 10px;
+            padding: 14px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
             width: 100%;
-            font-size: 0.75rem;
-            line-height: 1.4;
+            font-size: 0.8rem;
+            line-height: 1.5;
             color: var(--text-main);
         }
 
         .rules h2 {
-            font-size: 0.8rem;
-            margin: 0 0 6px 0;
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            margin: 0 0 8px 0;
             color: #fff;
+            letter-spacing: 1px;
         }
 
         .rules p {
-            margin: 3px 0;
+            margin: 4px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .hl-blue { color: var(--portal-blue); font-weight: bold; }
@@ -220,35 +287,50 @@
         <header>
             <h1>Agorlab_</h1>
             <div class="hud">
-                <div class="badge player active-turn" id="badge-player">[ USR: <span id="p-score">0</span> ]</div>
-                <div class="badge ai" id="badge-ai">[ SYS: <span id="ai-score">0</span> ]</div>
+                <div class="badge player active-turn" id="badge-player">
+                    <span class="dot"></span> USR: <span id="p-score">0</span>
+                </div>
+                <div class="badge ai" id="badge-ai">
+                    <span class="dot"></span> SYS: <span id="ai-score">0</span>
+                </div>
             </div>
         </header>
 
-        <div id="hex-grid"></div>
+        <div id="grid-container">
+            <div id="hex-grid"></div>
+        </div>
 
         <footer>
             <span id="tip">> CONEXIÓN ESTABLECIDA.</span>
-            <button onclick="init()" id="replay-btn">[ reiniciar ]</button>
+            <button onclick="init()" id="replay-btn">[ REINICIAR ]</button>
         </footer>
 
         <div class="rules">
-            <h2>> [ MANUAL_DE_OPERACIÓN ]</h2>
-            <p>1. Toca un nodo <span class="hl-blue">CELESTE</span> con >1 unidad.</p>
-            <p>2. Tócalo de nuevo para <strong>cancelar</strong> la selección.</p>
-            <p>3. Toca un adyacente para moverte o atacar.</p>
-            <p>4. Genera +1 unidad por turno (máx. 25).</p>
-            <p>5. Elimina al sistema <span class="hl-orange">NARANJA</span> para vencer.</p>
+            <h2>> MANUAL_DE_OPERACIÓN</h2>
+            <p>1. Selecciona un nodo <span class="hl-blue">CELESTE</span> (>1 unidad).</p>
+            <p>2. Toca un nodo vecino para moverte o atacar.</p>
+            <p>3. Generas +1 unidad por turno (máx. 25).</p>
+            <p>4. Asimila al sistema <span class="hl-orange">NARANJA</span> para ganar.</p>
         </div>
     </div>
 
     <script>
         let audioCtx = null;
+
+        function triggerHaptic(type) {
+            if (navigator.vibrate) {
+                if (type === 'select') navigator.vibrate(12);
+                else if (type === 'conquest') navigator.vibrate([20, 30, 20]);
+                else if (type === 'fail') navigator.vibrate(40);
+            }
+        }
+
         function initAudio() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         }
 
         function playSound(type) {
+            triggerHaptic(type);
             initAudio();
             if (!audioCtx) return;
             let osc = audioCtx.createOscillator();
@@ -258,31 +340,31 @@
             let now = audioCtx.currentTime;
 
             if (type === 'select') {
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(880, now);
-                osc.frequency.exponentialRampToValueAtTime(1200, now + 0.05);
-                gain.gain.setValueAtTime(0.05, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.05);
-                osc.start(now); osc.stop(now + 0.05);
-            } else if (type === 'conquest') {
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(400, now);
-                osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
-                gain.gain.setValueAtTime(0.1, now);
-                gain.gain.linearRampToValueAtTime(0, now + 0.1);
-                osc.start(now); osc.stop(now + 0.1);
+                osc.frequency.setValueAtTime(600, now);
+                osc.frequency.exponentialRampToValueAtTime(1200, now + 0.06);
+                gain.gain.setValueAtTime(0.08, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.06);
+                osc.start(now); osc.stop(now + 0.06);
+            } else if (type === 'conquest') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(350, now);
+                osc.frequency.exponentialRampToValueAtTime(850, now + 0.12);
+                gain.gain.setValueAtTime(0.12, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.12);
+                osc.start(now); osc.stop(now + 0.12);
             } else if (type === 'fail') {
                 osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(100, now);
-                osc.frequency.linearRampToValueAtTime(50, now + 0.15);
+                osc.frequency.setValueAtTime(120, now);
+                osc.frequency.linearRampToValueAtTime(60, now + 0.15);
                 gain.gain.setValueAtTime(0.08, now);
                 gain.gain.linearRampToValueAtTime(0, now + 0.15);
                 osc.start(now); osc.stop(now + 0.15);
             } else if (type === 'ai-move') {
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(200, now);
-                osc.frequency.exponentialRampToValueAtTime(100, now + 0.08);
-                gain.gain.setValueAtTime(0.05, now);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(250, now);
+                osc.frequency.exponentialRampToValueAtTime(150, now + 0.08);
+                gain.gain.setValueAtTime(0.06, now);
                 gain.gain.linearRampToValueAtTime(0, now + 0.08);
                 osc.start(now); osc.stop(now + 0.08);
             }
@@ -335,7 +417,17 @@
             container.innerHTML = '';
             let pTropas = 0, aiTropas = 0;
 
-            const centerX = 150; const centerY = 125; const size = 28;
+            const rect = container.getBoundingClientRect();
+            const width = rect.width || 340;
+            const height = rect.height || 300;
+
+            // Cálculo dinámico del tamaño de las celdas para adaptarse a cualquier pantalla
+            const size = Math.min(width / 7.2, height / 6.5);
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            const hexWidth = Math.sqrt(3) * size;
+            const hexHeight = 2 * size;
 
             coords.forEach(c => {
                 let key = `${c.q},${c.r}`;
@@ -348,7 +440,11 @@
                 div.className = `hex ${cell.owner}`;
                 if (selected?.q === c.q && selected?.r === c.r) div.classList.add('selected');
                 
-                div.style.left = `${x - 24}px`; div.style.top = `${y - 27}px`;
+                div.style.width = `${hexWidth}px`;
+                div.style.height = `${hexHeight}px`;
+                div.style.left = `${x - hexWidth / 2}px`; 
+                div.style.top = `${y - hexHeight / 2}px`;
+                
                 div.innerText = cell.troops;
                 div.onclick = () => clickCell(cell);
                 
@@ -424,7 +520,7 @@
                     if (!checkWin()) {
                         isPlayerTurn = false;
                         updateTurnVisuals();
-                        setTimeout(triggerAITurn, 700); 
+                        setTimeout(triggerAITurn, 600); 
                     }
                 } else if (cell.owner === 'player') {
                     selected = cell;
@@ -494,13 +590,13 @@
             let p = Object.values(grid).some(c => c.owner === 'player');
             let a = Object.values(grid).some(c => c.owner === 'ai');
             if (!a) { 
-                setTip("> FATAL ERROR: IA destruida."); 
+                setTip("> SISTEMA ASIMILADO: ¡Victoria!"); 
                 document.getElementById('badge-player').classList.add('active-turn');
                 isPlayerTurn = false; 
                 return true; 
             }
             if (!p) { 
-                setTip("> END OF LINE. Has sido asimilado."); 
+                setTip("> END OF LINE: Has sido asimilado."); 
                 document.getElementById('badge-ai').classList.add('active-turn');
                 isPlayerTurn = false; 
                 return true; 
@@ -508,6 +604,7 @@
             return false;
         }
 
+        window.addEventListener('resize', render);
         init();
     </script>
 </body>
