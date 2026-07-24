@@ -1,1 +1,438 @@
-.
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agorlab_ // WORD</title>
+    <style>
+        :root {
+            --bg: #050200;
+            --text-main: #d96b30;
+            --agorlab-orange: #ff5500;
+            --portal-blue: #00bfff;
+            --neutral: #1a0b00;
+            --border-style: 1px dashed var(--text-main);
+            --font-mono: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            font-family: var(--font-mono);
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px 10px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            box-sizing: border-box;
+            background-image: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.6) 2px,
+                rgba(0, 0, 0, 0.6) 4px
+            );
+        }
+
+        .game-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(5, 2, 0, 0.95);
+            padding: 16px;
+            border: var(--border-style);
+            z-index: 2;
+            width: 100%;
+            max-width: 360px;
+            box-sizing: border-box;
+        }
+
+        header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 15px;
+            gap: 5px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: normal;
+            letter-spacing: 2px;
+            color: var(--agorlab-orange);
+            text-shadow: 0 0 10px rgba(255, 85, 0, 0.6);
+        }
+
+        .subtitle {
+            font-size: 0.75rem;
+            color: var(--portal-blue);
+            letter-spacing: 1px;
+        }
+
+        #wordle-grid {
+            display: grid;
+            grid-template-rows: repeat(6, 1fr);
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+        }
+
+        .tile {
+            width: 42px;
+            height: 42px;
+            border: var(--border-style);
+            background-color: var(--neutral);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-main);
+            user-select: none;
+            box-sizing: border-box;
+        }
+
+        .tile.correct {
+            background-color: var(--portal-blue);
+            color: #000;
+            border-color: var(--portal-blue);
+            box-shadow: 0 0 10px var(--portal-blue);
+        }
+
+        .tile.present {
+            background-color: var(--agorlab-orange);
+            color: #000;
+            border-color: var(--agorlab-orange);
+            box-shadow: 0 0 10px var(--agorlab-orange);
+        }
+
+        .tile.absent {
+            background-color: #0d0400;
+            color: #4a2211;
+            border-color: #311508;
+        }
+
+        .keyboard {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .kb-row {
+            display: flex;
+            justify-content: center;
+            gap: 3px;
+            width: 100%;
+        }
+
+        .key {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px dashed var(--text-main);
+            padding: 12px 0;
+            flex: 1;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            cursor: pointer;
+            text-align: center;
+            user-select: none;
+            box-sizing: border-box;
+        }
+
+        .key.wide {
+            flex: 1.5;
+            font-size: 0.65rem;
+        }
+
+        .key.correct { background: var(--portal-blue); color: #000; border-color: var(--portal-blue); }
+        .key.present { background: var(--agorlab-orange); color: #000; border-color: var(--agorlab-orange); }
+        .key.absent { background: #0d0400; color: #311508; border-color: #200d05; }
+
+        footer {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #tip {
+            font-size: 0.75rem;
+            color: var(--text-main);
+            text-align: center;
+            min-height: 1.2rem;
+            letter-spacing: 0.5px;
+        }
+
+        button.action-btn {
+            background: transparent;
+            color: var(--agorlab-orange);
+            border: 1px dashed var(--agorlab-orange);
+            padding: 8px 16px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            cursor: pointer;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-wrapper">
+        <header>
+            <h1>Agorlab_</h1>
+            <span class="subtitle">> DECRYPTING_PROTOCOL</span>
+        </header>
+
+        <div id="wordle-grid"></div>
+
+        <div class="keyboard" id="keyboard"></div>
+
+        <footer>
+            <span id="tip">> CARGANDO SISTEMA...</span>
+            <button class="action-btn" onclick="initGame()" id="reset-btn" style="display:none;">[ REINICIAR ]</button>
+        </footer>
+    </div>
+
+    <script>
+        const WORDS = [
+            "ABRIR", "ABUSO", "ACERO", "ACTOR", "AGUAS", "AGUDO", "AGUJA", "AHORA", "ALIEN", "ALMAS", 
+            "ALTAR", "AMBOS", "AMIGA", "AMIGO", "ANCHO", "ANDAR", "ANGEL", "ANTES", "APOYO", "ARBOL", 
+            "ARENA", "ARMAS", "AROMA", "ASTAR", "ASTRO", "ATRAS", "AUTOS", "AVION", "AYUDA", "BAILE", 
+            "BAJAR", "BALON", "BANCO", "BANDA", "BARBA", "BARCO", "BARRO", "BASES", "BEBER", "BESOS", 
+            "BICHO", "BLUSA", "BOCAS", "BOLSA", "BOMBA", "BONOS", "BORDE", "BOTAS", "BOTES", "BRAVO", 
+            "BRAZO", "BREVE", "BRISA", "BROMA", "BRUJA", "BUENO", "BURLA", "BUSCA", "CACAO", "CAIDA", 
+            "CAJAS", "CALDO", "CALLE", "CALOR", "CAMAS", "CAMPO", "CANAL", "CANTO", "CAPAZ", "CARAS", 
+            "CARGA", "CARNE", "CARTA", "CASAS", "CASCO", "CAUSA", "CAZAR", "CEDER", "CELDA", "CELOS", 
+            "CENAS", "CERCA", "CERDO", "CESTA", "CHICA", "CHICO", "CHINA", "CHINO", "CIEGO", "CIELO", 
+            "CIFRA", "CINCO", "CINTA", "CISNE", "CLARA", "CLARO", "CLASE", "CLIMA", "COBRE", "COCHE", 
+            "COLOR", "COMER", "COMUN", "COPIA", "CORAL", "CORTE", "COSAS", "COSER", "COSTO", "CREAR", 
+            "CREER", "CRUCE", "CRUDO", "CRUEL", "CUEVA", "CULPA", "CULTO", "CURAR", "CURSO", "DADOS", 
+            "DANZA", "DATOS", "DEBER", "DEDOS", "DEJAR", "DENSO", "DESDE", "DICHO", "DIETA", "DIOSA", 
+            "DISCO", "DOBLE", "DOLOR", "DONDE", "DOSIS", "DUDAS", "DUELO", "DUEÑO", "DULCE", "DURAR", 
+            "ELLOS", "ENERO", "EPOCA", "ERROR", "ESPIA", "ESTAR", "ESTOS", "ETAPA", "ETICA", "EXITO", 
+            "EXTRA", "FACIL", "FALLA", "FALSO", "FALTA", "FAROL", "FAVOR", "FECHA", "FELIZ", "FERIA", 
+            "FEROZ", "FIBRA", "FICHA", "FIERA", "FILAS", "FINAL", "FIRME", "FLACA", "FLACO", "FLORA", 
+            "FLOTA", "FONDO", "FORMA", "FORRO", "FOTOS", "FRASE", "FRENO", "FRESA", "FRITO", "FRUTA", 
+            "FUEGO", "FUERA", "FUGAS", "FUMAR", "FUNDA", "FURIA", "FUSIL", "GAFAS", "GALLO", "GANAR", 
+            "GANAS", "GASTO", "GATOS", "GENIO", "GENTE", "GIRAR", "GOLPE", "GOMAS", "GORDA", "GORDO", 
+            "GORRA", "GORRO", "GOTAS", "GOZAR", "GRADO", "GRASA", "GRAVE", "GRITO", "GRUPO", "GUAPO", 
+            "GUIAR", "GUION", "GUSTO", "HABER", "HABIL", "HABLA", "HACER", "HACHA", "HADAS", "HASTA", 
+            "HECHO", "HELAR", "HERIR", "HEROE", "HIELO", "HIJOS", "HILOS", "HIMNO", "HOGAR", "HOJAS", 
+            "HORAS", "HORNO", "HOTEL", "HUESO", "HUEVO", "HUIDA", "HUMOR", "HUMOS", "IDEAL", "IDEAS", 
+            "IDOLO", "IGUAL", "ILUSO", "INDIO", "ISLAS", "JABON", "JAULA", "JEFES", "JOVEN", "JOYAS", 
+            "JUEGO", "JUGAR", "JUGOS", "JULIO", "JUNIO", "JUNTA", "JUNTO", "JURAR", "JUSTO", "KILOS", 
+            "LABIO", "LABOR", "LAGOS", "LADOS", "LANZA", "LAPIZ", "LARGO", "LATIR", "LECHE", "LEGAL", 
+            "LEJOS", "LENTO", "LETRA", "LEYES", "LIBRE", "LIBRO", "LICOR", "LIDER", "LIMON", "LINDO", 
+            "LINEA", "LISTA", "LISTO", "LLAMA", "LLAVE", "LLEGA", "LLENO", "LOBOS", "LOCAL", "LOCOS", 
+            "LOGRO", "LUCHA", "LUCES", "LUGAR", "LUNES", "MADRE", "MAGIA", "MALOS", "MANDO", "MANGO", 
+            "MANOS", "MANTA", "MAPAS", "MARCA", "MAREA", "MARZO", "MASAS", "MAYOR", "MEDIO", "MEJOR", 
+            "MELON", "MENOR", "MENOS", "MENTE", "METER", "METRO", "MIEDO", "MILES", "MINAS", "MIRAR", 
+            "MISMO", "MITAD", "MITOS", "MODOS", "MONOS", "MONTE", "MORAL", "MORIR", "MOSCA", "MOTOR", 
+            "MOVER", "MUCHO", "MUJER", "MULTA", "MUNDO", "MUROS", "MUSEO", "NACER", "NADAR", "NADIE", 
+            "NARIZ", "NATAL", "NAVES", "NEGAR", "NEGRO", "NIÑOS", "NIVEL", "NOBLE", "NOCHE", "NODOS", 
+            "NORMA", "NORTE", "NOTAR", "NOTAS", "NUBES", "NUEVO", "NUNCA", "OASIS", "OBRAS", "OCASO", 
+            "ODIAR", "OESTE", "OIDOS", "OJALA", "ORDEN", "OREJA", "ORINA", "ORUGA", "OVEJA", "OXIDO", 
+            "PADRE", "PAGAR", "PAGOS", "PALAS", "PAPEL", "PARAR", "PARED", "PARES", "PARTE", "PASAR", 
+            "PASOS", "PASTA", "PATAS", "PATIO", "PECHO", "PEDAL", "PEDIR", "PEGAR", "PELEA", "PELOS", 
+            "PENAL", "PENAS", "PERRO", "PESAR", "PESCA", "PESOS", "PICOS", "PIEZA", "PILAS", "PINOS", 
+            "PINTA", "PIOJO", "PISAR", "PISOS", "PISTA", "PIZZA", "PLACA", "PLAGA", "PLANO", "PLATA", 
+            "PLATO", "PLAYA", "PLAZA", "PLENO", "PLOMO", "PLUMA", "POBRE", "PODER", "POEMA", "POETA", 
+            "POLAR", "POLLO", "POLVO", "PONER", "POSTE", "PRADO", "PRESO", "PRIMA", "PRIMO", "PRISA", 
+            "PROSA", "PULSO", "PUNTO", "QUESO", "RADIO", "RAMAS", "RATON", "RAYOS", "RAZON", "REDES", 
+            "REGLA", "REINA", "REINO", "RELOJ", "REMAR", "RENTA", "RESTO", "REYES", "RICOS", "RITMO", 
+            "RIVAL", "ROBAR", "ROCAS", "RODAR", "ROJOS", "ROMAN", "ROPAS", "ROSAS", "ROTAR", "RUIDO", 
+            "RUINA", "RUMBO", "RURAL", "RUTAS", "SABER", "SABIO", "SACAR", "SACOS", "SALAS", "SALDO", 
+            "SALIR", "SALON", "SALTO", "SALUD", "SANOS", "SANTO", "SECOS", "SELLO", "SELVA", "SEÑAL", 
+            "SEÑOR", "SERES", "SERIO", "SIGLO", "SIGNO", "SILLA", "SITIO", "SOBRE", "SOCIO", "SODIO", 
+            "SOLAR", "SORDO", "SUAVE", "SUBIR", "SUCIO", "SUDAR", "SUELO", "SUEÑO", "SUIZA", "SUMAR", 
+            "SUPER", "SUSTO", "SUTIL", "TABLA", "TACOS", "TACTO", "TALAR", "TALLA", "TALON", "TARDE", 
+            "TAREA", "TAZAS", "TECHO", "TECLA", "TEJER", "TELAS", "TEMAS", "TEMOR", "TENER", "TENIS", 
+            "TEXTO", "TIGRE", "TIMON", "TINTA", "TIPOS", "TIRAR", "TOCAR", "TODOS", "TOMAR", "TONOS", 
+            "TONTO", "TORPE", "TORRE", "TOTAL", "TRAJE", "TRAMA", "TRATO", "TRECE", "TRIBU", "TRIGO", 
+            "TRIPA", "TROPA", "TRUCO", "TUBOS", "TUMBA", "TUNEL", "UNICO", "UNION", "USADO", "USTED", 
+            "VACAS", "VACIO", "VALER", "VALLE", "VALOR", "VAMOS", "VAPOR", "VASOS", "VECES", "VELAS", 
+            "VELOZ", "VENIR", "VENTA", "VENUS", "VERBO", "VERDE", "VERSO", "VIAJE", "VICIO", "VIDAS", 
+            "VIEJO", "VILLA", "VINOS", "VIRUS", "VISTA", "VITAL", "VIVAS", "VIVOS", "VOCES", "VOLAR", 
+            "VOTOS", "VUELO", "ZANJA", "ZONAS", "ZORRO"
+        ];
+        
+        const KB_LAYOUT = [
+            ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+            ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ñ'],
+            ['ENTER', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'DEL']
+        ];
+
+        let secret = "";
+        let row = 0;
+        let col = 0;
+        let gridData = [];
+        let isOver = false;
+
+        function initGame() {
+            secret = WORDS[Math.floor(Math.random() * WORDS.length)];
+            row = 0;
+            col = 0;
+            isOver = false;
+            gridData = Array(6).fill().map(() => Array(5).fill(''));
+            
+            document.getElementById('reset-btn').style.display = 'none';
+            setTip("> INGRESE SECUENCIA DE 5 LETRAS.");
+            
+            drawGrid();
+            drawKeyboard();
+        }
+
+        function drawGrid() {
+            const container = document.getElementById('wordle-grid');
+            container.innerHTML = '';
+
+            for (let r = 0; r < 6; r++) {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'row';
+
+                for (let c = 0; c < 5; c++) {
+                    const tile = document.createElement('div');
+                    tile.className = 'tile';
+                    const char = gridData[r][c];
+                    tile.innerText = char;
+
+                    if (r < row) {
+                        if (char === secret[c]) {
+                            tile.classList.add('correct');
+                        } else if (secret.includes(char)) {
+                            tile.classList.add('present');
+                        } else {
+                            tile.classList.add('absent');
+                        }
+                    }
+
+                    rowDiv.appendChild(tile);
+                }
+                container.appendChild(rowDiv);
+            }
+        }
+
+        function drawKeyboard() {
+            const container = document.getElementById('keyboard');
+            container.innerHTML = '';
+
+            KB_LAYOUT.forEach(rowKeys => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'kb-row';
+
+                rowKeys.forEach(key => {
+                    const btn = document.createElement('button');
+                    btn.className = 'key';
+                    btn.innerText = key;
+
+                    if (key === 'ENTER' || key === 'DEL') {
+                        btn.classList.add('wide');
+                    }
+
+                    btn.onclick = () => pressKey(key);
+
+                    // Evaluar color de tecla si ya fue usada
+                    if (key.length === 1 && row > 0) {
+                        let status = getKeyStatus(key);
+                        if (status) btn.classList.add(status);
+                    }
+
+                    rowDiv.appendChild(btn);
+                });
+
+                container.appendChild(rowDiv);
+            });
+        }
+
+        function getKeyStatus(letter) {
+            let res = null;
+            for (let r = 0; r < row; r++) {
+                for (let c = 0; c < 5; c++) {
+                    if (gridData[r][c] === letter) {
+                        if (secret[c] === letter) return 'correct';
+                        if (secret.includes(letter)) res = 'present';
+                        else if (!res) res = 'absent';
+                    }
+                }
+            }
+            return res;
+        }
+
+        function pressKey(key) {
+            if (isOver) return;
+
+            if (key === 'DEL') {
+                if (col > 0) {
+                    col--;
+                    gridData[row][col] = '';
+                    drawGrid();
+                }
+            } else if (key === 'ENTER') {
+                if (col < 5) {
+                    setTip("> ERROR: Secuencia incompleta.");
+                    return;
+                }
+                checkGuess();
+            } else {
+                if (col < 5) {
+                    gridData[row][col] = key;
+                    col++;
+                    drawGrid();
+                }
+            }
+        }
+
+        function checkGuess() {
+            const guess = gridData[row].join('');
+            row++;
+            col = 0;
+
+            drawGrid();
+            drawKeyboard();
+
+            if (guess === secret) {
+                setTip("> ACCESO CONCEDIDO.");
+                isOver = true;
+                document.getElementById('reset-btn').style.display = 'block';
+                return;
+            }
+
+            if (row === 6) {
+                setTip(`> BLOQUEADO. Solución: ${secret}`);
+                isOver = true;
+                document.getElementById('reset-btn').style.display = 'block';
+                return;
+            }
+
+            setTip(`> Intento ${row}/6 cargado.`);
+        }
+
+        function setTip(txt) {
+            document.getElementById('tip').innerText = txt;
+        }
+
+        // Event listener de soporte para teclado físico
+        window.addEventListener('keydown', (e) => {
+            const k = e.key.toUpperCase();
+            if (k === 'BACKSPACE') pressKey('DEL');
+            else if (k === 'ENTER') pressKey('ENTER');
+            else if (/^[A-ZÑ]$/.test(k)) pressKey(k);
+        });
+
+        // Ejecución limpia al cargar el DOM
+        window.onload = initGame;
+    </script>
+</body>
+</html>
