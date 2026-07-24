@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Agorlab_ // WORD</title>
     <style>
         :root {
@@ -11,7 +11,8 @@
             --agorlab-orange: #ff5500;
             --portal-blue: #00bfff;
             --neutral: #1a0b00;
-            --border-style: 1px dashed var(--text-main);
+            /* Bordes sólidos y amigables en lugar de dashed */
+            --border-style: 2px solid var(--text-main);
             --font-mono: 'Courier New', Courier, monospace;
         }
 
@@ -20,7 +21,7 @@
             background-color: var(--bg);
             color: var(--text-main);
             margin: 0;
-            padding: 20px 10px;
+            padding: 0;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -34,6 +35,8 @@
                 rgba(0, 0, 0, 0.6) 2px,
                 rgba(0, 0, 0, 0.6) 4px
             );
+            /* Evita el scroll horizontal accidental en móviles */
+            overflow-x: hidden; 
         }
 
         .game-wrapper {
@@ -41,11 +44,11 @@
             flex-direction: column;
             align-items: center;
             background: rgba(5, 2, 0, 0.95);
-            padding: 16px;
-            border: var(--border-style);
+            padding: 20px 15px;
             z-index: 2;
             width: 100%;
-            max-width: 360px;
+            max-width: 500px; /* Más ancho para aprovechar pantallas modernas */
+            min-height: 100vh;
             box-sizing: border-box;
         }
 
@@ -54,136 +57,161 @@
             flex-direction: column;
             align-items: center;
             width: 100%;
-            margin-bottom: 15px;
+            margin-bottom: 25px;
             gap: 5px;
         }
 
         h1 {
             margin: 0;
-            font-size: 1.5rem;
-            font-weight: normal;
-            letter-spacing: 2px;
+            font-size: 2rem; /* Título más grande */
+            font-weight: bold;
+            letter-spacing: 3px;
             color: var(--agorlab-orange);
-            text-shadow: 0 0 10px rgba(255, 85, 0, 0.6);
+            text-shadow: 0 0 12px rgba(255, 85, 0, 0.6);
         }
 
         .subtitle {
-            font-size: 0.75rem;
+            font-size: 0.9rem;
             color: var(--portal-blue);
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
         }
 
         #wordle-grid {
             display: grid;
             grid-template-rows: repeat(6, 1fr);
-            gap: 6px;
-            margin-bottom: 15px;
+            gap: 8px; /* Más espacio entre filas */
+            margin-bottom: 25px;
+            width: 100%;
+            max-width: 380px;
         }
 
         .row {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 6px;
+            gap: 8px;
         }
 
         .tile {
-            width: 42px;
-            height: 42px;
-            border: var(--border-style);
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border: 2px solid #4a2211; /* Borde sutil por defecto */
+            border-radius: 12px; /* Esquinas redondeadas amigables */
             background-color: var(--neutral);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            font-size: 2rem; /* Letras enormes y legibles */
             font-weight: bold;
             color: var(--text-main);
             user-select: none;
             box-sizing: border-box;
+            transition: all 0.3s ease; /* Transición suave de colores */
         }
 
         .tile.correct {
             background-color: var(--portal-blue);
             color: #000;
             border-color: var(--portal-blue);
-            box-shadow: 0 0 10px var(--portal-blue);
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.4);
         }
 
         .tile.present {
             background-color: var(--agorlab-orange);
             color: #000;
             border-color: var(--agorlab-orange);
-            box-shadow: 0 0 10px var(--agorlab-orange);
+            box-shadow: 0 0 15px rgba(255, 85, 0, 0.4);
         }
 
         .tile.absent {
             background-color: #0d0400;
             color: #4a2211;
-            border-color: #311508;
+            border-color: #2a1106;
         }
 
         .keyboard {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 8px; /* Más separación vertical */
             width: 100%;
-            margin-bottom: 15px;
+            max-width: 500px;
+            margin-bottom: 20px;
         }
 
         .kb-row {
             display: flex;
             justify-content: center;
-            gap: 3px;
+            gap: 6px; /* Más separación horizontal */
             width: 100%;
         }
 
         .key {
-            background: transparent;
+            background: rgba(26, 11, 0, 0.8);
             color: var(--text-main);
-            border: 1px dashed var(--text-main);
-            padding: 12px 0;
+            border: 2px solid #5a2811;
+            border-radius: 8px; /* Botones táctiles amigables */
+            padding: 18px 0; /* Área táctil mucho más alta */
             flex: 1;
             font-family: var(--font-mono);
-            font-size: 0.75rem;
+            font-size: 1.1rem; /* Letras del teclado más grandes */
+            font-weight: bold;
             cursor: pointer;
             text-align: center;
             user-select: none;
             box-sizing: border-box;
+            transition: background 0.2s, border-color 0.2s;
+            /* Previene el zoom en móviles al tocar rápido */
+            touch-action: manipulation; 
+        }
+
+        .key:active {
+            transform: scale(0.95);
         }
 
         .key.wide {
-            flex: 1.5;
-            font-size: 0.65rem;
+            flex: 1.6;
+            font-size: 0.9rem;
         }
 
         .key.correct { background: var(--portal-blue); color: #000; border-color: var(--portal-blue); }
         .key.present { background: var(--agorlab-orange); color: #000; border-color: var(--agorlab-orange); }
-        .key.absent { background: #0d0400; color: #311508; border-color: #200d05; }
+        .key.absent { background: #0d0400; color: #311508; border-color: #1a0a05; }
 
         footer {
             width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
+            margin-top: 10px;
+            padding-bottom: 20px;
         }
 
         #tip {
-            font-size: 0.75rem;
+            font-size: 0.9rem;
             color: var(--text-main);
             text-align: center;
             min-height: 1.2rem;
             letter-spacing: 0.5px;
+            font-weight: bold;
         }
 
         button.action-btn {
-            background: transparent;
+            background: rgba(255, 85, 0, 0.1);
             color: var(--agorlab-orange);
-            border: 1px dashed var(--agorlab-orange);
-            padding: 8px 16px;
+            border: 2px solid var(--agorlab-orange);
+            border-radius: 8px;
+            padding: 12px 24px;
             font-family: var(--font-mono);
-            font-size: 0.85rem;
+            font-size: 1.1rem;
+            font-weight: bold;
             cursor: pointer;
             letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+
+        button.action-btn:active {
+            background: var(--agorlab-orange);
+            color: #000;
         }
     </style>
 </head>
@@ -206,66 +234,50 @@
     </div>
 
     <script>
+        // Lista curada estrictamente a SUSTANTIVOS de 5 letras
         const WORDS = [
-            "ABRIR", "ABUSO", "ACERO", "ACTOR", "AGUAS", "AGUDO", "AGUJA", "AHORA", "ALIEN", "ALMAS", 
-            "ALTAR", "AMBOS", "AMIGA", "AMIGO", "ANCHO", "ANDAR", "ANGEL", "ANTES", "APOYO", "ARBOL", 
-            "ARENA", "ARMAS", "AROMA", "ASTAR", "ASTRO", "ATRAS", "AUTOS", "AVION", "AYUDA", "BAILE", 
-            "BAJAR", "BALON", "BANCO", "BANDA", "BARBA", "BARCO", "BARRO", "BASES", "BEBER", "BESOS", 
-            "BICHO", "BLUSA", "BOCAS", "BOLSA", "BOMBA", "BONOS", "BORDE", "BOTAS", "BOTES", "BRAVO", 
-            "BRAZO", "BREVE", "BRISA", "BROMA", "BRUJA", "BUENO", "BURLA", "BUSCA", "CACAO", "CAIDA", 
-            "CAJAS", "CALDO", "CALLE", "CALOR", "CAMAS", "CAMPO", "CANAL", "CANTO", "CAPAZ", "CARAS", 
-            "CARGA", "CARNE", "CARTA", "CASAS", "CASCO", "CAUSA", "CAZAR", "CEDER", "CELDA", "CELOS", 
-            "CENAS", "CERCA", "CERDO", "CESTA", "CHICA", "CHICO", "CHINA", "CHINO", "CIEGO", "CIELO", 
-            "CIFRA", "CINCO", "CINTA", "CISNE", "CLARA", "CLARO", "CLASE", "CLIMA", "COBRE", "COCHE", 
-            "COLOR", "COMER", "COMUN", "COPIA", "CORAL", "CORTE", "COSAS", "COSER", "COSTO", "CREAR", 
-            "CREER", "CRUCE", "CRUDO", "CRUEL", "CUEVA", "CULPA", "CULTO", "CURAR", "CURSO", "DADOS", 
-            "DANZA", "DATOS", "DEBER", "DEDOS", "DEJAR", "DENSO", "DESDE", "DICHO", "DIETA", "DIOSA", 
-            "DISCO", "DOBLE", "DOLOR", "DONDE", "DOSIS", "DUDAS", "DUELO", "DUEÑO", "DULCE", "DURAR", 
-            "ELLOS", "ENERO", "EPOCA", "ERROR", "ESPIA", "ESTAR", "ESTOS", "ETAPA", "ETICA", "EXITO", 
-            "EXTRA", "FACIL", "FALLA", "FALSO", "FALTA", "FAROL", "FAVOR", "FECHA", "FELIZ", "FERIA", 
-            "FEROZ", "FIBRA", "FICHA", "FIERA", "FILAS", "FINAL", "FIRME", "FLACA", "FLACO", "FLORA", 
-            "FLOTA", "FONDO", "FORMA", "FORRO", "FOTOS", "FRASE", "FRENO", "FRESA", "FRITO", "FRUTA", 
-            "FUEGO", "FUERA", "FUGAS", "FUMAR", "FUNDA", "FURIA", "FUSIL", "GAFAS", "GALLO", "GANAR", 
-            "GANAS", "GASTO", "GATOS", "GENIO", "GENTE", "GIRAR", "GOLPE", "GOMAS", "GORDA", "GORDO", 
-            "GORRA", "GORRO", "GOTAS", "GOZAR", "GRADO", "GRASA", "GRAVE", "GRITO", "GRUPO", "GUAPO", 
-            "GUIAR", "GUION", "GUSTO", "HABER", "HABIL", "HABLA", "HACER", "HACHA", "HADAS", "HASTA", 
-            "HECHO", "HELAR", "HERIR", "HEROE", "HIELO", "HIJOS", "HILOS", "HIMNO", "HOGAR", "HOJAS", 
-            "HORAS", "HORNO", "HOTEL", "HUESO", "HUEVO", "HUIDA", "HUMOR", "HUMOS", "IDEAL", "IDEAS", 
-            "IDOLO", "IGUAL", "ILUSO", "INDIO", "ISLAS", "JABON", "JAULA", "JEFES", "JOVEN", "JOYAS", 
-            "JUEGO", "JUGAR", "JUGOS", "JULIO", "JUNIO", "JUNTA", "JUNTO", "JURAR", "JUSTO", "KILOS", 
-            "LABIO", "LABOR", "LAGOS", "LADOS", "LANZA", "LAPIZ", "LARGO", "LATIR", "LECHE", "LEGAL", 
-            "LEJOS", "LENTO", "LETRA", "LEYES", "LIBRE", "LIBRO", "LICOR", "LIDER", "LIMON", "LINDO", 
-            "LINEA", "LISTA", "LISTO", "LLAMA", "LLAVE", "LLEGA", "LLENO", "LOBOS", "LOCAL", "LOCOS", 
-            "LOGRO", "LUCHA", "LUCES", "LUGAR", "LUNES", "MADRE", "MAGIA", "MALOS", "MANDO", "MANGO", 
-            "MANOS", "MANTA", "MAPAS", "MARCA", "MAREA", "MARZO", "MASAS", "MAYOR", "MEDIO", "MEJOR", 
-            "MELON", "MENOR", "MENOS", "MENTE", "METER", "METRO", "MIEDO", "MILES", "MINAS", "MIRAR", 
-            "MISMO", "MITAD", "MITOS", "MODOS", "MONOS", "MONTE", "MORAL", "MORIR", "MOSCA", "MOTOR", 
-            "MOVER", "MUCHO", "MUJER", "MULTA", "MUNDO", "MUROS", "MUSEO", "NACER", "NADAR", "NADIE", 
-            "NARIZ", "NATAL", "NAVES", "NEGAR", "NEGRO", "NIÑOS", "NIVEL", "NOBLE", "NOCHE", "NODOS", 
-            "NORMA", "NORTE", "NOTAR", "NOTAS", "NUBES", "NUEVO", "NUNCA", "OASIS", "OBRAS", "OCASO", 
-            "ODIAR", "OESTE", "OIDOS", "OJALA", "ORDEN", "OREJA", "ORINA", "ORUGA", "OVEJA", "OXIDO", 
-            "PADRE", "PAGAR", "PAGOS", "PALAS", "PAPEL", "PARAR", "PARED", "PARES", "PARTE", "PASAR", 
-            "PASOS", "PASTA", "PATAS", "PATIO", "PECHO", "PEDAL", "PEDIR", "PEGAR", "PELEA", "PELOS", 
-            "PENAL", "PENAS", "PERRO", "PESAR", "PESCA", "PESOS", "PICOS", "PIEZA", "PILAS", "PINOS", 
-            "PINTA", "PIOJO", "PISAR", "PISOS", "PISTA", "PIZZA", "PLACA", "PLAGA", "PLANO", "PLATA", 
-            "PLATO", "PLAYA", "PLAZA", "PLENO", "PLOMO", "PLUMA", "POBRE", "PODER", "POEMA", "POETA", 
-            "POLAR", "POLLO", "POLVO", "PONER", "POSTE", "PRADO", "PRESO", "PRIMA", "PRIMO", "PRISA", 
-            "PROSA", "PULSO", "PUNTO", "QUESO", "RADIO", "RAMAS", "RATON", "RAYOS", "RAZON", "REDES", 
-            "REGLA", "REINA", "REINO", "RELOJ", "REMAR", "RENTA", "RESTO", "REYES", "RICOS", "RITMO", 
-            "RIVAL", "ROBAR", "ROCAS", "RODAR", "ROJOS", "ROMAN", "ROPAS", "ROSAS", "ROTAR", "RUIDO", 
-            "RUINA", "RUMBO", "RURAL", "RUTAS", "SABER", "SABIO", "SACAR", "SACOS", "SALAS", "SALDO", 
-            "SALIR", "SALON", "SALTO", "SALUD", "SANOS", "SANTO", "SECOS", "SELLO", "SELVA", "SEÑAL", 
-            "SEÑOR", "SERES", "SERIO", "SIGLO", "SIGNO", "SILLA", "SITIO", "SOBRE", "SOCIO", "SODIO", 
-            "SOLAR", "SORDO", "SUAVE", "SUBIR", "SUCIO", "SUDAR", "SUELO", "SUEÑO", "SUIZA", "SUMAR", 
-            "SUPER", "SUSTO", "SUTIL", "TABLA", "TACOS", "TACTO", "TALAR", "TALLA", "TALON", "TARDE", 
-            "TAREA", "TAZAS", "TECHO", "TECLA", "TEJER", "TELAS", "TEMAS", "TEMOR", "TENER", "TENIS", 
-            "TEXTO", "TIGRE", "TIMON", "TINTA", "TIPOS", "TIRAR", "TOCAR", "TODOS", "TOMAR", "TONOS", 
-            "TONTO", "TORPE", "TORRE", "TOTAL", "TRAJE", "TRAMA", "TRATO", "TRECE", "TRIBU", "TRIGO", 
-            "TRIPA", "TROPA", "TRUCO", "TUBOS", "TUMBA", "TUNEL", "UNICO", "UNION", "USADO", "USTED", 
-            "VACAS", "VACIO", "VALER", "VALLE", "VALOR", "VAMOS", "VAPOR", "VASOS", "VECES", "VELAS", 
-            "VELOZ", "VENIR", "VENTA", "VENUS", "VERBO", "VERDE", "VERSO", "VIAJE", "VICIO", "VIDAS", 
-            "VIEJO", "VILLA", "VINOS", "VIRUS", "VISTA", "VITAL", "VIVAS", "VIVOS", "VOCES", "VOLAR", 
-            "VOTOS", "VUELO", "ZANJA", "ZONAS", "ZORRO"
+            "ABUSO", "ACERO", "ACTOR", "AGUAS", "AGUJA", "ALIEN", "ALMAS", "ALTAR", "AMIGA", "AMIGO", 
+            "ANGEL", "APOYO", "ARBOL", "ARENA", "ARMAS", "AROMA", "ASTRO", "AUTOS", "AVION", "AYUDA", 
+            "BAILE", "BALON", "BANCO", "BANDA", "BARBA", "BARCO", "BARRO", "BASES", "BESOS", "BICHO", 
+            "BLUSA", "BOCAS", "BOLSA", "BOMBA", "BONOS", "BORDE", "BOTAS", "BOTES", "BRAZO", "BRISA", 
+            "BROMA", "BRUJA", "BURLA", "CACAO", "CAIDA", "CAJAS", "CALDO", "CALLE", "CALOR", "CAMAS", 
+            "CAMPO", "CANAL", "CANTO", "CARAS", "CARGA", "CARNE", "CARTA", "CASAS", "CASCO", "CAUSA", 
+            "CELDA", "CELOS", "CENAS", "CERDO", "CESTA", "CHICA", "CHICO", "CHINA", "CHINO", "CIELO", 
+            "CIFRA", "CINTA", "CISNE", "CLASE", "CLIMA", "COBRE", "COCHE", "COLOR", "COPIA", "CORAL", 
+            "CORTE", "COSAS", "COSTO", "CRUCE", "CUEVA", "CULPA", "CULTO", "CURSO", "DADOS", "DANZA", 
+            "DATOS", "DEDOS", "DIETA", "DIOSA", "DISCO", "DOLOR", "DOSIS", "DUDAS", "DUELO", "DUEÑO", 
+            "ENERO", "EPOCA", "ERROR", "ESPIA", "ETAPA", "ETICA", "EXITO", "FALLA", "FALTA", "FAROL", 
+            "FAVOR", "FECHA", "FERIA", "FIBRA", "FICHA", "FIERA", "FILAS", "FINAL", "FLORA", "FLOTA", 
+            "FONDO", "FORMA", "FORRO", "FOTOS", "FRASE", "FRENO", "FRESA", "FRUTA", "FUEGO", "FUGAS", 
+            "FUNDA", "FURIA", "FUSIL", "GAFAS", "GALLO", "GANAS", "GASTO", "GATOS", "GENIO", "GENTE", 
+            "GOLPE", "GOMAS", "GORRA", "GORRO", "GOTAS", "GRADO", "GRASA", "GRITO", "GRUPO", "GUION", 
+            "GUSTO", "HACHA", "HADAS", "HECHO", "HEROE", "HIELO", "HIJOS", "HILOS", "HIMNO", "HOGAR", 
+            "HOJAS", "HORAS", "HORNO", "HOTEL", "HUESO", "HUEVO", "HUIDA", "HUMOR", "HUMOS", "IDEAL", 
+            "IDEAS", "IDOLO", "INDIO", "ISLAS", "JABON", "JAULA", "JEFES", "JOVEN", "JOYAS", "JUEGO", 
+            "JUGOS", "JULIO", "JUNIO", "JUNTA", "KILOS", "LABIO", "LABOR", "LAGOS", "LADOS", "LANZA", 
+            "LAPIZ", "LECHE", "LETRA", "LEYES", "LIBRO", "LICOR", "LIDER", "LIMON", "LINEA", "LISTA", 
+            "LLAMA", "LLAVE", "LOBOS", "LOCAL", "LOGRO", "LUCHA", "LUCES", "LUGAR", "LUNES", "MADRE", 
+            "MAGIA", "MANDO", "MANGO", "MANOS", "MANTA", "MAPAS", "MARCA", "MAREA", "MARZO", "MASAS", 
+            "MEDIO", "MELON", "MENTE", "METRO", "MIEDO", "MILES", "MINAS", "MITAD", "MITOS", "MODOS", 
+            "MONOS", "MONTE", "MORAL", "MOSCA", "MOTOR", "MUJER", "MULTA", "MUNDO", "MUROS", "MUSEO", 
+            "NARIZ", "NAVES", "NIÑOS", "NIVEL", "NOCHE", "NODOS", "NORMA", "NORTE", "NOTAS", "NUBES", 
+            "OASIS", "OBRAS", "OCASO", "OESTE", "OIDOS", "ORDEN", "OREJA", "ORINA", "ORUGA", "OVEJA", 
+            "OXIDO", "PADRE", "PAGOS", "PALAS", "PAPEL", "PARED", "PARES", "PARTE", "PASOS", "PASTA", 
+            "PATAS", "PATIO", "PECHO", "PEDAL", "PELEA", "PELOS", "PENAS", "PERRO", "PESCA", "PESOS", 
+            "PICOS", "PIEZA", "PILAS", "PINOS", "PINTA", "PIOJO", "PISOS", "PISTA", "PIZZA", "PLACA", 
+            "PLAGA", "PLANO", "PLATA", "PLATO", "PLAYA", "PLAZA", "PLOMO", "PLUMA", "POEMA", "POETA", 
+            "POLLO", "POLVO", "POSTE", "PRADO", "PRIMA", "PRIMO", "PRISA", "PROSA", "PULSO", "PUNTO", 
+            "QUESO", "RADIO", "RAMAS", "RATON", "RAYOS", "RAZON", "REDES", "REGLA", "REINA", "REINO", 
+            "RELOJ", "RENTA", "RESTO", "REYES", "RITMO", "RIVAL", "ROCAS", "ROPAS", "ROSAS", "RUIDO", 
+            "RUINA", "RUMBO", "RUTAS", "SACOS", "SALAS", "SALDO", "SALON", "SALTO", "SALUD", "SANTO", 
+            "SELLO", "SELVA", "SEÑAL", "SEÑOR", "SERES", "SIGLO", "SIGNO", "SILLA", "SITIO", "SOCIO", 
+            "SODIO", "SUELO", "SUEÑO", "SUIZA", "SUSTO", "TABLA", "TACOS", "TACTO", "TALLA", "TALON", 
+            "TARDE", "TAREA", "TAZAS", "TECHO", "TECLA", "TELAS", "TEMAS", "TEMOR", "TENIS", "TEXTO", 
+            "TIGRE", "TIMON", "TINTA", "TIPOS", "TONOS", "TORRE", "TOTAL", "TRAJE", "TRAMA", "TRATO", 
+            "TRIBU", "TRIGO", "TRIPA", "TROPA", "TRUCO", "TUBOS", "TUMBA", "TUNEL", "UNION", "VACAS", 
+            "VALLE", "VALOR", "VAPOR", "VASOS", "VECES", "VELAS", "VENTA", "VENUS", "VERBO", "VERSO", 
+            "VIAJE", "VICIO", "VIDAS", "VILLA", "VINOS", "VIRUS", "VISTA", "VOCES", "VOTOS", "VUELO", 
+            "ZANJA", "ZONAS", "ZORRO"
         ];
         
         const KB_LAYOUT = [
