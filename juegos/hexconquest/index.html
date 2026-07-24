@@ -7,11 +7,16 @@
     <style>
         :root {
             --bg: #080402;
-            --panel-bg: rgba(20, 10, 5, 0.7);
+            --panel-bg: rgba(20, 10, 5, 0.85);
             --panel-border: rgba(217, 107, 48, 0.25);
             --text-main: #e08b58;
             --agorlab-orange: #ff5500;
-            --portal-blue: #00bfff;
+            
+            /* Color dinámico del jugador (Por defecto Celeste) */
+            --player-color: #00bfff;
+            --player-gradient-start: #00d5ff;
+            --player-gradient-end: #0077ff;
+
             --neutral: #1a0c05;
             --neutral-border: #3a1c0d;
             --font-mono: 'Space Mono', 'Courier New', monospace;
@@ -20,7 +25,7 @@
 
         * {
             box-sizing: border-box;
-            touch-action: manipulation; /* Optimiza respuesta táctil en móviles */
+            touch-action: manipulation;
         }
 
         body {
@@ -28,14 +33,14 @@
             background-color: var(--bg);
             color: var(--text-main);
             margin: 0;
-            padding: 16px 12px;
+            padding: 12px;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             background-image: 
-                radial-gradient(circle at 50% 15%, rgba(255, 85, 0, 0.12) 0%, transparent 60%),
+                radial-gradient(circle at 50% 15%, rgba(255, 85, 0, 0.1) 0%, transparent 60%),
                 radial-gradient(circle at 50% 85%, rgba(0, 191, 255, 0.08) 0%, transparent 60%),
                 repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0, 0, 0, 0.4) 3px, rgba(0, 0, 0, 0.4) 6px);
             background-attachment: fixed;
@@ -48,12 +53,12 @@
             background: var(--panel-bg);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            padding: 24px 18px;
+            padding: 20px 16px;
             border: 1px solid var(--panel-border);
             border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.1);
             width: 100%;
-            max-width: 440px; /* Tamaño ampliado para una vista óptima en smartphones */
+            max-width: 420px;
         }
 
         header {
@@ -61,31 +66,31 @@
             flex-direction: column;
             align-items: center;
             width: 100%;
-            margin-bottom: 20px;
-            gap: 14px;
+            margin-bottom: 12px;
+            gap: 10px;
         }
 
         h1 {
             margin: 0;
             font-family: var(--font-mono);
-            font-size: 1.8rem;
+            font-size: 1.7rem;
             font-weight: 700;
             letter-spacing: 3px;
             color: var(--agorlab-orange);
             text-shadow: 0 0 16px rgba(255, 85, 0, 0.5);
         }
 
-        /* Marcadores estilo Badge Neón */
+        /* Marcadores HUD */
         .hud {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             width: 100%;
             justify-content: center;
         }
 
         .badge {
             flex: 1;
-            padding: 10px 14px;
+            padding: 8px 12px;
             font-family: var(--font-mono);
             font-size: 0.85rem;
             font-weight: bold;
@@ -108,18 +113,17 @@
         }
 
         .badge.player { 
-            color: var(--portal-blue); 
-            border-color: rgba(0, 191, 255, 0.2);
+            color: var(--player-color); 
+            border-color: var(--player-color);
         }
         .badge.ai { 
             color: var(--agorlab-orange); 
-            border-color: rgba(255, 85, 0, 0.2);
+            border-color: rgba(255, 85, 0, 0.3);
         }
         
         .badge.active-turn {
             background: rgba(255, 255, 255, 0.08);
-            border-color: currentColor;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.08), inset 0 0 10px rgba(255, 255, 255, 0.05);
+            box-shadow: 0 0 15px currentColor, inset 0 0 10px rgba(255, 255, 255, 0.05);
         }
 
         .badge.active-turn .dot {
@@ -133,13 +137,63 @@
             50% { transform: scale(1.4); opacity: 0.5; }
         }
 
-        /* Contenedor Responsivo del Tablero */
+        /* Selector de Colores del Jugador */
+        .color-picker-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 6px 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 8px;
+        }
+
+        .color-label {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            color: var(--text-main);
+            letter-spacing: 1px;
+        }
+
+        .color-options {
+            display: flex;
+            gap: 8px;
+        }
+
+        .color-btn {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            background: var(--c);
+            cursor: pointer;
+            padding: 0;
+            transition: transform 0.2s, border-color 0.2s;
+            box-shadow: 0 0 6px var(--c);
+        }
+
+        .color-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .color-btn.active {
+            border-color: #ffffff;
+            transform: scale(1.25);
+            box-shadow: 0 0 12px var(--c);
+        }
+
+        /* Contenedor del Tablero - Aislamiento estricto de dimensiones */
         #grid-container {
             width: 100%;
-            max-width: 380px;
-            aspect-ratio: 1 / 0.9;
+            height: 290px;
             position: relative;
-            margin: 10px 0 15px 0;
+            margin: 6px 0;
+            overflow: hidden;
+            border-radius: 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.03);
         }
 
         #hex-grid {
@@ -155,7 +209,7 @@
             align-items: center;
             justify-content: center;
             font-family: var(--font-mono);
-            font-size: 1.15rem;
+            font-size: clamp(0.85rem, 3.5vw, 1.1rem);
             font-weight: bold;
             cursor: pointer;
             user-select: none;
@@ -168,10 +222,10 @@
         }
 
         .hex.player { 
-            background: linear-gradient(135deg, #00d5ff, #0077ff); 
-            color: #020b14;
-            text-shadow: 0 1px 1px rgba(255,255,255,0.4);
-            filter: drop-shadow(0 0 8px rgba(0, 191, 255, 0.4));
+            background: linear-gradient(135deg, var(--player-gradient-start), var(--player-gradient-end)); 
+            color: #000;
+            text-shadow: 0 1px 1px rgba(255,255,255,0.5);
+            filter: drop-shadow(0 0 8px var(--player-color));
         }
         
         .hex.ai { 
@@ -207,31 +261,32 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 14px;
+            gap: 10px;
         }
 
         #tip {
             font-family: var(--font-mono);
-            font-size: 0.82rem;
+            font-size: 0.78rem;
             color: var(--text-main);
             text-align: center;
             letter-spacing: 0.5px;
             min-height: 1.4rem;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.4);
             padding: 6px 12px;
             border-radius: 8px;
             width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.04);
         }
 
-        button {
+        button.action-btn {
             width: 100%;
             background: rgba(255, 85, 0, 0.08);
             color: var(--agorlab-orange);
             border: 1px solid var(--agorlab-orange);
             border-radius: 12px;
-            padding: 12px 20px;
+            padding: 10px 18px;
             font-family: var(--font-mono);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.2s;
@@ -239,44 +294,41 @@
             letter-spacing: 1.5px;
         }
 
-        button:hover {
+        button.action-btn:hover {
             background: rgba(255, 85, 0, 0.2);
             box-shadow: 0 0 20px rgba(255, 85, 0, 0.3);
             transform: translateY(-1px);
         }
 
-        button:active {
+        button.action-btn:active {
             transform: translateY(1px);
         }
 
         .rules {
-            margin-top: 10px;
-            padding: 14px;
-            background: rgba(0, 0, 0, 0.25);
+            margin-top: 8px;
+            padding: 10px 12px;
+            background: rgba(0, 0, 0, 0.3);
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.05);
             width: 100%;
-            font-size: 0.8rem;
-            line-height: 1.5;
+            font-size: 0.75rem;
+            line-height: 1.4;
             color: var(--text-main);
         }
 
         .rules h2 {
             font-family: var(--font-mono);
-            font-size: 0.82rem;
-            margin: 0 0 8px 0;
+            font-size: 0.78rem;
+            margin: 0 0 6px 0;
             color: #fff;
             letter-spacing: 1px;
         }
 
         .rules p {
-            margin: 4px 0;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            margin: 3px 0;
         }
 
-        .hl-blue { color: var(--portal-blue); font-weight: bold; }
+        .hl-player { color: var(--player-color); font-weight: bold; }
         .hl-orange { color: var(--agorlab-orange); font-weight: bold; }
 
     </style>
@@ -296,26 +348,51 @@
             </div>
         </header>
 
+        <!-- Selector de Color para el Jugador -->
+        <div class="color-picker-container">
+            <span class="color-label">COLOR USR:</span>
+            <div class="color-options">
+                <button class="color-btn active" style="--c: #00bfff" onclick="setPlayerColor('#00bfff', '#00d5ff', '#0077ff', this)" title="Celeste"></button>
+                <button class="color-btn" style="--c: #00ff88" onclick="setPlayerColor('#00ff88', '#00ff88', '#009944', this)" title="Verde"></button>
+                <button class="color-btn" style="--c: #d000ff" onclick="setPlayerColor('#d000ff', '#e040ff', '#8800cc', this)" title="Morado"></button>
+                <button class="color-btn" style="--c: #ffea00" onclick="setPlayerColor('#ffea00', '#ffff55', '#ccb100', this)" title="Amarillo"></button>
+                <button class="color-btn" style="--c: #ff007f" onclick="setPlayerColor('#ff007f', '#ff55b3', '#cc0055', this)" title="Rosa"></button>
+            </div>
+        </div>
+
+        <!-- Tablero aislado -->
         <div id="grid-container">
             <div id="hex-grid"></div>
         </div>
 
         <footer>
             <span id="tip">> CONEXIÓN ESTABLECIDA.</span>
-            <button onclick="init()" id="replay-btn">[ REINICIAR ]</button>
+            <button onclick="init()" class="action-btn" id="replay-btn">[ REINICIAR ]</button>
         </footer>
 
         <div class="rules">
             <h2>> MANUAL_DE_OPERACIÓN</h2>
-            <p>1. Selecciona un nodo <span class="hl-blue">CELESTE</span> (>1 unidad).</p>
-            <p>2. Toca un nodo vecino para moverte o atacar.</p>
+            <p>1. Selecciona un nodo <span class="hl-player">USUARIO</span> (>1 unidad).</p>
+            <p>2. Toca un nodo adyacente para moverte o atacar.</p>
             <p>3. Generas +1 unidad por turno (máx. 25).</p>
-            <p>4. Asimila al sistema <span class="hl-orange">NARANJA</span> para ganar.</p>
+            <p>4. Asimila al sistema <span class="hl-orange">NARANJA</span> para vencer.</p>
         </div>
     </div>
 
     <script>
         let audioCtx = null;
+
+        function setPlayerColor(main, start, end, btn) {
+            document.documentElement.style.setProperty('--player-color', main);
+            document.documentElement.style.setProperty('--player-gradient-start', start);
+            document.documentElement.style.setProperty('--player-gradient-end', end);
+            
+            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            
+            playSound('select');
+            render();
+        }
 
         function triggerHaptic(type) {
             if (navigator.vibrate) {
@@ -419,10 +496,10 @@
 
             const rect = container.getBoundingClientRect();
             const width = rect.width || 340;
-            const height = rect.height || 300;
+            const height = rect.height || 290;
 
-            // Cálculo dinámico del tamaño de las celdas para adaptarse a cualquier pantalla
-            const size = Math.min(width / 7.2, height / 6.5);
+            // Fórmulas matemáticas ajustadas para evitar que el tablero sobresalga del contenedor
+            const size = Math.min(width / 8.8, height / 8.2);
             const centerX = width / 2;
             const centerY = height / 2;
 
