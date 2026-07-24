@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agorlab - Matriz Cuadriculada (Tablatura Personalizada)</title>
+    <style>
+        :root {
+            --orange: #FF5F00;
+            --cyan: #00FFFF;
+            --bg-color: #030303;
+            --text-muted: rgba(255, 95, 0, 0.25);
+            --danger: #ff3333;
+            --success: #33ff33;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6) 50%, rgba(255, 95, 0, 0.04) 50%);
+            background-size: 100% 4px;
+            color: var(--orange);
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .terminal-container {
+            width: 100%;
+            max-width: 700px;
+            background: #080808;
+            border: 1px solid var(--orange);
+            box-shadow: 0 0 25px rgba(255, 95, 0, 0.2);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .sys-header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dashed var(--orange);
+            padding-bottom: 8px;
+            font-weight: bold;
+            font-size: 13px;
+            color: var(--cyan);
+            text-shadow: 0 0 5px rgba(0, 255, 255, 0.4);
+        }
+
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 380px;
+            background: #000;
+            border: 1px solid #222;
+            position: relative;
+            padding: 15px;
+        }
+
+        .grid-board {
+            display: grid;
+            gap: 8px;
+            justify-content: center;
+            align-content: center;
+        }
+
+        .node {
+            width: 65px;
+            height: 65px;
+            background: #050505;
+            border: 1px solid var(--text-muted);
+            color: var(--text-muted);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+            border-radius: 4px;
+        }
+
+        .node:hover:not(.disabled) {
+            border-color: var(--cyan);
+            color: var(--cyan);
+            background: rgba(0, 255, 255, 0.05);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .node.active {
+            background: var(--cyan);
+            color: #000;
+            border-color: var(--cyan);
+            box-shadow: 0 0 20px var(--cyan);
+            transform: scale(1.05);
+            z-index: 2;
+        }
+
+        .node.correct {
+            background: var(--success);
+            color: #000;
+            border-color: var(--success);
+            box-shadow: 0 0 15px var(--success);
+        }
+
+        .node.wrong {
+            background: var(--danger);
+            color: #000;
+            border-color: var(--danger);
+            box-shadow: 0 0 20px var(--danger);
+            animation: shake 0.3s;
+        }
+
+        .log-console {
+            height: 75px;
+            background: #040404;
+            border: 1px dashed #333;
+            padding: 8px;
+            overflow-y: auto;
+            font-size: 11px;
+            color: #aaa;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .btn {
+            background: transparent;
+            border: 1px solid var(--orange);
+            color: var(--orange);
+            font-family: inherit;
+            padding: 10px 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: var(--orange);
+            color: #000;
+            box-shadow: 0 0 12px var(--orange);
+        }
+
+        .btn:disabled {
+            border-color: #222;
+            color: #444;
+            cursor: not-allowed;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="terminal-container">
+        
+        <div class="sys-header">
+            <span id="ui-level">SECTOR: NIVEL 1</span>
+            <span id="ui-integrity">INTEGRIDAD: [██████████] 100%</span>
+        </div>
+
+        <div class="game-area">
+            <div id="grid-board" class="grid-board"></div>
+        </div>
+
+        <div class="controls">
+            <button id="btn-start" class="btn" onclick="initGame()">[ INICIALIZAR ENLACE TABLATURA ]</button>
+        </div>
+
+        <div id="sys-log" class="log-console">
+            <div>> Tablatura personalizada cargada en el núcleo.</div>
+            <div>> Establezca enlace para iniciar secuencia melódica infinita.</div>
+        </div>
+
+    </div>
+
+    <script>
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Frecuencias exactas basadas en la afinación estándar de guitarra y los trastes provistos en la tablatura
+        // Cuerdas al aire: E2=82.41, A2=110.00, D3=146.83, G3=196.00, B3=246.94, e4=329.63
+        // Función auxiliar para calcular frecuencia por traste y cuerda estándar
+        function getGuitarNoteFreq(stringBaseFreq, fret) {
+            return stringBaseFreq * Math.pow(2, fret / 12);
+        }
+
+        // Frecuencias estándar de las cuerdas de la guitarra
+        const STRINGS = {
+            E_LOW: 82.41, // 6ta cuerda (Eb estándar o afinación base mapeada)
+            A: 110.00,    // 5ta cuerda
+            D: 146.83,    // 4ta cuerda
+            G: 196.00,    // 3ra cuerda
+            B: 246.94,    // 2da cuerda
+            E_HIGH: 329.63// 1ra cuerda (eb aguda)
+        };
+
+        // Traducción exacta de las notas extraídas de la tablatura provista:
+        // Se compone de las notas secuenciales tocadas en la tab:
+        const CUSTOM_MELODY = [
+            // Compás 1: Gb: 7-9, 9-11-9 | Db: 7-9-7
+            { string: STRINGS.G, fret: 7 },
+            { string: STRINGS.G, fret: 9 },
+            { string: STRINGS.G, fret: 9 },
+            { string: STRINGS.G, fret: 11 },
+            { string: STRINGS.G, fret: 9 },
+            { string: STRINGS.D, fret: 7 },
+            { string: STRINGS.D, fret: 9 },
+            { string: STRINGS.D, fret: 7 },
+            { string: STRINGS.G, fret: 7 },
+            { string: STRINGS.G, fret: 9 },
+            { string: STRINGS.G, fret: 9 },
+            { string: STRINGS.G, fret: 7 },
+
+            // Compás 2: Gb: 6-7-6, 7-9 | Db: 7-9-7-9-7
+            { string: STRINGS.Gb || STRINGS.G, fret: 6 },
+            { string: STRINGS.G, fret: 7 },
+            { string: STRINGS.G, fret: 6 },
+            { string: STRINGS.G, fret: 7 },
+            { string: STRINGS.G, fret: 9 },
+            { string: STRINGS.D, fret: 7 },
+            { string: STRINGS.D, fret: 9 },
+            { string: STRINGS.D, fret: 7 },
+            { string: STRINGS.G, fret: 7 },
+            { string: STRINGS.D, fret: 9 },
+            { string: STRINGS.D, fret: 7 },
+
+            // Compás 3: Gb: 7-9, 9-11-9 | Db: 7-9-7 | Bb: 8-10 | Gb: 6-7-6 | Db: 9
+            { string: STRINGS.G, fret: 7 },
+            { string: STRINGS.G, fret: 9 },
+            { string: STRINGS.G, fret: 9 },
+            { string: STRINGS.G, fret: 11 },
+            { string: STRINGS.G, fret: 9 },
+            { string: STRINGS.D, fret: 7 },
+            { string: STRINGS.D, fret: 9 },
+            { string: STRINGS.D, fret: 7 },
+            { string: STRINGS.B, fret: 8 },
+            { string: STRINGS.B, fret: 10 },
+            { string: STRINGS.G, fret: 6 },
+            { string: STRINGS.G, fret: 7 },
+            { string: STRINGS.G, fret: 6 },
+            { string: STRINGS.D, fret: 9 },
+
+            // Compás 4: Cierre con Gb: 6-7-6, 7-9 y pasajes finales en Db
+            { string: STRINGS.G, fret: 6 },
+            { string: STRINGS.G, fret: 7 },
+            { string: STRINGS.G, fret: 6 },
+            { string: STRINGS.G, fret: 7 },
+            { string: STRINGS.G, fret: 9 },
+            { string: STRINGS.D, fret: 7 },
+            { string: STRINGS.D, fret: 9 },
+            { string: STRINGS.D, fret: 7 }
+        ].map(note => getGuitarNoteFreq(note.string, note.fret));
+
+        function playTone(freq, duration = 0.25, type = 'triangle') {
+            try {
+                initAudio();
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        let level = 1;
+        let integrity = 100;
+        let sequence = [];
+        let playerIndex = 0;
+        let isPlayingSequence = false;
+        let gameActive = false;
+        let nodesList = [];
+
+        const gridBoard = document.getElementById('grid-board');
+        const startBtn = document.getElementById('btn-start');
+        const uiLevel = document.getElementById('ui-level');
+        const uiIntegrity = document.getElementById('ui-integrity');
+        const sysLog = document.getElementById('sys-log');
+
+        function log(message, type = 'normal') {
+            const entry = document.createElement('div');
+            entry.innerText = `> ${message}`;
+            if (type === 'error') entry.style.color = 'var(--danger)';
+            if (type === 'success') entry.style.color = 'var(--success)';
+            if (type === 'system') entry.style.color = 'var(--cyan)';
+            
+            sysLog.appendChild(entry);
+            sysLog.scrollTop = sysLog.scrollHeight;
+        }
+
+        function updateUI() {
+            uiLevel.innerText = `SECTOR: NIVEL ${level}`;
+            let blocks = Math.max(0, Math.ceil(integrity / 10));
+            let bar = '█'.repeat(blocks) + '-'.repeat(10 - blocks);
+            uiIntegrity.innerText = `INTEGRIDAD: [${bar}] ${integrity}%`;
+            uiIntegrity.style.color = integrity <= 30 ? 'var(--danger)' : 'var(--cyan)';
+        }
+
+        function getGridSize() {
+            if (level <= 2) return 2;
+            if (level <= 5) return 3;
+            if (level <= 9) return 4;
+            return 5;
+        }
+
+        function buildGrid() {
+            gridBoard.innerHTML = '';
+            nodesList = [];
+            
+            let size = getGridSize();
+            gridBoard.style.gridTemplateColumns = `repeat(${size}, 65px)`;
+            let totalNodes = size * size;
+
+            for (let i = 0; i < totalNodes; i++) {
+                const node = document.createElement('div');
+                node.className = 'node disabled';
+                node.dataset.id = i;
+                node.innerText = i + 1;
+                node.onclick = () => handleNodeClick(i);
+                
+                gridBoard.appendChild(node);
+                nodesList.push(node);
+            }
+        }
+
+        function initGame() {
+            initAudio();
+            level = 1;
+            integrity = 100;
+            sequence = [];
+            gameActive = true;
+            startBtn.disabled = true;
+            buildGrid();
+            updateUI();
+            log("Tablatura enlazada. Iniciando secuencia de notas...", "system");
+            nextLevel();
+        }
+
+        function nextLevel() {
+            playerIndex = 0;
+            isPlayingSequence = true;
+            setNodesState(true);
+            
+            let totalNodes = nodesList.length;
+            let randomNode = Math.floor(Math.random() * totalNodes);
+            sequence.push(randomNode);
+
+            log(`Nivel ${level}: Patrón extendido a ${sequence.length} nodos.`);
+            
+            setTimeout(() => {
+                playSequence();
+            }, 1000);
+        }
+
+        function playSequence() {
+            let i = 0;
+            let interval = setInterval(() => {
+                if (i < sequence.length) {
+                    let nodeIdx = sequence[i];
+                    let tabNoteFreq = CUSTOM_MELODY[i % CUSTOM_MELODY.length];
+                    
+                    flashNode(nodeIdx, 'active', 420, tabNoteFreq);
+                    i++;
+                } else {
+                    clearInterval(interval);
+                    isPlayingSequence = false;
+                    setNodesState(false);
+                    log("Tu turno: Reproduce la tablatura en la cuadrícula.", "system");
+                }
+            }, 700);
+        }
+
+        function flashNode(index, className, duration, freq) {
+            const node = nodesList[index];
+            if (node) {
+                node.classList.add(className);
+                playTone(freq, duration / 1000, 'triangle');
+                setTimeout(() => {
+                    node.classList.remove(className);
+                }, duration);
+            }
+        }
+
+        function handleNodeClick(index) {
+            if (isPlayingSequence || !gameActive) return;
+
+            let targetTabNoteFreq = CUSTOM_MELODY[playerIndex % CUSTOM_MELODY.length];
+
+            if (index === sequence[playerIndex]) {
+                flashNode(index, 'correct', 250, targetTabNoteFreq);
+                playerIndex++;
+
+                if (playerIndex === sequence.length) {
+                    log(`¡Nivel ${level} superado con éxito!`, "success");
+                    level++;
+                    
+                    if (integrity < 100) {
+                        integrity = Math.min(100, integrity + 15);
+                    }
+                    
+                    updateUI();
+                    buildGrid();
+                    setTimeout(nextLevel, 1500);
+                }
+            } else {
+                flashNode(index, 'wrong', 350, 140);
+                integrity -= 25;
+                updateUI();
+                log("¡Fallo en la tablatura! Integridad reducida.", "error");
+
+                if (integrity <= 0) {
+                    gameOver();
+                } else {
+                    playerIndex = 0;
+                    isPlayingSequence = true;
+                    setNodesState(true);
+                    log("Reintentando patrón actual...", "system");
+                    setTimeout(playSequence, 1100);
+                }
+            }
+        }
+
+        function setNodesState(disabled) {
+            nodesList.forEach(node => {
+                if (disabled) node.classList.add('disabled');
+                else node.classList.remove('disabled');
+            });
+        }
+
+        function gameOver() {
+            gameActive = false;
+            setNodesState(true);
+            playTone(90, 0.6, 'sawtooth');
+            log("SISTEMA COLAPSADO: Secuencia de tablatura interrumpida.", "error");
+            startBtn.disabled = false;
+            startBtn.innerText = "[ REINICIAR SISTEMA ]";
+        }
+
+        buildGrid();
+        setNodesState(true);
+    </script>
+</body>
+</html>
