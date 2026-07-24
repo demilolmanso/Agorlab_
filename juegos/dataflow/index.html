@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agorlab - [ DATA_FLOW ] Avanzado</title>
+    <style>
+        :root {
+            --grid-size: 3;
+        }
+        body {
+            background-color: #0b0b0b;
+            color: #ff5500;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .agorlab-terminal {
+            background: #121212;
+            border: 1px dashed #ff5500;
+            padding: 20px;
+            max-width: 450px;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 0 15px rgba(255, 85, 0, 0.15);
+        }
+        .terminal-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            border-bottom: 1px dashed #ff5500;
+            padding-bottom: 8px;
+        }
+        .pipe-grid {
+            display: grid;
+            grid-template-columns: repeat(var(--grid-size), 1fr);
+            gap: 5px;
+            margin: 20px 0;
+        }
+        .pipe-node {
+            background: #181818;
+            border: 1px solid #ff5500;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: calc(80px / var(--grid-size));
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .pipe-node:hover {
+            background: #221208;
+            border-color: #ff7722;
+        }
+        .pipe-node.connected {
+            border-color: #00ffff;
+            color: #00ffff;
+            background: #081a1a;
+            box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.2);
+        }
+        .pipe-node.fixed {
+            cursor: default;
+            background: #1c1410;
+            font-size: calc(45px / var(--grid-size));
+            font-weight: bold;
+        }
+        .pipe-node.fixed.connected {
+            background: #00ffff;
+            color: #0b0b0b;
+        }
+        #status-msg {
+            font-size: 13px;
+            margin-top: 15px;
+            min-height: 20px;
+            color: #ff9966;
+            text-align: center;
+        }
+        .btn-action {
+            background: transparent;
+            border: 1px solid #ff5500;
+            color: #ff5500;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 10px 15px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-size: 14px;
+            letter-spacing: 1px;
+            transition: 0.2s;
+            width: 100%;
+            display: none;
+        }
+        .btn-action:hover {
+            background: #ff5500;
+            color: #0b0b0b;
+        }
+        .manual {
+            margin-top: 20px;
+            border-top: 1px dashed #441a00;
+            padding-top: 12px;
+            font-size: 11px;
+            color: #bb7744;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="agorlab-terminal">
+        <div class="terminal-header">
+            <span>> [ DATA_FLOW ]</span>
+            <span id="level-display">[ LVL: 1 ]</span>
+        </div>
+        <div id="grid-container" class="pipe-grid"></div>
+        
+        <div id="status-msg">> Analizando puertos...</div>
+        
+        <button id="btn-restart" class="btn-action" onclick="initLevel()">[ REINICIAR CONEXIÓN ]</button>
+        <button id="btn-next" class="btn-action" style="border-color:#00ffff; color:#00ffff;" onclick="nextLevel()">[ SIGUIENTE SECTOR ]</button>
+        
+        <div class="manual">
+            <strong>> [ MAN_PAGE ]</strong><br>
+            1. Enruta los datos desde <span style="color:#00ffff">SRC</span> hasta <span style="color:#ff5500">TRG</span>.<br>
+            2. Toca nodos para rotar 90°.<br>
+            3. A mayor nivel, sectores más amplios y conexiones corruptas generadas por el sistema.
+        </div>
+    </div>
+
+    <script>
+        // Piezas canónicas y sus máscaras binarias (N=1, E=2, S=4, W=8)
+        const PIECES = {
+            'straight': { mask: 5, symbol: '║' }, // N+S
+            'curve':    { mask: 3, symbol: '╚' }, // N+E
+            'tee':      { mask: 7, symbol: '╠' }, // N+E+S
+            'cross':    { mask: 15, symbol: '╬'}  // N+E+S+W
+        };
+
+        let currentLevel = 1;
+        let gridSize = 3;
+        let board = [];
+        let gameActive = true;
+
+        function getGridSize(lvl) {
+            // Sube de tamaño cada 3 niveles (Max 6x6 para móviles)
+            return Math.min(3 + Math.floor((lvl - 1) / 3), 6);
+        }
+
+        // Rota una máscara binaria 90° horario
+        function rotateMask(mask) {
+            return ((mask << 1) | (mask >> 3)) & 15;
+        }
+
+        // Busca el tipo de pieza y la rotación necesaria para una máscara dada
+        function getPieceInfo(targetMask) {
+            for (const [type, data] of Object.entries(PIECES)) {
+                let m = data.mask;
+                for (let rot = 0; rot < 4; rot++) {
+                    if (m === targetMask) return { type, rot };
+                    m = rotateMask(m);
+                }
+            }
+            return { type: 'cross', rot: 0 }; 
+        }
+
+        function getDirBit(from, to, size) {
+            let fr = Math.floor(from / size), fc = from % size;
+            let tr = Math.floor(to / size), tc = to % size;
+            if (tr < fr) return 1; // N
+            if (tc > fc) return 2; // E
+            if (tr > fr) return 4; // S
+            if (tc < fc) return 8; // W
+            return 0;
+        }
+
+        function generateProceduralBoard(size) {
+            let path = [];
+            let visited = new Set();
+            let target = size * size - 1;
+
+            // 1. DFS Random para asegurar que siempre haya un camino posible
+            function dfs(curr) {
+                if (curr === target) {
+                    path.push(curr);
+                    return true;
+                }
+                visited.add(curr);
+                path.push(curr);
+
+                let r = Math.floor(curr / size);
+                let c = curr % size;
+                let dirs = [0,1,2,3].sort(() => Math.random() - 0.5);
+
+                for(let d of dirs) {
+                    let nr = r + [-1, 0, 1, 0][d];
+                    let nc = c + [0, 1, 0, -1][d];
+                    let next = nr * size + nc;
+                    if(nr>=0 && nr<size && nc>=0 && nc<size && !visited.has(next)) {
+                        if(dfs(next)) return true;
+                    }
+                }
+                path.pop();
+                return false;
+            }
+            dfs(0);
+
+            // 2. Asignar máscaras correctas al camino principal
+            let gridMasks = new Array(size*size).fill(0);
+            for(let i=0; i < path.length; i++) {
+                let curr = path[i];
+                let mask = 0;
+                if (i > 0) mask |= getDirBit(curr, path[i-1], size);
+                if (i < path.length - 1) mask |= getDirBit(curr, path[i+1], size);
+                gridMasks[curr] = mask;
+            }
+
+            // 3. Rellenar vacíos y añadir dificultad corrupta (fake exits)
+            for(let i=0; i < size*size; i++) {
+                if (i === 0 || i === target) continue;
+                
+                if (gridMasks[i] === 0) {
+                    // Celdas vacías -> piezas aleatorias
+                    let validMasks = [3, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15];
+                    gridMasks[i] = validMasks[Math.floor(Math.random() * validMasks.length)];
+                } else {
+                    // Dificultad: Añadir salidas extra al camino correcto para despistar
+                    let corruptionChance = Math.min(0.1 + (currentLevel * 0.05), 0.5);
+                    if (Math.random() < corruptionChance) {
+                        let randomBit = [1,2,4,8][Math.floor(Math.random()*4)];
+                        gridMasks[i] |= randomBit;
+                    }
+                }
+            }
+
+            // 4. Construir el tablero final
+            board = [];
+            for(let i=0; i < size*size; i++) {
+                if (i === 0) {
+                    board.push({ type: 'start', rot: 0, fixed: true, symbol: 'SRC' });
+                } else if (i === target) {
+                    board.push({ type: 'target', rot: 0, fixed: true, symbol: 'TRG' });
+                } else {
+                    let info = getPieceInfo(gridMasks[i]);
+                    board.push({
+                        type: info.type,
+                        rot: Math.floor(Math.random() * 4), // Desordenar!
+                        fixed: false,
+                        symbol: PIECES[info.type].symbol
+                    });
+                }
+            }
+        }
+
+        function initLevel() {
+            gameActive = true;
+            gridSize = getGridSize(currentLevel);
+            document.documentElement.style.setProperty('--grid-size', gridSize);
+            document.getElementById('level-display').innerText = `[ LVL: ${currentLevel} ]`;
+            document.getElementById('btn-next').style.display = 'none';
+            document.getElementById('btn-restart').style.display = 'block';
+            
+            generateProceduralBoard(gridSize);
+            renderBoard();
+            validateFlow();
+        }
+
+        function nextLevel() {
+            currentLevel++;
+            initLevel();
+        }
+
+        function renderBoard() {
+            const container = document.getElementById('grid-container');
+            container.innerHTML = '';
+            
+            board.forEach((cell, index) => {
+                const div = document.createElement('div');
+                div.className = 'pipe-node';
+                if (cell.fixed) div.classList.add('fixed');
+                div.innerText = cell.symbol;
+                
+                if (!cell.fixed) {
+                    div.style.transform = `rotate(${cell.rot * 90}deg)`;
+                }
+                
+                div.onclick = () => rotateCell(index);
+                container.appendChild(div);
+            });
+        }
+
+        function rotateCell(index) {
+            if (!gameActive || board[index].fixed) return;
+            board[index].rot = (board[index].rot + 1) % 4;
+            renderBoard();
+            validateFlow();
+        }
+
+        // Obtiene el array [N, E, S, W] de una pieza rotada
+        function getExits(cell) {
+            if (cell.type === 'start' || cell.type === 'target') return [1, 1, 1, 1];
+            let mask = PIECES[cell.type].mask;
+            for(let i=0; i < cell.rot; i++) mask = rotateMask(mask);
+            return [(mask & 1)?1:0, (mask & 2)?1:0, (mask & 4)?1:0, (mask & 8)?1:0];
+        }
+
+        function validateFlow() {
+            let startIndex = 0;
+            let targetIndex = gridSize * gridSize - 1;
+
+            let queue = [startIndex];
+            let visited = new Array(board.length).fill(false);
+            visited[startIndex] = true;
+            
+            let activeNodes = new Set();
+            activeNodes.add(startIndex);
+
+            // N:0, E:1, S:2, W:3
+            const dr = [-1, 0, 1, 0];
+            const dc = [0, 1, 0, -1];
+            const opposite = [2, 3, 0, 1];
+
+            while(queue.length > 0) {
+                let curr = queue.shift();
+                let r = Math.floor(curr / gridSize);
+                let c = curr % gridSize;
+                let currExits = getExits(board[curr]);
+
+                for(let dir = 0; dir < 4; dir++) {
+                    if (currExits[dir] === 1) {
+                        let nr = r + dr[dir];
+                        let nc = c + dc[dir];
+                        
+                        if(nr >= 0 && nr < gridSize && nc >= 0 && nc < gridSize) {
+                            let nextIdx = nr * gridSize + nc;
+                            let nextExits = getExits(board[nextIdx]);
+                            
+                            if(nextExits[opposite[dir]] === 1 && !visited[nextIdx]) {
+                                visited[nextIdx] = true;
+                                activeNodes.add(nextIdx);
+                                queue.push(nextIdx);
+                            }
+                        }
+                    }
+                }
+            }
+
+            const nodesDOM = document.querySelectorAll('.pipe-node');
+            nodesDOM.forEach((node, idx) => {
+                if (activeNodes.has(idx)) {
+                    node.classList.add('connected');
+                } else {
+                    node.classList.remove('connected');
+                }
+            });
+
+            const statusMsg = document.getElementById('status-msg');
+            if (visited[targetIndex]) {
+                gameActive = false;
+                statusMsg.style.color = '#00ffff';
+                statusMsg.innerHTML = '> BYPASS COMPLETADO. ACCESO CONCEDIDO.';
+                document.getElementById('btn-restart').style.display = 'none';
+                document.getElementById('btn-next').style.display = 'block';
+            } else {
+                statusMsg.style.color = '#ff9966';
+                statusMsg.innerHTML = '> Estado: Buscando ruta de datos...';
+            }
+        }
+
+        // Iniciar el juego
+        initLevel();
+    </script>
+</body>
+</html>
