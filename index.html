@@ -1,391 +1,1498 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta name="google-site-verification" content="SoM7uMHM_aVpeFbVifwL9c7XdTC3ZZbXns4dKT-M3W0" />
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agorlab | Un laboratorio digital a la vista de todos</title>
-    
-    <link rel="icon" type="image/png" href="/favicon.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FF5F00">
+<title>Agorlab · Launcher de PWAs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #FF5F00;
+    --bg: #FAFAFA;
+    --bg-elev: #FFFFFF;
+    --text: #111111;
+    --text-soft: #555555;
+    --border: #E5E5E5;
+    --danger: #EF4444;
+    --success: #10B981;
+    --warning: #F59E0B;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow: 0 2px 12px rgba(0,0,0,.06);
+    --shadow-lg: 0 10px 40px rgba(0,0,0,.12);
+    --transition: .25s cubic-bezier(.4,0,.2,1);
+  }
+  [data-theme="dark"] {
+    --bg: #0E0E10;
+    --bg-elev: #18181B;
+    --text: #F5F5F5;
+    --text-soft: #A1A1AA;
+    --border: #2A2A2E;
+    --shadow: 0 2px 12px rgba(0,0,0,.4);
+    --shadow-lg: 0 10px 40px rgba(0,0,0,.6);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; }
+  body {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    transition: background var(--transition), color var(--transition);
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  input, textarea, select, button { font-family: inherit; }
 
-    <style>
-        :root {
-            --primary-color: #FF5F00;
-            --primary-rgb: 255, 95, 0;
-            --primary-glow: rgba(255, 95, 0, 0.4);
-            --text-secondary: #ff8533;
-            --text-muted: rgba(255, 140, 66, 0.92);
-        }
+  /* HEADER */
+  header {
+    position: sticky; top: 0; z-index: 50;
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+  }
+  .header-inner {
+    display:flex; align-items:center; gap:12px;
+    max-width:1200px; margin:0 auto;
+  }
+  .logo {
+    font-weight:700; font-size:20px;
+    display:flex; align-items:center; gap:8px;
+    white-space:nowrap;
+  }
+  .logo-dot {
+    width:12px; height:12px;
+    background: var(--accent);
+    border-radius: 3px;
+    transform: rotate(45deg);
+    box-shadow: 0 0 20px var(--accent);
+  }
+  .search { flex:1; position:relative; }
+  .search input {
+    width:100%;
+    background: var(--bg-elev);
+    border:1px solid var(--border);
+    color: var(--text);
+    padding: 10px 14px 10px 40px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    transition: border var(--transition);
+  }
+  .search input:focus { outline:none; border-color: var(--accent); }
+  .search::before {
+    content: "🔍";
+    position: absolute;
+    left: 12px; top: 50%;
+    transform: translateY(-50%);
+    opacity: .6;
+    font-size: 14px;
+  }
+  .icon-btn {
+    width: 40px; height: 40px;
+    display:flex; align-items:center; justify-content:center;
+    background: var(--bg-elev);
+    border:1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 18px;
+    transition: all var(--transition);
+  }
+  .icon-btn:hover { border-color: var(--accent); }
+  .icon-btn.loading { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            background-color: #030303;
-            /* Filtro tipo CRT más oscuro, sutil y constante, tintado ligeramente con el color principal */
-            background-image: linear-gradient(rgba(0, 0, 0, 0.45) 50%, rgba(var(--primary-rgb), 0.07) 50%);
-            background-size: 100% 4px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: var(--text-secondary); 
-            font-family: 'Courier New', Courier, monospace;
-            overflow-x: hidden;
-            transition: color 0.3s ease;
-        }
+  /* HERO */
+  .hero { max-width:1200px; margin:0 auto; padding: 20px 16px; }
+  .hero-card {
+    position: relative;
+    background: linear-gradient(135deg, var(--accent) 0%, #FF8C42 100%);
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    color: white;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform var(--transition);
+  }
+  .hero-card.empty-hero {
+    background: linear-gradient(135deg, #2a2a2e 0%, #3f3f46 100%);
+    cursor: default;
+    text-align: center;
+  }
+  .hero-card:not(.empty-hero):hover { transform: translateY(-2px); }
+  .hero-card::after {
+    content:""; position:absolute;
+    right:-60px; bottom:-60px;
+    width:200px; height:200px;
+    background: rgba(255,255,255,.1);
+    border-radius: 50%;
+  }
+  .hero-badge {
+    display:inline-block;
+    background: rgba(255,255,255,.2);
+    backdrop-filter: blur(10px);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .hero h1 { font-size: 24px; margin-bottom: 6px; position: relative; z-index:1; }
+  .hero p { opacity: .9; font-size: 14px; position: relative; z-index:1; }
 
-        /* --- ESTILOS DE NAVEGACIÓN / BOTÓN "A" --- */
-        #agorlab-toggle {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            background-color: #000000;
-            color: var(--primary-color);
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 24px;
-            font-weight: bold;
-            border: 1px solid var(--primary-color);
-            padding: 4px 12px;
-            cursor: pointer;
-            z-index: 9999;
-            box-shadow: 0 0 8px var(--primary-glow);
-            transition: all 0.2s ease;
-        }
-        #agorlab-toggle:hover {
-            background-color: var(--primary-color);
-            color: #000000;
-            box-shadow: 0 0 12px var(--primary-color);
-        }
+  /* CATEGORIES */
+  .categories {
+    max-width:1200px; margin:0 auto;
+    padding: 8px 16px 16px;
+    display:flex; gap:8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .categories::-webkit-scrollbar { display:none; }
+  .chip {
+    flex-shrink: 0;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+  }
+  .chip:hover { border-color: var(--accent); }
+  .chip.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
 
-        #agorlab-tooltip {
-            position: fixed;
-            top: 55px;
-            left: 10px;
-            background-color: #ffffff;
-            color: #000000;
-            border: 2px solid var(--primary-color);
-            border-radius: 10px;
-            padding: 10px 28px 10px 12px;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.82rem;
-            font-weight: bold;
-            z-index: 10000;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            max-width: 240px;
-            line-height: 1.3;
-            animation: tooltip-fade 0.3s ease-in-out;
-        }
-        #agorlab-tooltip::before {
-            content: '';
-            position: absolute;
-            top: -9px;
-            left: 12px;
-            border-width: 0 7px 9px 7px;
-            border-style: solid;
-            border-color: transparent transparent var(--primary-color) transparent;
-        }
-        #agorlab-tooltip-close {
-            position: absolute;
-            top: 4px;
-            right: 6px;
-            background: none;
-            border: none;
-            font-size: 14px;
-            font-weight: bold;
-            color: #666;
-            cursor: pointer;
-            line-height: 1;
-            padding: 2px 4px;
-        }
-        #agorlab-tooltip-close:hover {
-            color: var(--primary-color);
-        }
+  /* SECTION */
+  section { max-width:1200px; margin:0 auto; padding: 8px 16px 24px; }
+  .section-title {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom: 14px;
+  }
+  .section-title h2 { font-size: 18px; font-weight: 600; }
+  .section-title .count { font-size: 12px; color: var(--text-soft); }
 
-        @keyframes tooltip-fade {
-            from { opacity: 0; transform: translateY(-5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+  /* APP GRID */
+  .app-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+  .app-card {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    display: flex;
+    gap: 14px;
+    cursor: pointer;
+    transition: all var(--transition);
+    position: relative;
+  }
+  .app-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+  .app-icon {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    flex-shrink: 0;
+    display:flex; align-items:center; justify-content:center;
+    font-size: 28px;
+    background: linear-gradient(135deg, var(--icon-from, var(--accent)), var(--icon-to, #FF8C42));
+    box-shadow: 0 4px 12px rgba(0,0,0,.1);
+  }
+  .app-info { flex:1; min-width:0; }
+  .app-info h3 {
+    font-size: 15px; font-weight: 600;
+    margin-bottom: 2px;
+    display:flex; align-items:center; gap:6px;
+  }
+  .verified {
+    width:14px; height:14px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size: 9px;
+  }
+  .app-info .dev { font-size: 12px; color: var(--text-soft); margin-bottom: 4px; }
+  .app-info .desc {
+    font-size: 13px;
+    color: var(--text-soft);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .app-meta {
+    position: absolute;
+    top: 14px; right: 14px;
+    display:flex; flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--text-soft);
+  }
+  .app-rating {
+    display:flex; align-items:center; gap:2px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .fav-btn {
+    position:absolute;
+    bottom: 14px; right: 14px;
+    background: none; border: none;
+    font-size: 18px;
+    cursor: pointer;
+    opacity: .4;
+    transition: all var(--transition);
+    padding: 4px;
+  }
+  .fav-btn:hover, .fav-btn.active {
+    opacity: 1;
+    transform: scale(1.2);
+  }
 
-        #agorlab-panel {
-            position: fixed;
-            top: 60px;
-            left: 10px;
-            background-color: rgba(0, 0, 0, 0.95);
-            color: var(--primary-color);
-            font-family: 'Courier New', Courier, monospace;
-            border: 1px solid var(--primary-color);
-            padding: 15px;
-            z-index: 9998;
-            box-shadow: 0 0 10px var(--primary-glow);
-            min-width: 250px;
-            display: none; 
-            flex-direction: column;
-            gap: 10px;
-        }
-        #agorlab-panel.visible {
-            display: flex;
-        }
-        #agorlab-panel h3 { font-size: 1.1rem; letter-spacing: 1px; margin-bottom: 5px; margin-top: 0; color: var(--primary-color); }
-        #agorlab-panel label { font-size: 0.75rem; color: #aaa; text-transform: uppercase; font-family: 'Inter', sans-serif;}
-        
-        /* Estilos del selector de color tipo ruedita */
-        .color-picker-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #181818;
-            padding: 8px;
-            border: 1px solid #444;
-            border-radius: 4px;
-        }
-        #color-picker-input {
-            appearance: none;
-            -webkit-appearance: none;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            background: transparent;
-        }
-        #color-picker-input::-webkit-color-swatch-wrapper { padding: 0; }
-        #color-picker-input::-webkit-color-swatch { border: 2px solid var(--primary-color); border-radius: 50%; }
-        
-        .color-picker-text {
-            font-family: 'Inter', sans-serif;
-            font-size: 0.85rem;
-            color: #fff;
-        }
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.6);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 100;
+    animation: fadeIn .2s;
+  }
+  .modal-overlay.active { display: flex; }
+  @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
+  .modal {
+    background: var(--bg);
+    border-radius: 20px 20px 0 0;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp .3s cubic-bezier(.4,0,.2,1);
+  }
+  @keyframes slideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }
+  .modal-handle {
+    width: 40px; height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 10px auto;
+  }
+  .modal-hero {
+    padding: 20px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .modal-hero .app-icon { width: 72px; height: 72px; font-size: 36px; }
+  .modal-hero h2 { font-size: 22px; margin-bottom: 4px; }
+  .modal-hero .dev { color: var(--accent); font-size: 13px; font-weight: 500; }
+  .modal-actions { padding: 0 20px; display:flex; gap:10px; }
+  .btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    border: none;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all var(--transition);
+    display:flex; align-items:center; justify-content:center; gap:6px;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #E55500; }
+  .btn-primary:disabled { background: var(--border); color: var(--text-soft); cursor: not-allowed; }
+  .btn-secondary {
+    background: var(--bg-elev);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-danger { background: var(--danger); color: white; }
+  .btn-danger:hover { background: #DC2626; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-soft);
+    border: none;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  .btn-ghost:hover { color: var(--accent); }
+  .modal-stats {
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    text-align: center;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin: 20px 20px 0;
+  }
+  .stat-num { font-weight: 600; font-size: 14px; }
+  .stat-label { font-size: 11px; color: var(--text-soft); }
+  .modal-body { padding: 20px; }
+  .modal-body h4 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text-soft);
+    margin-bottom: 8px;
+  }
+  .modal-body p { color: var(--text); font-size: 14px; line-height: 1.6; }
 
-        /* --- CONTENIDO PRINCIPAL --- */
-        .main-container {
-            max-width: 800px;
-            width: 100%;
-            padding: 20px;
-            text-align: center;
-            margin-top: 8vh;
-        }
+  /* FORMS */
+  .form-group { margin-bottom: 14px; }
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text-soft);
+    margin-bottom: 6px;
+  }
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 14px;
+    transition: border var(--transition);
+  }
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+  .form-row { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form-row-3 { display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .color-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .color-row input[type="color"] {
+    width: 44px; height: 44px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 2px;
+    cursor: pointer;
+    background: var(--bg-elev);
+  }
+  .color-row input[type="text"] { flex:1; min-width: 80px; }
+  .checkbox-label {
+    display:flex; align-items:center; gap:8px;
+    font-size: 14px;
+    color: var(--text);
+    cursor: pointer;
+    user-select: none;
+  }
+  .checkbox-label input {
+    width: 18px; height: 18px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
 
-        .logo-text {
-            font-size: clamp(4rem, 12vw, 8rem);
-            font-weight: bold;
-            margin: 0 0 50px 0;
-            color: var(--primary-color); 
-            text-shadow: 0px 0px 20px var(--primary-glow);
-            letter-spacing: -3px;
-            transition: color 0.3s ease, text-shadow 0.3s ease;
-        }
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display:none; }
+  .tab {
+    padding: 10px 14px;
+    background: none;
+    border: none;
+    color: var(--text-soft);
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all var(--transition);
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
 
-        /* Animación del cursor parpadeante */
-        .cursor {
-            animation: blink 1s step-end infinite;
-        }
+  /* APP LIST (ADMIN) */
+  .admin-app-list { display:flex; flex-direction:column; gap:8px; }
+  .admin-app-item {
+    display:flex; align-items:center; gap:12px;
+    padding: 10px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+  .admin-app-item .app-icon { width: 40px; height: 40px; font-size: 20px; border-radius: 10px; }
+  .admin-app-item .info { flex:1; min-width:0; }
+  .admin-app-item .info h4 {
+    font-size: 14px; margin: 0;
+    color: var(--text);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .admin-app-item .info p { font-size: 12px; color: var(--text-soft); margin: 0; }
+  .admin-app-item .actions { display:flex; gap:6px; }
+  .mini-btn {
+    width: 32px; height: 32px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 14px;
+    transition: all var(--transition);
+  }
+  .mini-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .mini-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
 
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
+  /* PIN SCREEN */
+  .pin-screen { padding: 30px 20px; text-align:center; }
+  .pin-screen h2 { font-size: 20px; margin-bottom: 6px; }
+  .pin-screen p { color: var(--text-soft); font-size: 13px; margin-bottom: 20px; }
+  .pin-input {
+    font-size: 24px !important;
+    text-align: center;
+    letter-spacing: 8px;
+    font-family: 'JetBrains Mono', monospace !important;
+  }
+  .pin-error {
+    color: var(--danger);
+    font-size: 13px;
+    margin-top: 10px;
+    display: none;
+  }
+  .pin-error.show { display: block; }
 
-        .prologo {
-            display: block;
-            width: 100%;
-            max-width: 650px;    
-            margin: 0 auto 60px auto; 
-            padding: 0 20px;     
-            text-align: center;  
-            box-sizing: border-box;
-        }
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 30px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-elev);
+    border: 1px solid var(--accent);
+    color: var(--text);
+    padding: 12px 20px;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-lg);
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: all var(--transition);
+    max-width: calc(100% - 32px);
+    text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(-10px); }
+  .toast.error { border-color: var(--danger); }
+  .toast.success { border-color: var(--success); }
+  .toast.warning { border-color: var(--warning); }
 
-        .prologo p {
-            font-size: 1.25rem;
-            line-height: 1.8;    
-            letter-spacing: 0.5px;
-            margin-bottom: 2rem;
-            color: var(--text-secondary); 
-            transition: color 0.3s ease;
-        }
+  /* INSTALL BANNER */
+  .install-banner {
+    position: fixed;
+    bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-elev);
+    border: 1px solid var(--accent);
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    display: none;
+    align-items: center;
+    gap: 12px;
+    z-index: 60;
+    max-width: calc(100% - 32px);
+  }
+  .install-banner.show { display: flex; }
 
-        .prologo strong {
-            font-weight: bold;
-            color: var(--primary-color);
-            transition: color 0.3s ease;
-        }
+  /* FOOTER */
+  footer {
+    max-width:1200px; margin: 0 auto;
+    padding: 30px 16px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-soft);
+    border-top: 1px solid var(--border);
+    margin-top: 20px;
+  }
+  footer .mono { color: var(--accent); }
+  .admin-trigger {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    opacity: .5;
+    transition: opacity var(--transition);
+    margin-bottom: 10px;
+    display: inline-block;
+  }
+  .admin-trigger:hover { opacity: 1; color: var(--accent); }
 
-        /* --- CONTENEDOR DE ENLACES --- */
-        .contenedor-enlaces {
-            display: flex;
-            flex-direction: column;
-            gap: 40px; 
-            width: 100%;
-            margin-bottom: 60px;
-            align-items: center;
-        }
+  /* STATUS INDICATOR */
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 500;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+  }
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--text-soft);
+  }
+  .status-dot.online { background: var(--success); box-shadow: 0 0 6px var(--success); }
+  .status-dot.offline { background: var(--text-soft); }
+  .status-dot.error { background: var(--danger); }
 
-        .enlace-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-        }
+  /* INFO BOX */
+  .info-box {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--text-soft);
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+  .info-box a { color: var(--accent); text-decoration: none; }
+  .info-box a:hover { text-decoration: underline; }
+  .info-box code {
+    background: var(--bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    border: 1px solid var(--border);
+  }
 
-        .btn-interactivo {
-            display: inline-block;
-            color: var(--primary-color);
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 1.3rem;
-            letter-spacing: 2px;
-            border: 1px dashed var(--primary-color);
-            padding: 12px 30px;
-            background-color: rgba(255, 95, 0, 0.03);
-            transition: all 0.2s ease-in-out;
-        }
+  /* JSON PREVIEW */
+  .json-preview {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    max-height: 200px;
+    overflow: auto;
+    white-space: pre;
+    color: var(--text);
+  }
 
-        .btn-interactivo:hover {
-            background-color: var(--primary-color);
-            color: #050505;
-            box-shadow: 0px 0px 20px var(--primary-glow);
-            border: 1px solid var(--primary-color);
-            cursor: pointer;
-        }
+  /* EMPTY */
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-soft);
+  }
+  .empty-icon { font-size: 48px; margin-bottom: 12px; }
 
-        .desc-sutil {
-            font-size: 1.12rem;
-            color: var(--text-muted);
-            max-width: 500px;
-            text-align: center;
-            line-height: 1.6;
-            transition: color 0.3s ease;
-        }
-    </style>
+  @media (min-width: 768px) {
+    .modal { border-radius: 20px; margin-bottom: 20px; }
+    .modal-overlay { align-items: center; }
+    .hero h1 { font-size: 32px; }
+  }
+</style>
 </head>
-<body> 
+<body>
 
-    <!-- Botón minimalista de Agorlab -->
-    <button id="agorlab-toggle">a</button>
-
-    <!-- Cartel explicativo descartable actualizado -->
-    <div id="agorlab-tooltip">
-        <button id="agorlab-tooltip-close" title="Cerrar">&times;</button>
-        ¡Este botón despliega un panel con una selección cromática para cambiar el color de acento de todo el sitio en tiempo real!
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-dot"></span>
+      <span>agorlab</span>
+      <span class="mono" style="color:var(--text-soft);font-weight:400;font-size:12px">/launcher</span>
     </div>
-    
-    <!-- El panel de cambio de color -->
-    <div id="agorlab-panel" class="hidden">
-        <h3>[ Agorlab Engine ]</h3>
-        <label>Selección Cromática:</label>
-        <div class="color-picker-wrapper">
-            <input type="color" id="color-picker-input" value="#FF5F00">
-            <span class="color-picker-text" id="color-hex-label">#FF5F00</span>
+    <div class="search">
+      <input type="text" id="search" placeholder="Buscar PWAs...">
+    </div>
+    <button class="icon-btn" id="refreshBtn" title="Recargar apps desde GitHub">🔄</button>
+    <button class="icon-btn" id="themeToggle" title="Cambiar tema">🌙</button>
+  </div>
+</header>
+
+<div class="hero" id="heroWrap"></div>
+
+<div class="categories" id="categories"></div>
+
+<section>
+  <div class="section-title">
+    <h2 id="sectionTitle">Todas las apps</h2>
+    <span class="count" id="sectionCount"></span>
+  </div>
+  <div class="app-grid" id="appGrid"></div>
+  <div class="empty" id="empty" style="display:none">
+    <div class="empty-icon">🔍</div>
+    <p>No se encontraron apps</p>
+  </div>
+</section>
+
+<footer>
+  <button class="admin-trigger" id="adminTrigger" title="Admin">🔒</button>
+  <p>hecho con ☕ en <span class="mono">agorlab.com</span> · 2026</p>
+  <p style="margin-top:4px">ágora + laboratorio = PWAs para el pueblo</p>
+</footer>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<div class="install-banner" id="installBanner">
+  <span>📱 Instalá Agorlab en tu celu</span>
+  <button class="btn btn-primary" id="installBtn" style="flex:0;padding:8px 16px">Instalar</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ====== CONSTANTES ======
+  const ADMIN_PIN = '46348930';
+  const STORAGE_APPS = 'agorlab_apps';
+  const STORAGE_FAVS = 'agorlab_favs';
+  const STORAGE_THEME = 'agorlab_theme';
+  const STORAGE_GITHUB = 'agorlab_github_config';
+  const GITHUB_FILE_PATH = 'apps.json';
+
+  // ====== ESTADO ======
+  let APPS = [];
+  let activeCategory = 'Todas';
+  let searchQuery = '';
+  let favorites = JSON.parse(localStorage.getItem(STORAGE_FAVS) || '[]');
+  let deferredInstall = null;
+  let isAdmin = false;
+  let editingAppId = null;
+  let currentSha = null; // SHA del archivo en GitHub para updates
+  let githubConfig = JSON.parse(localStorage.getItem(STORAGE_GITHUB) || 'null');
+
+  // ====== UTILIDADES ======
+  function saveAppsLocal() {
+    localStorage.setItem(STORAGE_APPS, JSON.stringify(APPS));
+  }
+  function getCategories() {
+    const cats = new Set(APPS.map(a => a.category).filter(Boolean));
+    return ['Todas', ...Array.from(cats)];
+  }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).substr(2,5); }
+  function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast show ${type}`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+  function escapeHtml(s) {
+    if (s === null || s === undefined) return '';
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ====== GITHUB API ======
+  async function githubApi(method, path, body = null) {
+    if (!githubConfig?.token) throw new Error('Sin configurar GitHub');
+    const url = `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}${path}`;
+    const opts = {
+      method,
+      headers: {
+        'Authorization': `Bearer ${githubConfig.token}`,
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Content-Type': 'application/json'
+      }
+    };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(url, opts);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `HTTP ${res.status}`);
+    }
+    if (res.status === 204) return null;
+    return res.json();
+  }
+
+  async function loadFromGitHub(showFeedback = false) {
+    if (!githubConfig?.token) {
+      // Fallback a localStorage
+      APPS = JSON.parse(localStorage.getItem(STORAGE_APPS) || '[]');
+      return;
+    }
+    try {
+      const refreshBtn = document.getElementById('refreshBtn');
+      refreshBtn?.classList.add('loading');
+      const data = await githubApi('GET', `/contents/${GITHUB_FILE_PATH}`);
+      const content = atob(data.content);
+      APPS = JSON.parse(content);
+      currentSha = data.sha;
+      saveAppsLocal();
+      renderAll();
+      if (showFeedback) showToast(`✅ ${APPS.length} apps cargadas desde GitHub`);
+    } catch (err) {
+      console.error('GitHub load error:', err);
+      if (err.message.includes('404')) {
+        // El archivo no existe todavía
+        APPS = JSON.parse(localStorage.getItem(STORAGE_APPS) || '[]');
+        currentSha = null;
+        if (showFeedback) showToast('No hay apps.json en el repo todavía', 'warning');
+      } else {
+        if (showFeedback) showToast(`Error: ${err.message}`, 'error');
+      }
+    } finally {
+      document.getElementById('refreshBtn')?.classList.remove('loading');
+    }
+  }
+
+  async function saveToGitHub(commitMessage = 'update apps') {
+    if (!githubConfig?.token) return false;
+    try {
+      const content = btoa(unescape(encodeURIComponent(JSON.stringify(APPS, null, 2))));
+      const body = {
+        message: commitMessage,
+        content
+      };
+      // Si ya existe el archivo, hay que pasar el SHA para update
+      if (currentSha) body.sha = currentSha;
+      else {
+        // Intentar obtener SHA por si existe pero no lo tenemos
+        try {
+          const existing = await githubApi('GET', `/contents/${GITHUB_FILE_PATH}`);
+          body.sha = existing.sha;
+        } catch {}
+      }
+      const res = await githubApi('PUT', `/contents/${GITHUB_FILE_PATH}`, body);
+      currentSha = res.content.sha;
+      return true;
+    } catch (err) {
+      console.error('GitHub save error:', err);
+      showToast(`Error al subir: ${err.message}`, 'error');
+      return false;
+    }
+  }
+
+  async function saveApps() {
+    saveAppsLocal();
+    if (githubConfig?.token) {
+      const name = editingAppId ? 'edit app' : 'add app';
+      const ok = await saveToGitHub(`[${name}] update apps.json`);
+      if (ok) showToast('💾 Guardado en localStorage + GitHub');
+    } else {
+      showToast('💾 Guardado en localStorage (sin GitHub configurado)');
+    }
+  }
+
+  // ====== RENDER PRINCIPAL ======
+  function renderHero() {
+    const wrap = document.getElementById('heroWrap');
+    const featured = APPS.find(a => a.featured) || APPS[0];
+    if (!featured) {
+      wrap.innerHTML = `
+        <div class="hero-card empty-hero">
+          <h1>Todavía no hay PWAs</h1>
+          <p>Entrá al panel 🔒 para agregar tu primera app</p>
+        </div>`;
+      return;
+    }
+    wrap.innerHTML = `
+      <div class="hero-card" id="heroCard" style="background: linear-gradient(135deg, ${featured.iconFrom || 'var(--accent)'} 0%, ${featured.iconTo || '#FF8C42'} 100%);">
+        <span class="hero-badge">✨ Destacado</span>
+        <h1>${escapeHtml(featured.name)}</h1>
+        <p>${escapeHtml(featured.desc || '')}</p>
+      </div>`;
+    document.getElementById('heroCard').addEventListener('click', () => openAppModal(featured.id));
+  }
+
+  function renderCategories() {
+    const cats = getCategories();
+    if (!cats.includes(activeCategory)) activeCategory = 'Todas';
+    const el = document.getElementById('categories');
+    el.innerHTML = cats.map(cat => `
+      <button class="chip ${cat === activeCategory ? 'active' : ''}" data-cat="${cat}">
+        ${escapeHtml(cat)}
+      </button>
+    `).join('');
+    el.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        activeCategory = chip.dataset.cat;
+        renderCategories();
+        renderApps();
+      });
+    });
+  }
+
+  function renderApps() {
+    const grid = document.getElementById('appGrid');
+    const empty = document.getElementById('empty');
+    const filtered = APPS.filter(app => {
+      const matchCat = activeCategory === 'Todas' || app.category === activeCategory;
+      const q = searchQuery;
+      const matchSearch = !q ||
+        (app.name || '').toLowerCase().includes(q) ||
+        (app.desc || '').toLowerCase().includes(q) ||
+        (app.category || '').toLowerCase().includes(q);
+      return matchCat && matchSearch;
+    });
+
+    document.getElementById('sectionTitle').textContent =
+      activeCategory === 'Todas' ? 'Todas las apps' : activeCategory;
+    document.getElementById('sectionCount').textContent = `${filtered.length} app${filtered.length===1?'':'s'}`;
+
+    if (filtered.length === 0) {
+      grid.style.display = 'none';
+      empty.style.display = 'block';
+      return;
+    }
+    grid.style.display = 'grid';
+    empty.style.display = 'none';
+
+    grid.innerHTML = filtered.map(app => `
+      <div class="app-card" data-id="${app.id}">
+        <div class="app-icon" style="--icon-from:${app.iconFrom};--icon-to:${app.iconTo}">
+          ${app.icon || '📱'}
         </div>
-    </div>
-
-    <div class="main-container">
-        
-        <h1 class="logo-text">Agorlab<span class="cursor">_</span></h1>
-        
-        <section class="prologo">
-            <p>Hola, mi nombre es <strong>Demián</strong>.</p>
-            
-            <p><strong>Agorlab</strong> toma su nombre de dos conceptos clave:
-
-Por un lado, el ágora: en la antigua Grecia era la plaza pública de encuentro, debate e intercambio; yo siento que internet es exactamente eso hoy en día, nuestro ágora contemporáneo. Por el otro, un laboratorio, el entorno técnico de pruebas destinado al desarrollo, la experimentación y el prototipado.
-
-Agorlab es el híbrido de ambos mundos: mi portafolio, mi blog, y el rincón que dedico a probar y registrar cualquier idea que se me pase por la cabeza.</p>
-            
-            
-        </section>
-
-        <div class="contenedor-enlaces">
-            
-            <div class="enlace-item">
-                <a href="/webs" class="btn-interactivo">[ Webs ]</a>
-                <span class="desc-sutil">> Hago webs personalizadas para negocios, empresas o proyectos particulares a precios accesibles.</span>
-            </div>
-
-            <div class="enlace-item">
-                <a href="/agorlaburantes" class="btn-interactivo">[ Agorlaburantes ]</a>
-                <span class="desc-sutil">> Todos estuvimos sin trabajo alguna vez, aca te ofrezco herramientas que pueden ayudarte u orientarte.</span>
-            </div>
-
-            <div class="enlace-item">
-                <a href="/nanarincon" class="btn-interactivo">[ Nanarincón ]</a>
-                <span class="desc-sutil">> Un espacio informal dedicado a Nana, mi compañera de vida.</span>
-            </div>
-
-            <div class="enlace-item">
-                <a href="/juegos" class="btn-interactivo">[ Juegos ]</a>
-                <span class="desc-sutil">> Mis proyectos de minijuegos y experiencias interactivas.</span>
-            </div>
-
-            <div class="enlace-item">
-                <a href="/bitacora" class="btn-interactivo">[ Mi pizarra ]</a>
-                <span class="desc-sutil">> Mirá mi pizarra personal en tiempo real.</span>
-            </div>
-
+        <div class="app-info">
+          <h3>
+            ${escapeHtml(app.name)}
+            ${app.verified ? '<span class="verified">✓</span>' : ''}
+          </h3>
+          <div class="dev">${escapeHtml(app.dev || '')}</div>
+          <div class="desc">${escapeHtml(app.desc || '')}</div>
         </div>
-    </div>
+        <div class="app-meta">
+          ${app.rating ? `<div class="app-rating">⭐ ${app.rating}</div>` : ''}
+          ${app.installs ? `<div>${escapeHtml(app.installs)}</div>` : ''}
+        </div>
+        <button class="fav-btn ${favorites.includes(app.id) ? 'active' : ''}" data-fav="${app.id}">
+          ${favorites.includes(app.id) ? '❤️' : '🤍'}
+        </button>
+      </div>
+    `).join('');
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const btnToggle = document.getElementById('agorlab-toggle');
-            const panelAgorlab = document.getElementById('agorlab-panel');
-            const tooltip = document.getElementById('agorlab-tooltip');
-            const btnCloseTooltip = document.getElementById('agorlab-tooltip-close');
-            const colorPicker = document.getElementById('color-picker-input');
-            const colorHexLabel = document.getElementById('color-hex-label');
+    grid.querySelectorAll('.app-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.fav-btn')) return;
+        openAppModal(card.dataset.id);
+      });
+    });
+    grid.querySelectorAll('.fav-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleFav(btn.dataset.fav);
+      });
+    });
+  }
 
-            if (btnCloseTooltip) {
-                btnCloseTooltip.addEventListener('click', () => {
-                    tooltip.style.display = 'none';
-                });
-            }
+  function toggleFav(id) {
+    if (favorites.includes(id)) favorites = favorites.filter(f => f !== id);
+    else favorites.push(id);
+    localStorage.setItem(STORAGE_FAVS, JSON.stringify(favorites));
+    renderApps();
+  }
 
-            btnToggle.addEventListener('click', () => {
-                panelAgorlab.classList.toggle('visible');
-                if (tooltip) tooltip.style.display = 'none';
+  function openAppModal(id) {
+    const app = APPS.find(a => a.id === id);
+    if (!app) return;
+    const content = document.getElementById('modalContent');
+    content.innerHTML = `
+      <div class="modal-handle"></div>
+      <div class="modal-hero">
+        <div class="app-icon" style="--icon-from:${app.iconFrom || '#FF5F00'};--icon-to:${app.iconTo || '#FF8C42'}">
+          ${app.icon || '📱'}
+        </div>
+        <div style="flex:1">
+          <h2>${escapeHtml(app.name)}</h2>
+          <div class="dev">${escapeHtml(app.dev || '')} ${app.verified ? '<span class="verified" style="margin-left:4px">✓</span>' : ''}</div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <a class="btn btn-primary" href="${escapeHtml(app.url || '#')}" target="_blank" rel="noopener">
+          Abrir PWA →
+        </a>
+        <button class="btn btn-secondary" onclick="closeModal()">✕ Cerrar</button>
+      </div>
+      <div class="modal-stats">
+        <div><div class="stat-num">⭐ ${app.rating || '—'}</div><div class="stat-label">Rating</div></div>
+        <div><div class="stat-num">${escapeHtml(app.installs || '—')}</div><div class="stat-label">Instalaciones</div></div>
+        <div><div class="stat-num">${escapeHtml(app.size || '—')}</div><div class="stat-label">Tamaño</div></div>
+      </div>
+      <div class="modal-body">
+        <h4>Descripción</h4>
+        <p>${escapeHtml(app.longDesc || app.desc || 'Sin descripción.')}</p>
+        <h4 style="margin-top:16px">Información</h4>
+        <p class="mono" style="font-size:12px;color:var(--text-soft);margin-top:4px">
+          Categoría: ${escapeHtml(app.category || '—')} · PWA instalable
+          ${app.version ? ` · v${escapeHtml(app.version)}` : ''}
+        </p>
+      </div>
+    `;
+    document.getElementById('modal').classList.add('active');
+  }
 
-                if (panelAgorlab.classList.contains('visible')) {
-                    btnToggle.style.backgroundColor = colorPicker.value;
-                    btnToggle.style.color = '#000000';
-                } else {
-                    btnToggle.style.backgroundColor = '#000000';
-                    btnToggle.style.color = colorPicker.value;
-                }
-            });
+  function closeModal() {
+    document.getElementById('modal').classList.remove('active');
+    editingAppId = null;
+  }
+  document.getElementById('modal').addEventListener('click', (e) => {
+    if (e.target.id === 'modal') closeModal();
+  });
 
-            // Función para convertir HEX a RGB y actualizar dinámicamente el tema y el filtro sutil
-            function updateThemeColor(hex) {
-                colorHexLabel.textContent = hex;
-                
-                let r = parseInt(hex.substring(1, 3), 16);
-                let g = parseInt(hex.substring(3, 5), 16);
-                let b = parseInt(hex.substring(5, 7), 16);
+  // ====== BÚSQUEDA ======
+  document.getElementById('search').addEventListener('input', (e) => {
+    searchQuery = e.target.value.toLowerCase();
+    renderApps();
+  });
 
-                let root = document.documentElement;
-                root.style.setProperty('--primary-color', hex);
-                root.style.setProperty('--primary-rgb', `${r}, ${g}, ${b}`);
-                root.style.setProperty('--primary-glow', `rgba(${r}, ${g}, ${b}, 0.4)`);
-                
-                root.style.setProperty('--text-secondary', hex);
-                root.style.setProperty('--text-muted', `rgba(${r}, ${g}, ${b}, 0.92)`);
+  // ====== REFRESH ======
+  document.getElementById('refreshBtn').addEventListener('click', () => {
+    loadFromGitHub(true);
+  });
 
-                if (panelAgorlab.classList.contains('visible')) {
-                    btnToggle.style.backgroundColor = hex;
-                } else {
-                    btnToggle.style.color = hex;
-                    btnToggle.style.borderColor = hex;
-                }
-            }
+  // ====== THEME ======
+  if (localStorage.getItem(STORAGE_THEME) === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (isDark) {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem(STORAGE_THEME, 'light');
+      document.getElementById('themeToggle').textContent = '🌙';
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem(STORAGE_THEME, 'dark');
+      document.getElementById('themeToggle').textContent = '☀️';
+    }
+  });
+  document.getElementById('themeToggle').textContent =
+    localStorage.getItem(STORAGE_THEME) === 'dark' ? '☀️' : '🌙';
 
-            colorPicker.addEventListener('input', (e) => {
-                updateThemeColor(e.target.value);
-            });
-        });
-    </script>
+  // ====== ADMIN: PIN ======
+  document.getElementById('adminTrigger').addEventListener('click', () => {
+    if (isAdmin) { openAdminPanel(); return; }
+    openPinScreen();
+  });
+
+  function openPinScreen() {
+    const content = document.getElementById('modalContent');
+    content.innerHTML = `
+      <div class="modal-handle"></div>
+      <div class="pin-screen">
+        <h2>🔒 Acceso admin</h2>
+        <p>Ingresá el PIN para gestionar las PWAs</p>
+        <div class="form-group">
+          <input type="password" id="pinInput" class="pin-input" maxlength="8" inputmode="numeric" placeholder="••••••••" autofocus>
+          <div class="pin-error" id="pinError">PIN incorrecto</div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:10px">
+          <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-primary" id="pinSubmit">Entrar</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('modal').classList.add('active');
+    const input = document.getElementById('pinInput');
+    const submit = document.getElementById('pinSubmit');
+    setTimeout(() => input.focus(), 100);
+    const trySubmit = () => {
+      if (input.value === ADMIN_PIN) {
+        isAdmin = true;
+        showToast('Sesión admin iniciada 🔓');
+        openAdminPanel();
+      } else {
+        document.getElementById('pinError').classList.add('show');
+        input.value = '';
+        input.focus();
+      }
+    };
+    submit.addEventListener('click', trySubmit);
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') trySubmit(); });
+  }
+
+  // ====== ADMIN PANEL ======
+  function openAdminPanel(tab='list') {
+    const content = document.getElementById('modalContent');
+    content.innerHTML = `
+      <div class="modal-handle"></div>
+      <div style="padding:20px 20px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <h2 style="font-size:20px">Panel admin</h2>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="status-pill">
+            <span class="status-dot ${githubConfig?.token ? 'online' : 'offline'}"></span>
+            ${githubConfig?.token ? 'GitHub' : 'Local'}
+          </span>
+          <button class="btn-ghost" id="logoutBtn">Salir</button>
+        </div>
+      </div>
+      <div class="tabs">
+        <button class="tab ${tab==='list'?'active':''}" data-tab="list">Apps (${APPS.length})</button>
+        <button class="tab ${tab==='form'?'active':''}" data-tab="form">${editingAppId?'Editar':'Nueva'}</button>
+        <button class="tab ${tab==='github'?'active':''}" data-tab="github">GitHub</button>
+        <button class="tab ${tab==='data'?'active':''}" data-tab="data">Datos</button>
+      </div>
+      <div id="tabContent" style="padding:0 20px 20px"></div>
+    `;
+    document.getElementById('modal').classList.add('active');
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      isAdmin = false;
+      showToast('Sesión cerrada');
+      closeModal();
+    });
+    content.querySelectorAll('.tab').forEach(t => {
+      t.addEventListener('click', () => renderAdminTab(t.dataset.tab));
+    });
+    renderAdminTab(tab);
+  }
+
+  function renderAdminTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => {
+      t.classList.toggle('active', t.dataset.tab === tab);
+    });
+    const c = document.getElementById('tabContent');
+    if (tab === 'list') renderAdminList(c);
+    else if (tab === 'form') renderAdminForm(c);
+    else if (tab === 'github') renderAdminGitHub(c);
+    else if (tab === 'data') renderAdminData(c);
+  }
+
+  function renderAdminList(c) {
+    if (APPS.length === 0) {
+      c.innerHTML = `
+        <div class="empty">
+          <div class="empty-icon">📦</div>
+          <p>Todavía no hay PWAs</p>
+          <button class="btn btn-primary" style="margin-top:14px;flex:0 0 auto;padding:10px 20px" onclick="document.querySelector('[data-tab=form]').click()">
+            + Agregar primera app
+          </button>
+        </div>`;
+      return;
+    }
+    c.innerHTML = `
+      <div class="admin-app-list">
+        ${APPS.map(app => `
+          <div class="admin-app-item">
+            <div class="app-icon" style="--icon-from:${app.iconFrom};--icon-to:${app.iconTo}">
+              ${app.icon || '📱'}
+            </div>
+            <div class="info">
+              <h4>${escapeHtml(app.name)}</h4>
+              <p>${escapeHtml(app.category || 'Sin categoría')} · ${escapeHtml(app.url || 'sin URL')}</p>
+            </div>
+            <div class="actions">
+              <button class="mini-btn" data-edit="${app.id}" title="Editar">✏️</button>
+              <button class="mini-btn danger" data-del="${app.id}" title="Borrar">🗑️</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <button class="btn btn-primary" style="margin-top:14px" onclick="editingAppId=null;document.querySelector('[data-tab=form]').click()">
+        + Agregar nueva PWA
+      </button>
+    `;
+    c.querySelectorAll('[data-edit]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        editingAppId = btn.dataset.edit;
+        renderAdminTab('form');
+      });
+    });
+    c.querySelectorAll('[data-del]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (confirm('¿Borrar esta PWA? Esta acción no se puede deshacer.')) {
+          APPS = APPS.filter(a => a.id !== btn.dataset.del);
+          await saveApps();
+          renderAll();
+          renderAdminTab('list');
+        }
+      });
+    });
+  }
+
+  function renderAdminForm(c) {
+    const app = editingAppId ? APPS.find(a => a.id === editingAppId) : null;
+    const a = app || {
+      id: '', name: '', dev: 'agorlab', icon: '📱',
+      iconFrom: '#FF5F00', iconTo: '#FF8C42',
+      category: 'Herramientas', rating: '', installs: '', size: '', version: '',
+      desc: '', longDesc: '', url: 'https://',
+      verified: true, featured: false
+    };
+    c.innerHTML = `
+      <form id="appForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre *</label>
+            <input type="text" name="name" required value="${escapeHtml(a.name)}">
+          </div>
+          <div class="form-group">
+            <label>Desarrollador</label>
+            <input type="text" name="dev" value="${escapeHtml(a.dev)}">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Ícono (emoji)</label>
+            <input type="text" name="icon" maxlength="4" value="${escapeHtml(a.icon)}">
+          </div>
+          <div class="form-group">
+            <label>Categoría</label>
+            <input type="text" name="category" list="catList" value="${escapeHtml(a.category)}">
+            <datalist id="catList">
+              <option value="Herramientas"><option value="Juegos"><option value="Personal">
+              <option value="Productividad"><option value="Educación"><option value="Entretenimiento">
+            </datalist>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Colores del ícono</label>
+          <div class="color-row">
+            <input type="color" name="iconFrom" value="${a.iconFrom}">
+            <input type="color" name="iconTo" value="${a.iconTo}">
+            <input type="text" name="iconFromText" placeholder="#FF5F00" value="${a.iconFrom}">
+            <input type="text" name="iconToText" placeholder="#FF8C42" value="${a.iconTo}">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Descripción corta *</label>
+          <textarea name="desc" required maxlength="120">${escapeHtml(a.desc)}</textarea>
+        </div>
+        <div class="form-group">
+          <label>Descripción completa</label>
+          <textarea name="longDesc">${escapeHtml(a.longDesc)}</textarea>
+        </div>
+        <div class="form-group">
+          <label>URL de la PWA *</label>
+          <input type="url" name="url" required value="${escapeHtml(a.url)}" placeholder="https://...">
+        </div>
+        <div class="form-row-3">
+          <div class="form-group"><label>Rating</label>
+            <input type="number" step="0.1" min="0" max="5" name="rating" value="${escapeHtml(a.rating)}"></div>
+          <div class="form-group"><label>Instalaciones</label>
+            <input type="text" name="installs" placeholder="1.2k" value="${escapeHtml(a.installs)}"></div>
+          <div class="form-group"><label>Tamaño</label>
+            <input type="text" name="size" placeholder="2.4 MB" value="${escapeHtml(a.size)}"></div>
+        </div>
+        <div class="form-group">
+          <label>Versión</label>
+          <input type="text" name="version" placeholder="1.0.0" value="${escapeHtml(a.version)}">
+        </div>
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" name="verified" ${a.verified?'checked':''}>
+            Verificado (✓ al lado del nombre)
+          </label>
+        </div>
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" name="featured" ${a.featured?'checked':''}>
+            Destacar en el hero principal
+          </label>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:18px">
+          <button type="button" class="btn btn-secondary" onclick="editingAppId=null;document.querySelector('[data-tab=list]').click()">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary">
+            ${editingAppId ? 'Guardar cambios' : '+ Crear PWA'}
+          </button>
+        </div>
+      </form>
+    `;
+    const form = document.getElementById('appForm');
+    const syncColor = (fromPicker, toText) => {
+      fromPicker.addEventListener('input', () => { form.elements[toText].value = fromPicker.value; });
+      form.elements[toText].addEventListener('input', (e) => {
+        if (/^#[0-9A-Fa-f]{6}$/.test(e.target.value)) fromPicker.value = e.target.value;
+      });
+    };
+    syncColor(form.elements.iconFrom, 'iconFromText');
+    syncColor(form.elements.iconTo, 'iconToText');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const data = {
+        id: editingAppId || uid(),
+        name: fd.get('name').trim(),
+        dev: fd.get('dev').trim() || 'agorlab',
+        icon: fd.get('icon').trim() || '📱',
+        iconFrom: fd.get('iconFromText').value || '#FF5F00',
+        iconTo: fd.get('iconToText').value || '#FF8C42',
+        category: fd.get('category').trim(),
+        rating: fd.get('rating'),
+        installs: fd.get('installs').trim(),
+        size: fd.get('size').trim(),
+        version: fd.get('version').trim(),
+        desc: fd.get('desc').trim(),
+        longDesc: fd.get('longDesc').trim(),
+        url: fd.get('url').trim(),
+        verified: form.elements.verified.checked,
+        featured: form.elements.featured.checked
+      };
+      if (data.featured) APPS.forEach(a => a.featured = false);
+      if (editingAppId) {
+        const idx = APPS.findIndex(a => a.id === editingAppId);
+        APPS[idx] = data;
+      } else {
+        APPS.push(data);
+      }
+      await saveApps();
+      editingAppId = null;
+      renderAll();
+      renderAdminTab('list');
+    });
+  }
+
+  function renderAdminGitHub(c) {
+    const cfg = githubConfig || { owner: '', repo: '', token: '' };
+    c.innerHTML = `
+      <div class="info-box">
+        Configurá estos datos para que el panel haga commits automáticos al repo donde está hosteado el launcher.
+        El archivo <code>apps.json</code> se creará en la raíz del repo.
+        <br><br>
+        <strong>Pasos:</strong>
+        <br>1. Creá un token en <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a> con scope <code>repo</code>
+        <br>2. Pegá owner (tu usuario), repo y token acá
+        <br>3. Probá la conexión antes de guardar
+      </div>
+      <form id="ghForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Owner (usuario/org)</label>
+            <input type="text" name="owner" required placeholder="agorlab" value="${escapeHtml(cfg.owner)}">
+          </div>
+          <div class="form-group">
+            <label>Repo</label>
+            <input type="text" name="repo" required placeholder="agorlab.com" value="${escapeHtml(cfg.repo)}">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Branch (opcional)</label>
+          <input type="text" name="branch" placeholder="main (por defecto)" value="${escapeHtml(cfg.branch || '')}">
+        </div>
+        <div class="form-group">
+          <label>Personal Access Token</label>
+          <input type="password" name="token" required placeholder="ghp_..." value="${escapeHtml(cfg.token)}">
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button type="button" class="btn btn-secondary" id="testBtn" style="flex:1;min-width:140px">
+            🔌 Probar conexión
+          </button>
+          <button type="submit" class="btn btn-primary" style="flex:1;min-width:140px">
+            💾 Guardar config
+          </button>
+        </div>
+        ${cfg.token ? `
+          <button type="button" class="btn btn-danger" id="clearGhBtn" style="margin-top:10px;width:100%">
+            ❌ Desconectar GitHub (volver a modo local)
+          </button>
+        ` : ''}
+      </form>
+      <div id="testResult" style="margin-top:14px"></div>
+    `;
+    const form = document.getElementById('ghForm');
+    const testBtn = document.getElementById('testBtn');
+    const result = document.getElementById('testResult');
+
+    testBtn.addEventListener('click', async () => {
+      const fd = new FormData(form);
+      const tempCfg = {
+        owner: fd.get('owner').trim(),
+        repo: fd.get('repo').trim(),
+        token: fd.get('token').trim(),
+        branch: fd.get('branch').trim() || 'main'
+      };
+      if (!tempCfg.owner || !tempCfg.repo || !tempCfg.token) {
+        result.innerHTML = `<div class="info-box" style="border-left-color:var(--danger);color:var(--danger)">Completá todos los campos</div>`;
+        return;
+      }
+      testBtn.disabled = true;
+      testBtn.textContent = 'Probando...';
+      try {
+        const oldCfg = githubConfig;
+        githubConfig = tempCfg;
+        const repo = await githubApi('GET', '');
+        result.innerHTML = `
+          <div class="info-box" style="border-left-color:var(--success)">
+            ✅ Conectado a <strong>${repo.full_name}</strong>
+            <br>Permisos OK. Ya podés guardar.
+          </div>`;
+      } catch (err) {
+        result.innerHTML = `
+          <div class="info-box" style="border-left-color:var(--danger);color:var(--danger)">
+            ❌ Error: ${escapeHtml(err.message)}
+            <br>Revisá el token y que el repo exista.
+          </div>`;
+      } finally {
+        testBtn.disabled = false;
+        testBtn.textContent = '🔌 Probar conexión';
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      githubConfig = {
+        owner: fd.get('owner').trim(),
+        repo: fd.get('repo').trim(),
+        token: fd.get('token').trim(),
+        branch: fd.get('branch').trim() || 'main'
+      };
+      localStorage.setItem(STORAGE_GITHUB, JSON.stringify(githubConfig));
+      showToast('✅ Config de GitHub guardada');
+      // Hacer push inicial si hay apps
+      if (APPS.length > 0) {
+        const ok = await saveToGitHub('initial sync from admin panel');
+        if (ok) showToast('🚀 Apps subidas a GitHub');
+      }
+      openAdminPanel('github');
+    });
+
+    const clearBtn = document.getElementById('clearGhBtn');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        if (confirm('¿Desconectar GitHub? Las apps seguirán en localStorage.')) {
+          githubConfig = null;
+          currentSha = null;
+          localStorage.removeItem(STORAGE_GITHUB);
+          showToast('Modo local activado');
+          openAdminPanel('github');
+        }
+      });
+    }
+  }
+
+  function renderAdminData(c) {
+    c.innerHTML = `
+      <p style="color:var(--text-soft);font-size:13px;margin-bottom:14px">
+        Exportá/importá el JSON manualmente. Útil para backups o migrar entre dispositivos.
+      </p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-primary" id="exportBtn" style="flex:1;min-width:140px">
+          ⬇️ Descargar apps.json
+        </button>
+        <button class="btn btn-secondary" id="copyBtn" style="flex:1;min-width:140px">
+          📋 Copiar JSON
+        </button>
+      </div>
+      <div class="form-group" style="margin-top:18px">
+        <label>Preview JSON</label>
+        <div class="json-preview" id="jsonPreview"></div>
+      </div>
+      <div class="form-group">
+        <label>Importar JSON (pegar y restaurar)</label>
+        <textarea id="importArea" placeholder='[{"id":...}]'></textarea>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-secondary" id="importBtn" style="flex:1">⬆️ Importar</button>
+        <button class="btn btn-danger" id="clearBtn" style="flex:1">🧹 Borrar todo</button>
+      </div>
+    `;
+    document.getElementById('jsonPreview').textContent = JSON.stringify(APPS, null, 2);
+
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(APPS, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'apps.json'; a.click();
+      URL.revokeObjectURL(url);
+      showToast('apps.json descargado ⬇️');
+    });
+    document.getElementById('copyBtn').addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(JSON.stringify(APPS, null, 2));
+        showToast('JSON copiado 📋');
+      } catch { showToast('No se pudo copiar', 'error'); }
+    });
+    document.getElementById('importBtn').addEventListener('click', async () => {
+      const raw = document.getElementById('importArea').value.trim();
+      if (!raw) return showToast('Pegá un JSON', 'error');
+      try {
+        const data = JSON.parse(raw);
+        if (!Array.isArray(data)) throw new Error('No es array');
+        APPS = data;
+        await saveApps();
+        renderAll();
+        renderAdminData(c);
+        showToast('JSON importado ⬆️');
+      } catch (err) { showToast('JSON inválido', 'error'); }
+    });
+    document.getElementById('clearBtn').addEventListener('click', async () => {
+      if (confirm('¿Borrar TODAS las apps?')) {
+        APPS = [];
+        await saveApps();
+        renderAll();
+        renderAdminData(c);
+        showToast('Todo borrado', 'error');
+      }
+    });
+  }
+
+  // ====== INSTALL PWA ======
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstall = e;
+    document.getElementById('installBanner').classList.add('show');
+  });
+  document.getElementById('installBtn').addEventListener('click', async () => {
+    if (!deferredInstall) return;
+    deferredInstall.prompt();
+    const { outcome } = await deferredInstall.userChoice;
+    if (outcome === 'accepted') document.getElementById('installBanner').classList.remove('show');
+    deferredInstall = null;
+  });
+  window.addEventListener('appinstalled', () => {
+    document.getElementById('installBanner').classList.remove('show');
+    deferredInstall = null;
+  });
+
+  // ====== INIT ======
+  function renderAll() {
+    renderHero();
+    renderCategories();
+    renderApps();
+  }
+
+  // Cargar desde GitHub al arrancar (si hay config)
+  (async function init() {
+    if (githubConfig?.token) {
+      await loadFromGitHub(false);
+    } else {
+      APPS = JSON.parse(localStorage.getItem(STORAGE_APPS) || '[]');
+    }
+    renderAll();
+  })();
+</script>
+
 </body>
 </html>
