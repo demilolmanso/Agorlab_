@@ -16,5 +16,23 @@
     "url": "https://heladerita.netlify.app",
     "verified": true,
     "featured": false
+  },
+  {
+    "id": "msg6azidjgjum",
+    "name": "Atlas",
+    "dev": "agorlab",
+    "icon": "📍🗺",
+    "iconFrom": "#FF5F00",
+    "iconTo": "#FF8C42",
+    "category": "Herramientas",
+    "rating": "",
+    "installs": "",
+    "size": "",
+    "version": "",
+    "desc": "Gps, mapas satelitales, waypoints y brújula.",
+    "longDesc": "",
+    "url": "https://waldtest.netlify.app",
+    "verified": true,
+    "featured": false
   }
 ]
