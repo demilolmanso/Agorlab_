@@ -7,14 +7,14 @@
     "iconFrom": "#FF5F00",
     "iconTo": "#FF8C42",
     "category": "Herramientas",
-    "rating": "4.6",
+    "rating": "",
     "installs": "",
     "size": "",
-    "version": "1.4.1",
+    "version": "",
     "desc": "Gestiona el stock y las compras.",
     "longDesc": "Heladerita virtual para gestionar listas de compras y stock de tu heladera.",
     "url": "https://heladerita.netlify.app",
-    "verified": true,
+    "verified": false,
     "featured": false
   },
   {
