@@ -14,7 +14,7 @@
     "desc": "Gestiona el stock y las compras.",
     "longDesc": "Heladerita virtual para gestionar listas de compras y stock de tu heladera.",
     "url": "https://heladerita.netlify.app",
-    "verified": false,
+    "verified": true,
     "featured": false
   },
   {
