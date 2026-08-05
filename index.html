@@ -47,7 +47,6 @@
   .mono { font-family: 'JetBrains Mono', monospace; }
   input, textarea, select, button { font-family: inherit; }
 
-  /* HEADER */
   header {
     position: sticky; top: 0; z-index: 50;
     background: color-mix(in srgb, var(--bg) 85%, transparent);
@@ -106,7 +105,6 @@
   .icon-btn.loading { animation: spin 1s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* HERO */
   .hero { max-width:1200px; margin:0 auto; padding: 20px 16px; }
   .hero-card {
     position: relative;
@@ -146,7 +144,6 @@
   .hero h1 { font-size: 24px; margin-bottom: 6px; position: relative; z-index:1; }
   .hero p { opacity: .9; font-size: 14px; position: relative; z-index:1; }
 
-  /* CATEGORIES */
   .categories {
     max-width:1200px; margin:0 auto;
     padding: 8px 16px 16px;
@@ -169,13 +166,8 @@
     white-space: nowrap;
   }
   .chip:hover { border-color: var(--accent); }
-  .chip.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: white;
-  }
+  .chip.active { background: var(--accent); border-color: var(--accent); color: white; }
 
-  /* SECTION */
   section { max-width:1200px; margin:0 auto; padding: 8px 16px 24px; }
   .section-title {
     display:flex; align-items:center; justify-content:space-between;
@@ -184,7 +176,6 @@
   .section-title h2 { font-size: 18px; font-weight: 600; }
   .section-title .count { font-size: 12px; color: var(--text-soft); }
 
-  /* APP GRID */
   .app-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -262,12 +253,8 @@
     transition: all var(--transition);
     padding: 4px;
   }
-  .fav-btn:hover, .fav-btn.active {
-    opacity: 1;
-    transform: scale(1.2);
-  }
+  .fav-btn:hover, .fav-btn.active { opacity: 1; transform: scale(1.2); }
 
-  /* MODAL */
   .modal-overlay {
     position: fixed; inset: 0;
     background: rgba(0,0,0,.6);
@@ -296,12 +283,7 @@
     border-radius: 2px;
     margin: 10px auto;
   }
-  .modal-hero {
-    padding: 20px;
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-  }
+  .modal-hero { padding: 20px; display: flex; gap: 16px; align-items: flex-start; }
   .modal-hero .app-icon { width: 72px; height: 72px; font-size: 36px; }
   .modal-hero h2 { font-size: 22px; margin-bottom: 4px; }
   .modal-hero .dev { color: var(--accent); font-size: 13px; font-weight: 500; }
@@ -320,20 +302,10 @@
   .btn-primary { background: var(--accent); color: white; }
   .btn-primary:hover { background: #E55500; }
   .btn-primary:disabled { background: var(--border); color: var(--text-soft); cursor: not-allowed; }
-  .btn-secondary {
-    background: var(--bg-elev);
-    color: var(--text);
-    border: 1px solid var(--border);
-  }
+  .btn-secondary { background: var(--bg-elev); color: var(--text); border: 1px solid var(--border); }
   .btn-danger { background: var(--danger); color: white; }
   .btn-danger:hover { background: #DC2626; }
-  .btn-ghost {
-    background: transparent;
-    color: var(--text-soft);
-    border: none;
-    padding: 8px 12px;
-    font-size: 13px;
-  }
+  .btn-ghost { background: transparent; color: var(--text-soft); border: none; padding: 8px 12px; font-size: 13px; }
   .btn-ghost:hover { color: var(--accent); }
   .modal-stats {
     padding: 20px;
@@ -357,7 +329,6 @@
   }
   .modal-body p { color: var(--text); font-size: 14px; line-height: 1.6; }
 
-  /* FORMS */
   .form-group { margin-bottom: 14px; }
   .form-group label {
     display: block;
@@ -382,10 +353,7 @@
   }
   .form-group input:focus,
   .form-group textarea:focus,
-  .form-group select:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
+  .form-group select:focus { outline: none; border-color: var(--accent); }
   .form-group textarea { resize: vertical; min-height: 80px; }
   .form-row { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .form-row-3 { display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
@@ -406,13 +374,8 @@
     cursor: pointer;
     user-select: none;
   }
-  .checkbox-label input {
-    width: 18px; height: 18px;
-    accent-color: var(--accent);
-    cursor: pointer;
-  }
+  .checkbox-label input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
 
-  /* TABS */
   .tabs {
     display: flex;
     gap: 4px;
@@ -436,12 +399,8 @@
     white-space: nowrap;
   }
   .tab:hover { color: var(--text); }
-  .tab.active {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
-  }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-  /* APP LIST (ADMIN) */
   .admin-app-list { display:flex; flex-direction:column; gap:8px; }
   .admin-app-item {
     display:flex; align-items:center; gap:12px;
@@ -474,7 +433,6 @@
   .mini-btn:hover { border-color: var(--accent); color: var(--accent); }
   .mini-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
 
-  /* PIN SCREEN */
   .pin-screen { padding: 30px 20px; text-align:center; }
   .pin-screen h2 { font-size: 20px; margin-bottom: 6px; }
   .pin-screen p { color: var(--text-soft); font-size: 13px; margin-bottom: 20px; }
@@ -484,15 +442,9 @@
     letter-spacing: 8px;
     font-family: 'JetBrains Mono', monospace !important;
   }
-  .pin-error {
-    color: var(--danger);
-    font-size: 13px;
-    margin-top: 10px;
-    display: none;
-  }
+  .pin-error { color: var(--danger); font-size: 13px; margin-top: 10px; display: none; }
   .pin-error.show { display: block; }
 
-  /* TOAST */
   .toast {
     position: fixed;
     bottom: 30px; left: 50%;
@@ -517,7 +469,6 @@
   .toast.success { border-color: var(--success); }
   .toast.warning { border-color: var(--warning); }
 
-  /* INSTALL BANNER */
   .install-banner {
     position: fixed;
     bottom: 20px; left: 50%;
@@ -535,7 +486,6 @@
   }
   .install-banner.show { display: flex; }
 
-  /* FOOTER */
   footer {
     max-width:1200px; margin: 0 auto;
     padding: 30px 16px;
@@ -558,7 +508,6 @@
   }
   .admin-trigger:hover { opacity: 1; color: var(--accent); }
 
-  /* STATUS INDICATOR */
   .status-pill {
     display: inline-flex;
     align-items: center;
@@ -577,9 +526,7 @@
   }
   .status-dot.online { background: var(--success); box-shadow: 0 0 6px var(--success); }
   .status-dot.offline { background: var(--text-soft); }
-  .status-dot.error { background: var(--danger); }
 
-  /* INFO BOX */
   .info-box {
     background: var(--bg-elev);
     border: 1px solid var(--border);
@@ -602,7 +549,6 @@
     border: 1px solid var(--border);
   }
 
-  /* JSON PREVIEW */
   .json-preview {
     background: var(--bg-elev);
     border: 1px solid var(--border);
@@ -616,13 +562,38 @@
     color: var(--text);
   }
 
-  /* EMPTY */
-  .empty {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text-soft);
-  }
+  .empty { text-align: center; padding: 60px 20px; color: var(--text-soft); }
   .empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+  /* LOADING SKELETON */
+  .skeleton-card {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    display: flex;
+    gap: 14px;
+  }
+  .skeleton-icon {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    background: linear-gradient(90deg, var(--border) 25%, var(--bg-elev) 50%, var(--border) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+  .skeleton-lines { flex:1; }
+  .skeleton-line {
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--border) 25%, var(--bg-elev) 50%, var(--border) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    margin-bottom: 8px;
+  }
+  .skeleton-line:nth-child(1) { width: 60%; }
+  .skeleton-line:nth-child(2) { width: 40%; }
+  .skeleton-line:nth-child(3) { width: 90%; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
 
   @media (min-width: 768px) {
     .modal { border-radius: 20px; margin-bottom: 20px; }
@@ -643,13 +614,12 @@
     <div class="search">
       <input type="text" id="search" placeholder="Buscar PWAs...">
     </div>
-    <button class="icon-btn" id="refreshBtn" title="Recargar apps desde GitHub">🔄</button>
+    <button class="icon-btn" id="refreshBtn" title="Recargar apps">🔄</button>
     <button class="icon-btn" id="themeToggle" title="Cambiar tema">🌙</button>
   </div>
 </header>
 
 <div class="hero" id="heroWrap"></div>
-
 <div class="categories" id="categories"></div>
 
 <section>
@@ -657,7 +627,11 @@
     <h2 id="sectionTitle">Todas las apps</h2>
     <span class="count" id="sectionCount"></span>
   </div>
-  <div class="app-grid" id="appGrid"></div>
+  <div class="app-grid" id="appGrid">
+    <div class="skeleton-card"><div class="skeleton-icon"></div><div class="skeleton-lines"><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line"></div></div></div>
+    <div class="skeleton-card"><div class="skeleton-icon"></div><div class="skeleton-lines"><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line"></div></div></div>
+    <div class="skeleton-card"><div class="skeleton-icon"></div><div class="skeleton-lines"><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line"></div></div></div>
+  </div>
   <div class="empty" id="empty" style="display:none">
     <div class="empty-icon">🔍</div>
     <p>No se encontraron apps</p>
@@ -698,7 +672,7 @@
   let deferredInstall = null;
   let isAdmin = false;
   let editingAppId = null;
-  let currentSha = null; // SHA del archivo en GitHub para updates
+  let currentSha = null;
   let githubConfig = JSON.parse(localStorage.getItem(STORAGE_GITHUB) || 'null');
 
   // ====== UTILIDADES ======
@@ -721,9 +695,42 @@
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
 
-  // ====== GITHUB API ======
+  // ======================================================
+  // 🔑 CARGA PÚBLICA DE APPS (lo que ven TODOS los usuarios)
+  // ======================================================
+  // Lee apps.json directamente del mismo dominio.
+  // No necesita token. GitHub Pages lo sirve como archivo estático.
+  // El ?t= evita caché del browser/CDN.
+  async function loadAppsPublic(showFeedback = false) {
+    try {
+      const res = await fetch(`./${GITHUB_FILE_PATH}?t=${Date.now()}`, {
+        cache: 'no-store'
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        APPS = data;
+        saveAppsLocal(); // cache local por si falla la red después
+        renderAll();
+        if (showFeedback) showToast(`✅ ${APPS.length} apps cargadas`);
+        return true;
+      }
+      throw new Error('Formato inválido');
+    } catch (err) {
+      console.warn('No se pudo leer apps.json del sitio:', err.message);
+      // Fallback: localStorage (modo admin sin deploy todavía)
+      APPS = JSON.parse(localStorage.getItem(STORAGE_APPS) || '[]');
+      renderAll();
+      if (showFeedback) showToast('Usando datos locales (apps.json no disponible)', 'warning');
+      return false;
+    }
+  }
+
+  // ======================================================
+  // 🔐 ESCRITURA A GITHUB (solo admin, con token)
+  // ======================================================
   async function githubApi(method, path, body = null) {
-    if (!githubConfig?.token) throw new Error('Sin configurar GitHub');
+    if (!githubConfig?.token) throw new Error('GitHub no configurado');
     const url = `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}${path}`;
     const opts = {
       method,
@@ -744,59 +751,25 @@
     return res.json();
   }
 
-  async function loadFromGitHub(showFeedback = false) {
-    if (!githubConfig?.token) {
-      // Fallback a localStorage
-      APPS = JSON.parse(localStorage.getItem(STORAGE_APPS) || '[]');
-      return;
-    }
-    try {
-      const refreshBtn = document.getElementById('refreshBtn');
-      refreshBtn?.classList.add('loading');
-      const data = await githubApi('GET', `/contents/${GITHUB_FILE_PATH}`);
-      const content = atob(data.content);
-      APPS = JSON.parse(content);
-      currentSha = data.sha;
-      saveAppsLocal();
-      renderAll();
-      if (showFeedback) showToast(`✅ ${APPS.length} apps cargadas desde GitHub`);
-    } catch (err) {
-      console.error('GitHub load error:', err);
-      if (err.message.includes('404')) {
-        // El archivo no existe todavía
-        APPS = JSON.parse(localStorage.getItem(STORAGE_APPS) || '[]');
-        currentSha = null;
-        if (showFeedback) showToast('No hay apps.json en el repo todavía', 'warning');
-      } else {
-        if (showFeedback) showToast(`Error: ${err.message}`, 'error');
-      }
-    } finally {
-      document.getElementById('refreshBtn')?.classList.remove('loading');
-    }
-  }
-
-  async function saveToGitHub(commitMessage = 'update apps') {
+  async function pushToGitHub(commitMessage = 'update apps') {
     if (!githubConfig?.token) return false;
     try {
       const content = btoa(unescape(encodeURIComponent(JSON.stringify(APPS, null, 2))));
-      const body = {
-        message: commitMessage,
-        content
-      };
-      // Si ya existe el archivo, hay que pasar el SHA para update
-      if (currentSha) body.sha = currentSha;
-      else {
-        // Intentar obtener SHA por si existe pero no lo tenemos
+      const body = { message: commitMessage, content };
+      if (currentSha) {
+        body.sha = currentSha;
+      } else {
         try {
           const existing = await githubApi('GET', `/contents/${GITHUB_FILE_PATH}`);
           body.sha = existing.sha;
+          currentSha = existing.sha;
         } catch {}
       }
       const res = await githubApi('PUT', `/contents/${GITHUB_FILE_PATH}`, body);
       currentSha = res.content.sha;
       return true;
     } catch (err) {
-      console.error('GitHub save error:', err);
+      console.error('GitHub push error:', err);
       showToast(`Error al subir: ${err.message}`, 'error');
       return false;
     }
@@ -804,16 +777,21 @@
 
   async function saveApps() {
     saveAppsLocal();
+    renderAll();
     if (githubConfig?.token) {
-      const name = editingAppId ? 'edit app' : 'add app';
-      const ok = await saveToGitHub(`[${name}] update apps.json`);
-      if (ok) showToast('💾 Guardado en localStorage + GitHub');
+      showToast('Subiendo a GitHub...');
+      const ok = await pushToGitHub(editingAppId ? 'edit app' : 'add app');
+      if (ok) {
+        showToast('✅ Guardado y subido a GitHub');
+        // Recargar desde el sitio para confirmar (esperando deploy)
+        setTimeout(() => loadAppsPublic(false), 3000);
+      }
     } else {
-      showToast('💾 Guardado en localStorage (sin GitHub configurado)');
+      showToast('💾 Guardado local (configurá GitHub para publicar)');
     }
   }
 
-  // ====== RENDER PRINCIPAL ======
+  // ====== RENDER ======
   function renderHero() {
     const wrap = document.getElementById('heroWrap');
     const featured = APPS.find(a => a.featured) || APPS[0];
@@ -968,15 +946,13 @@
     if (e.target.id === 'modal') closeModal();
   });
 
-  // ====== BÚSQUEDA ======
   document.getElementById('search').addEventListener('input', (e) => {
     searchQuery = e.target.value.toLowerCase();
     renderApps();
   });
 
-  // ====== REFRESH ======
   document.getElementById('refreshBtn').addEventListener('click', () => {
-    loadFromGitHub(true);
+    loadAppsPublic(true);
   });
 
   // ====== THEME ======
@@ -998,7 +974,7 @@
   document.getElementById('themeToggle').textContent =
     localStorage.getItem(STORAGE_THEME) === 'dark' ? '☀️' : '🌙';
 
-  // ====== ADMIN: PIN ======
+  // ====== ADMIN ======
   document.getElementById('adminTrigger').addEventListener('click', () => {
     if (isAdmin) { openAdminPanel(); return; }
     openPinScreen();
@@ -1040,7 +1016,6 @@
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') trySubmit(); });
   }
 
-  // ====== ADMIN PANEL ======
   function openAdminPanel(tab='list') {
     const content = document.getElementById('modalContent');
     content.innerHTML = `
@@ -1050,7 +1025,7 @@
         <div style="display:flex;align-items:center;gap:10px">
           <span class="status-pill">
             <span class="status-dot ${githubConfig?.token ? 'online' : 'offline'}"></span>
-            ${githubConfig?.token ? 'GitHub' : 'Local'}
+            ${githubConfig?.token ? 'GitHub conectado' : 'Solo local'}
           </span>
           <button class="btn-ghost" id="logoutBtn">Salir</button>
         </div>
@@ -1092,7 +1067,7 @@
         <div class="empty">
           <div class="empty-icon">📦</div>
           <p>Todavía no hay PWAs</p>
-          <button class="btn btn-primary" style="margin-top:14px;flex:0 0 auto;padding:10px 20px" onclick="document.querySelector('[data-tab=form]').click()">
+          <button class="btn btn-primary" style="margin-top:14px;flex:0 0 auto;padding:10px 20px" onclick="editingAppId=null;renderAdminTab('form')">
             + Agregar primera app
           </button>
         </div>`;
@@ -1116,7 +1091,7 @@
           </div>
         `).join('')}
       </div>
-      <button class="btn btn-primary" style="margin-top:14px" onclick="editingAppId=null;document.querySelector('[data-tab=form]').click()">
+      <button class="btn btn-primary" style="margin-top:14px" onclick="editingAppId=null;renderAdminTab('form')">
         + Agregar nueva PWA
       </button>
     `;
@@ -1131,7 +1106,6 @@
         if (confirm('¿Borrar esta PWA? Esta acción no se puede deshacer.')) {
           APPS = APPS.filter(a => a.id !== btn.dataset.del);
           await saveApps();
-          renderAll();
           renderAdminTab('list');
         }
       });
@@ -1219,11 +1193,11 @@
           </label>
         </div>
         <div style="display:flex;gap:10px;margin-top:18px">
-          <button type="button" class="btn btn-secondary" onclick="editingAppId=null;document.querySelector('[data-tab=list]').click()">
+          <button type="button" class="btn btn-secondary" onclick="editingAppId=null;renderAdminTab('list')">
             Cancelar
           </button>
           <button type="submit" class="btn btn-primary">
-            ${editingAppId ? 'Guardar cambios' : '+ Crear PWA'}
+            ${editingAppId ? 'Guardar y publicar' : '+ Crear y publicar'}
           </button>
         </div>
       </form>
@@ -1268,22 +1242,20 @@
       }
       await saveApps();
       editingAppId = null;
-      renderAll();
       renderAdminTab('list');
     });
   }
 
   function renderAdminGitHub(c) {
-    const cfg = githubConfig || { owner: '', repo: '', token: '' };
+    const cfg = githubConfig || { owner: '', repo: '', token: '', branch: '' };
     c.innerHTML = `
       <div class="info-box">
-        Configurá estos datos para que el panel haga commits automáticos al repo donde está hosteado el launcher.
-        El archivo <code>apps.json</code> se creará en la raíz del repo.
+        <strong>¿Cómo funciona?</strong>
+        <br>1. Vos guardás una app → se hace commit de <code>apps.json</code> al repo
+        <br>2. GitHub Pages actualiza el sitio automáticamente (~30-60 seg)
+        <br>3. Los visitantes ven las apps nuevas al recargar
         <br><br>
-        <strong>Pasos:</strong>
-        <br>1. Creá un token en <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a> con scope <code>repo</code>
-        <br>2. Pegá owner (tu usuario), repo y token acá
-        <br>3. Probá la conexión antes de guardar
+        <strong>Importante:</strong> el sitio público lee <code>apps.json</code> directamente del dominio, sin necesidad de token. El token solo se usa para escribir.
       </div>
       <form id="ghForm">
         <div class="form-row">
@@ -1297,12 +1269,15 @@
           </div>
         </div>
         <div class="form-group">
-          <label>Branch (opcional)</label>
-          <input type="text" name="branch" placeholder="main (por defecto)" value="${escapeHtml(cfg.branch || '')}">
+          <label>Branch</label>
+          <input type="text" name="branch" placeholder="main" value="${escapeHtml(cfg.branch || 'main')}">
         </div>
         <div class="form-group">
           <label>Personal Access Token</label>
           <input type="password" name="token" required placeholder="ghp_..." value="${escapeHtml(cfg.token)}">
+          <p style="font-size:11px;color:var(--text-soft);margin-top:6px">
+            Solo necesita permiso <code>Contents: Read and write</code>. Se guarda en tu browser, no se comparte.
+          </p>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
           <button type="button" class="btn btn-secondary" id="testBtn" style="flex:1;min-width:140px">
@@ -1314,7 +1289,7 @@
         </div>
         ${cfg.token ? `
           <button type="button" class="btn btn-danger" id="clearGhBtn" style="margin-top:10px;width:100%">
-            ❌ Desconectar GitHub (volver a modo local)
+            ❌ Desconectar GitHub
           </button>
         ` : ''}
       </form>
@@ -1347,11 +1322,11 @@
             ✅ Conectado a <strong>${repo.full_name}</strong>
             <br>Permisos OK. Ya podés guardar.
           </div>`;
+        githubConfig = oldCfg;
       } catch (err) {
         result.innerHTML = `
           <div class="info-box" style="border-left-color:var(--danger);color:var(--danger)">
             ❌ Error: ${escapeHtml(err.message)}
-            <br>Revisá el token y que el repo exista.
           </div>`;
       } finally {
         testBtn.disabled = false;
@@ -1370,12 +1345,11 @@
       };
       localStorage.setItem(STORAGE_GITHUB, JSON.stringify(githubConfig));
       showToast('✅ Config de GitHub guardada');
-      // Hacer push inicial si hay apps
       if (APPS.length > 0) {
-        const ok = await saveToGitHub('initial sync from admin panel');
+        const ok = await pushToGitHub('sync from admin panel');
         if (ok) showToast('🚀 Apps subidas a GitHub');
       }
-      openAdminPanel('github');
+      renderAdminTab('github');
     });
 
     const clearBtn = document.getElementById('clearGhBtn');
@@ -1386,7 +1360,7 @@
           currentSha = null;
           localStorage.removeItem(STORAGE_GITHUB);
           showToast('Modo local activado');
-          openAdminPanel('github');
+          renderAdminTab('github');
         }
       });
     }
@@ -1395,7 +1369,7 @@
   function renderAdminData(c) {
     c.innerHTML = `
       <p style="color:var(--text-soft);font-size:13px;margin-bottom:14px">
-        Exportá/importá el JSON manualmente. Útil para backups o migrar entre dispositivos.
+        Backup manual del JSON. Útil para migrar entre dispositivos.
       </p>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
         <button class="btn btn-primary" id="exportBtn" style="flex:1;min-width:140px">
@@ -1442,7 +1416,6 @@
         if (!Array.isArray(data)) throw new Error('No es array');
         APPS = data;
         await saveApps();
-        renderAll();
         renderAdminData(c);
         showToast('JSON importado ⬆️');
       } catch (err) { showToast('JSON inválido', 'error'); }
@@ -1451,7 +1424,6 @@
       if (confirm('¿Borrar TODAS las apps?')) {
         APPS = [];
         await saveApps();
-        renderAll();
         renderAdminData(c);
         showToast('Todo borrado', 'error');
       }
@@ -1483,15 +1455,8 @@
     renderApps();
   }
 
-  // Cargar desde GitHub al arrancar (si hay config)
-  (async function init() {
-    if (githubConfig?.token) {
-      await loadFromGitHub(false);
-    } else {
-      APPS = JSON.parse(localStorage.getItem(STORAGE_APPS) || '[]');
-    }
-    renderAll();
-  })();
+  // 🔑 Carga inicial: siempre lee del sitio público primero
+  loadAppsPublic(false);
 </script>
 
 </body>
