@@ -47,6 +47,7 @@
   .mono { font-family: 'JetBrains Mono', monospace; }
   input, textarea, select, button { font-family: inherit; }
 
+  /* HEADER */
   header {
     position: sticky; top: 0; z-index: 50;
     background: color-mix(in srgb, var(--bg) 85%, transparent);
@@ -105,6 +106,7 @@
   .icon-btn.loading { animation: spin 1s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* HERO */
   .hero { max-width:1200px; margin:0 auto; padding: 20px 16px; }
   .hero-card {
     position: relative;
@@ -144,6 +146,7 @@
   .hero h1 { font-size: 24px; margin-bottom: 6px; position: relative; z-index:1; }
   .hero p { opacity: .9; font-size: 14px; position: relative; z-index:1; }
 
+  /* CATEGORIES */
   .categories {
     max-width:1200px; margin:0 auto;
     padding: 8px 16px 16px;
@@ -168,6 +171,7 @@
   .chip:hover { border-color: var(--accent); }
   .chip.active { background: var(--accent); border-color: var(--accent); color: white; }
 
+  /* SECTION */
   section { max-width:1200px; margin:0 auto; padding: 8px 16px 24px; }
   .section-title {
     display:flex; align-items:center; justify-content:space-between;
@@ -176,6 +180,7 @@
   .section-title h2 { font-size: 18px; font-weight: 600; }
   .section-title .count { font-size: 12px; color: var(--text-soft); }
 
+  /* APP GRID */
   .app-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -255,6 +260,7 @@
   }
   .fav-btn:hover, .fav-btn.active { opacity: 1; transform: scale(1.2); }
 
+  /* MODAL */
   .modal-overlay {
     position: fixed; inset: 0;
     background: rgba(0,0,0,.6);
@@ -329,6 +335,7 @@
   }
   .modal-body p { color: var(--text); font-size: 14px; line-height: 1.6; }
 
+  /* FORMS */
   .form-group { margin-bottom: 14px; }
   .form-group label {
     display: block;
@@ -376,6 +383,7 @@
   }
   .checkbox-label input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
 
+  /* TABS */
   .tabs {
     display: flex;
     gap: 4px;
@@ -401,6 +409,7 @@
   .tab:hover { color: var(--text); }
   .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
+  /* ADMIN LIST */
   .admin-app-list { display:flex; flex-direction:column; gap:8px; }
   .admin-app-item {
     display:flex; align-items:center; gap:12px;
@@ -433,6 +442,7 @@
   .mini-btn:hover { border-color: var(--accent); color: var(--accent); }
   .mini-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
 
+  /* PIN SCREEN */
   .pin-screen { padding: 30px 20px; text-align:center; }
   .pin-screen h2 { font-size: 20px; margin-bottom: 6px; }
   .pin-screen p { color: var(--text-soft); font-size: 13px; margin-bottom: 20px; }
@@ -445,6 +455,7 @@
   .pin-error { color: var(--danger); font-size: 13px; margin-top: 10px; display: none; }
   .pin-error.show { display: block; }
 
+  /* TOAST */
   .toast {
     position: fixed;
     bottom: 30px; left: 50%;
@@ -469,6 +480,7 @@
   .toast.success { border-color: var(--success); }
   .toast.warning { border-color: var(--warning); }
 
+  /* INSTALL BANNER */
   .install-banner {
     position: fixed;
     bottom: 20px; left: 50%;
@@ -486,6 +498,7 @@
   }
   .install-banner.show { display: flex; }
 
+  /* FOOTER */
   footer {
     max-width:1200px; margin: 0 auto;
     padding: 30px 16px;
@@ -508,6 +521,7 @@
   }
   .admin-trigger:hover { opacity: 1; color: var(--accent); }
 
+  /* STATUS */
   .status-pill {
     display: inline-flex;
     align-items: center;
@@ -565,7 +579,7 @@
   .empty { text-align: center; padding: 60px 20px; color: var(--text-soft); }
   .empty-icon { font-size: 48px; margin-bottom: 12px; }
 
-  /* LOADING SKELETON */
+  /* SKELETON */
   .skeleton-card {
     background: var(--bg-elev);
     border: 1px solid var(--border);
@@ -656,15 +670,18 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // ====== CONSTANTES ======
+  // ============================================
+  // 🔑 CONFIGURACIÓN
+  // ============================================
   const ADMIN_PIN = '46348930';
-  const STORAGE_APPS = 'agorlab_apps';
   const STORAGE_FAVS = 'agorlab_favs';
   const STORAGE_THEME = 'agorlab_theme';
   const STORAGE_GITHUB = 'agorlab_github_config';
-  const GITHUB_FILE_PATH = 'apps.json';
+  const APPS_FILE = './apps.json';
 
-  // ====== ESTADO ======
+  // ============================================
+  // ESTADO
+  // ============================================
   let APPS = [];
   let activeCategory = 'Todas';
   let searchQuery = '';
@@ -675,10 +692,9 @@
   let currentSha = null;
   let githubConfig = JSON.parse(localStorage.getItem(STORAGE_GITHUB) || 'null');
 
-  // ====== UTILIDADES ======
-  function saveAppsLocal() {
-    localStorage.setItem(STORAGE_APPS, JSON.stringify(APPS));
-  }
+  // ============================================
+  // UTILIDADES
+  // ============================================
   function getCategories() {
     const cats = new Set(APPS.map(a => a.category).filter(Boolean));
     return ['Todas', ...Array.from(cats)];
@@ -695,40 +711,25 @@
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
 
-  // ======================================================
-  // 🔑 CARGA PÚBLICA DE APPS (lo que ven TODOS los usuarios)
-  // ======================================================
-  // Lee apps.json directamente del mismo dominio.
-  // No necesita token. GitHub Pages lo sirve como archivo estático.
-  // El ?t= evita caché del browser/CDN.
-  async function loadAppsPublic(showFeedback = false) {
+  // ============================================
+  // 🔑 CARGA DE APPS (simple y directa)
+  // ============================================
+  async function loadApps() {
     try {
-      const res = await fetch(`./${GITHUB_FILE_PATH}?t=${Date.now()}`, {
-        cache: 'no-store'
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        APPS = data;
-        saveAppsLocal(); // cache local por si falla la red después
-        renderAll();
-        if (showFeedback) showToast(`✅ ${APPS.length} apps cargadas`);
-        return true;
-      }
-      throw new Error('Formato inválido');
-    } catch (err) {
-      console.warn('No se pudo leer apps.json del sitio:', err.message);
-      // Fallback: localStorage (modo admin sin deploy todavía)
-      APPS = JSON.parse(localStorage.getItem(STORAGE_APPS) || '[]');
+      const res = await fetch(APPS_FILE + '?t=' + Date.now());
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      APPS = await res.json();
       renderAll();
-      if (showFeedback) showToast('Usando datos locales (apps.json no disponible)', 'warning');
-      return false;
+    } catch (e) {
+      console.error('Error al cargar apps.json:', e);
+      APPS = [];
+      renderAll();
     }
   }
 
-  // ======================================================
-  // 🔐 ESCRITURA A GITHUB (solo admin, con token)
-  // ======================================================
+  // ============================================
+  // 🔐 GUARDAR EN GITHUB (admin)
+  // ============================================
   async function githubApi(method, path, body = null) {
     if (!githubConfig?.token) throw new Error('GitHub no configurado');
     const url = `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}${path}`;
@@ -737,7 +738,6 @@
       headers: {
         'Authorization': `Bearer ${githubConfig.token}`,
         'Accept': 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28',
         'Content-Type': 'application/json'
       }
     };
@@ -760,13 +760,15 @@
         body.sha = currentSha;
       } else {
         try {
-          const existing = await githubApi('GET', `/contents/${GITHUB_FILE_PATH}`);
+          const existing = await githubApi('GET', '/contents/apps.json');
           body.sha = existing.sha;
           currentSha = existing.sha;
         } catch {}
       }
-      const res = await githubApi('PUT', `/contents/${GITHUB_FILE_PATH}`, body);
+      const res = await githubApi('PUT', '/contents/apps.json', body);
       currentSha = res.content.sha;
+      showToast('✅ Guardado en GitHub');
+      setTimeout(() => loadApps(), 3000);
       return true;
     } catch (err) {
       console.error('GitHub push error:', err);
@@ -776,22 +778,24 @@
   }
 
   async function saveApps() {
-    saveAppsLocal();
-    renderAll();
     if (githubConfig?.token) {
       showToast('Subiendo a GitHub...');
-      const ok = await pushToGitHub(editingAppId ? 'edit app' : 'add app');
-      if (ok) {
-        showToast('✅ Guardado y subido a GitHub');
-        // Recargar desde el sitio para confirmar (esperando deploy)
-        setTimeout(() => loadAppsPublic(false), 3000);
-      }
+      await pushToGitHub(editingAppId ? 'edit app' : 'add app');
     } else {
-      showToast('💾 Guardado local (configurá GitHub para publicar)');
+      showToast('⚠️ Configurá GitHub para publicar', 'warning');
     }
+    renderAll();
   }
 
-  // ====== RENDER ======
+  // ============================================
+  // RENDER
+  // ============================================
+  function renderAll() {
+    renderHero();
+    renderCategories();
+    renderApps();
+  }
+
   function renderHero() {
     const wrap = document.getElementById('heroWrap');
     const featured = APPS.find(a => a.featured) || APPS[0];
@@ -804,7 +808,7 @@
       return;
     }
     wrap.innerHTML = `
-      <div class="hero-card" id="heroCard" style="background: linear-gradient(135deg, ${featured.iconFrom || 'var(--accent)'} 0%, ${featured.iconTo || '#FF8C42'} 100%);">
+      <div class="hero-card" id="heroCard" style="background: linear-gradient(135deg, ${featured.iconFrom || '#FF5F00'} 0%, ${featured.iconTo || '#FF8C42'} 100%);">
         <span class="hero-badge">✨ Destacado</span>
         <h1>${escapeHtml(featured.name)}</h1>
         <p>${escapeHtml(featured.desc || '')}</p>
@@ -952,10 +956,13 @@
   });
 
   document.getElementById('refreshBtn').addEventListener('click', () => {
-    loadAppsPublic(true);
+    loadApps();
+    showToast('Actualizando...');
   });
 
-  // ====== THEME ======
+  // ============================================
+  // THEME
+  // ============================================
   if (localStorage.getItem(STORAGE_THEME) === 'dark') {
     document.documentElement.setAttribute('data-theme', 'dark');
   }
@@ -974,7 +981,9 @@
   document.getElementById('themeToggle').textContent =
     localStorage.getItem(STORAGE_THEME) === 'dark' ? '☀️' : '🌙';
 
-  // ====== ADMIN ======
+  // ============================================
+  // ADMIN
+  // ============================================
   document.getElementById('adminTrigger').addEventListener('click', () => {
     if (isAdmin) { openAdminPanel(); return; }
     openPinScreen();
@@ -1247,15 +1256,16 @@
   }
 
   function renderAdminGitHub(c) {
-    const cfg = githubConfig || { owner: '', repo: '', token: '', branch: '' };
+    const cfg = githubConfig || { owner: '', repo: '', token: '' };
     c.innerHTML = `
       <div class="info-box">
-        <strong>¿Cómo funciona?</strong>
-        <br>1. Vos guardás una app → se hace commit de <code>apps.json</code> al repo
-        <br>2. GitHub Pages actualiza el sitio automáticamente (~30-60 seg)
-        <br>3. Los visitantes ven las apps nuevas al recargar
+        Configurá estos datos para que el panel haga commits automáticos al repo.
+        El archivo <code>apps.json</code> se actualizará en la raíz del repo.
         <br><br>
-        <strong>Importante:</strong> el sitio público lee <code>apps.json</code> directamente del dominio, sin necesidad de token. El token solo se usa para escribir.
+        <strong>Pasos:</strong>
+        <br>1. Creá un token en <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a> con scope <code>repo</code>
+        <br>2. Pegá owner (tu usuario), repo y token acá
+        <br>3. Probá la conexión antes de guardar
       </div>
       <form id="ghForm">
         <div class="form-row">
@@ -1269,14 +1279,10 @@
           </div>
         </div>
         <div class="form-group">
-          <label>Branch</label>
-          <input type="text" name="branch" placeholder="main" value="${escapeHtml(cfg.branch || 'main')}">
-        </div>
-        <div class="form-group">
           <label>Personal Access Token</label>
           <input type="password" name="token" required placeholder="ghp_..." value="${escapeHtml(cfg.token)}">
           <p style="font-size:11px;color:var(--text-soft);margin-top:6px">
-            Solo necesita permiso <code>Contents: Read and write</code>. Se guarda en tu browser, no se comparte.
+            Solo necesita permiso <code>Contents: Read and write</code>. Se guarda en tu browser.
           </p>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -1304,8 +1310,7 @@
       const tempCfg = {
         owner: fd.get('owner').trim(),
         repo: fd.get('repo').trim(),
-        token: fd.get('token').trim(),
-        branch: fd.get('branch').trim() || 'main'
+        token: fd.get('token').trim()
       };
       if (!tempCfg.owner || !tempCfg.repo || !tempCfg.token) {
         result.innerHTML = `<div class="info-box" style="border-left-color:var(--danger);color:var(--danger)">Completá todos los campos</div>`;
@@ -1340,14 +1345,12 @@
       githubConfig = {
         owner: fd.get('owner').trim(),
         repo: fd.get('repo').trim(),
-        token: fd.get('token').trim(),
-        branch: fd.get('branch').trim() || 'main'
+        token: fd.get('token').trim()
       };
       localStorage.setItem(STORAGE_GITHUB, JSON.stringify(githubConfig));
       showToast('✅ Config de GitHub guardada');
       if (APPS.length > 0) {
         const ok = await pushToGitHub('sync from admin panel');
-        if (ok) showToast('🚀 Apps subidas a GitHub');
       }
       renderAdminTab('github');
     });
@@ -1355,7 +1358,7 @@
     const clearBtn = document.getElementById('clearGhBtn');
     if (clearBtn) {
       clearBtn.addEventListener('click', () => {
-        if (confirm('¿Desconectar GitHub? Las apps seguirán en localStorage.')) {
+        if (confirm('¿Desconectar GitHub?')) {
           githubConfig = null;
           currentSha = null;
           localStorage.removeItem(STORAGE_GITHUB);
@@ -1430,7 +1433,9 @@
     });
   }
 
-  // ====== INSTALL PWA ======
+  // ============================================
+  // INSTALL PWA
+  // ============================================
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredInstall = e;
@@ -1448,15 +1453,10 @@
     deferredInstall = null;
   });
 
-  // ====== INIT ======
-  function renderAll() {
-    renderHero();
-    renderCategories();
-    renderApps();
-  }
-
-  // 🔑 Carga inicial: siempre lee del sitio público primero
-  loadAppsPublic(false);
+  // ============================================
+  // INIT
+  // ============================================
+  loadApps();
 </script>
 
 </body>
