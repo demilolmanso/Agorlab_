@@ -70,5 +70,23 @@
     "url": "https://bolsillito.netlify.app",
     "verified": true,
     "featured": false
+  },
+  {
+    "id": "mshrtjh3zg8tb",
+    "name": "NumChess",
+    "dev": "agorlab",
+    "icon": "♟️",
+    "iconFrom": "#FF5F00",
+    "iconTo": "#FF8C42",
+    "category": "Herramientas",
+    "rating": "",
+    "installs": "",
+    "size": "",
+    "version": "",
+    "desc": "Ajedrez aritmético.",
+    "longDesc": "Una reinterpretación del ajedrez, reemplazando todas las piezas (a excepción del rey) por números, cuya movilidad depende de su valor y su valor depende de tu astucia.\nY no, \"más\" no siempre es mejor...",
+    "url": "https://numchess.netlify.app",
+    "verified": true,
+    "featured": false
   }
 ]
