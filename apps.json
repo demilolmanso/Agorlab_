@@ -87,6 +87,24 @@
     "longDesc": "",
     "url": "https://agorlabp2p.netlify.app",
     "verified": true,
-    "featured": true
+    "featured": false
+  },
+  {
+    "id": "msjizqso6lqyp",
+    "name": "Delete Me",
+    "dev": "agorlab",
+    "icon": "🪞",
+    "iconFrom": "#FF5F00",
+    "iconTo": "#FF8C42",
+    "category": "Herramientas",
+    "rating": "",
+    "installs": "",
+    "size": "",
+    "version": "",
+    "desc": "Hazte invisible a los ojos, tal como lo escencial.",
+    "longDesc": "Filtro de invisibilidad para la webcam xd.",
+    "url": "https://agordeleteme.netlify.app/",
+    "verified": true,
+    "featured": false
   }
 ]
