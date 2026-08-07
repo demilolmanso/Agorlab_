@@ -88,5 +88,23 @@
     "url": "https://numchess.netlify.app",
     "verified": true,
     "featured": false
+  },
+  {
+    "id": "msjdxqzw427df",
+    "name": "Agorlab_P2P",
+    "dev": "agorlab",
+    "icon": "📱",
+    "iconFrom": "#FF5F00",
+    "iconTo": "#FF8C42",
+    "category": "Herramientas",
+    "rating": "",
+    "installs": "",
+    "size": "",
+    "version": "",
+    "desc": "Videollamada, chat, compartir pantalla, pizarra, todo en una sala hecha a medida.",
+    "longDesc": "",
+    "url": "https://agorlabp2p.netlify.app",
+    "verified": true,
+    "featured": false
   }
 ]
