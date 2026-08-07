@@ -54,24 +54,6 @@
     "featured": false
   },
   {
-    "id": "mshp9ds6x9dnb",
-    "name": "Bosillito",
-    "dev": "agorlab",
-    "icon": "💞",
-    "iconFrom": "#FF5F00",
-    "iconTo": "#FF8C42",
-    "category": "Herramientas",
-    "rating": "",
-    "installs": "",
-    "size": "",
-    "version": "",
-    "desc": "Una dimensión de bolsillo para dos.",
-    "longDesc": "",
-    "url": "https://bolsillito.netlify.app",
-    "verified": true,
-    "featured": false
-  },
-  {
     "id": "mshrtjh3zg8tb",
     "name": "NumChess",
     "dev": "agorlab",
