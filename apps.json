@@ -73,9 +73,9 @@
   },
   {
     "id": "msjdxqzw427df",
-    "name": "Agorlab_P2P",
+    "name": "AgorMeet",
     "dev": "agorlab",
-    "icon": "📱",
+    "icon": "🫂",
     "iconFrom": "#FF5F00",
     "iconTo": "#FF8C42",
     "category": "Herramientas",
@@ -83,8 +83,8 @@
     "installs": "",
     "size": "",
     "version": "",
-    "desc": "Videollamada, chat, compartir pantalla, pizarra, todo en una sala hecha a medida.",
-    "longDesc": "",
+    "desc": "P2P!!",
+    "longDesc": "Videollamada con efectos, chat, compartir pantalla, pizarra, todo en una sala hecha a medida.",
     "url": "https://agorlabp2p.netlify.app",
     "verified": true,
     "featured": false
