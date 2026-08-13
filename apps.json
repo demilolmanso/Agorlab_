@@ -106,5 +106,23 @@
     "url": "https://agorcamera.netlify.app/",
     "verified": true,
     "featured": false
+  },
+  {
+    "id": "mss1gjgmc267m",
+    "name": "CuboCAD",
+    "dev": "agorlab",
+    "icon": "✏️",
+    "iconFrom": "#FF5F00",
+    "iconTo": "#FF8C42",
+    "category": "Herramientas",
+    "rating": "",
+    "installs": "",
+    "size": "",
+    "version": "",
+    "desc": "AutoCAD, pero para minecraft.",
+    "longDesc": "CuboCAD fusiona la precisión del software CAD profesional con la lógica de vóxeles de Minecraft en una experiencia fluida, potente y gratuita.",
+    "url": "https://cubocad.netlify.app/",
+    "verified": true,
+    "featured": false
   }
 ]
