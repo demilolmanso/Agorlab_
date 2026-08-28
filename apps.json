@@ -36,24 +36,6 @@
     "featured": false
   },
   {
-    "id": "msg8bt29m6f36",
-    "name": "Nanatarot",
-    "dev": "agorlab",
-    "icon": "🌌",
-    "iconFrom": "#FF5F00",
-    "iconTo": "#FF8C42",
-    "category": "Herramientas",
-    "rating": "",
-    "installs": "",
-    "size": "",
-    "version": "",
-    "desc": "Una app de tarot.",
-    "longDesc": "Un app de tarot con cartas diarias y música lo-fi.",
-    "url": "https://nanatarot.netlify.app",
-    "verified": true,
-    "featured": false
-  },
-  {
     "id": "mshrtjh3zg8tb",
     "name": "NumChess",
     "dev": "agorlab",
