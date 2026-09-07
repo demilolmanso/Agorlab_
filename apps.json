@@ -106,5 +106,23 @@
     "url": "https://cubocad.netlify.app/",
     "verified": true,
     "featured": false
+  },
+  {
+    "id": "mtr5jpkut1jvz",
+    "name": "El Sistema",
+    "dev": "agorlab",
+    "icon": "💸💰",
+    "iconFrom": "#FF5F00",
+    "iconTo": "#FF8C42",
+    "category": "Herramientas",
+    "rating": "",
+    "installs": "",
+    "size": "",
+    "version": "",
+    "desc": "De 0 a 100.000 pesos en un día, todos los días....",
+    "longDesc": "Solo para personas con verdadera determinación...",
+    "url": "https://elsistema0100.netlify.app",
+    "verified": true,
+    "featured": true
   }
 ]
